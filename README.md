@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# MWM Portal - Dashboard de Monitoramento
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é o repositório para o MWM Portal, uma aplicação web desenvolvida para monitorar dados e métricas importantes em tempo real.
 
-Currently, two official plugins are available:
+## Visão Geral do Projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+O projeto foi iniciado com o objetivo de criar um dashboard centralizado que exibe indicadores chave de performance (KPIs), status de estoque e análises de cooperados. A aplicação é construída com tecnologias web modernas para garantir uma experiência de usuário fluida e responsiva.
 
-## React Compiler
+## Tecnologias Utilizadas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React**: Biblioteca principal para a construção da interface de usuário.
+- **TypeScript**: Para adicionar tipagem estática ao JavaScript, aumentando a robustez e a manutenibilidade do código.
+- **Vite**: Ferramenta de build moderna que oferece um ambiente de desenvolvimento rápido.
+- **Bulma**: Framework CSS leve e baseado em Flexbox para estilização.
+- **Recharts**: Biblioteca de gráficos para visualização de dados.
 
-## Expanding the ESLint configuration
+## Funcionalidades Implementadas
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Até o momento, o foco principal foi a construção da tela de Dashboard, que inclui:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1.  **Busca de Dados**: A tela busca dados de forma assíncrona de uma API mockada (`/src/services/api.ts`), exibindo estados de "Carregando..." e de erro.
+2.  **Cards de Métricas (`MetricCard`)**: Exibem os principais KPIs, como densidade, volume e status operacional.
+3.  **Status do Estoque (`StockStatus`)**: Um componente que mostra os níveis de estoque de diferentes itens (Fertilizantes, Bio Metano, etc.) através de barras de progresso.
+4.  **Gráfico de Análise (`CooperativeAnalysisChart`)**: Um gráfico de barras que apresenta a "Análise de Cooperados", permitindo uma visualização rápida do desempenho.
+5.  **Componentes Reutilizáveis**: A estrutura do projeto foi organizada em componentes para facilitar a manutenção e a escalabilidade.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Como Executar o Projeto
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Testes
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O projeto utiliza **Vitest** e **React Testing Library** para testes unitários e de integração. Foram criados testes para os principais componentes e para a página de Dashboard, cobrindo:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Renderização dos componentes com diferentes props.
+- Lógica de carregamento, sucesso e erro da página de Dashboard.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Para executar os testes, utilize os seguintes comandos:
+
+- `npm test`: Roda os testes uma vez no terminal.
+- `npm run test:ui`: Abre a interface gráfica do Vitest para uma experiência de teste interativa.
+
+1.  **Instalar as dependências:**
+    ```bash
+    npm install
+    ```
+
+2.  **Iniciar o servidor de desenvolvimento:**
+    ```bash
+    npm run dev
+    ```
+
+A aplicação estará disponível em `http://localhost:5173` (ou na porta que o Vite designar).

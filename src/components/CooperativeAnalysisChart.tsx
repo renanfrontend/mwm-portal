@@ -1,15 +1,13 @@
-import React from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
-  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   Bar,
   Cell,
   Line,
-  Legend,
+  Legend
 } from 'recharts';
 import type { CooperativeAnalysisItem } from '../services/api';
 
@@ -17,10 +15,24 @@ import type { CooperativeAnalysisItem } from '../services/api';
 
 interface Props {
   chartData: CooperativeAnalysisItem[];
-  title?: string; // Tornando o título opcional
+  title?: string;
+  theme: 'light' | 'dark';
 }
 
-const CooperativeAnalysisChart = ({ chartData, title = 'Análise' }: Props) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip" style={{ backgroundColor: 'var(--tooltip-bg)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px' }}>
+        <p className="label" style={{ color: 'var(--text-color)' }}>{`${label} : ${payload[0].value}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CooperativeAnalysisChart = ({ chartData, title = 'Análise', theme }: Props) => {
+  const axisColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
+
   return (
     <div className="card" style={{ height: '100%' }}>
       <header className="card-header">
@@ -33,21 +45,18 @@ const CooperativeAnalysisChart = ({ chartData, title = 'Análise' }: Props) => {
             margin={{
               top: 5, right: 30, left: 20, bottom: 5,
             }}
+            barGap={10}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12 }} angle={-45} textAnchor="end" height={70} />
-            <YAxis tick={{ fontFamily: 'Quicksand', fontSize: 12 }} />
-            <Tooltip
-              cursor={{ fill: 'rgba(206, 206, 206, 0.2)' }}
-              contentStyle={{ fontFamily: 'Quicksand' }}
-            />
-            <Legend wrapperStyle={{ fontFamily: 'Quicksand' }} />
-            <Bar dataKey="value" name="Densidade (Barra)">
+            <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} angle={-45} textAnchor="end" height={70} interval={0} />
+            <YAxis tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} />
+            <Tooltip cursor={{ fill: 'rgba(206, 206, 206, 0.2)' }} content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ fontFamily: 'Quicksand', color: 'var(--text-color)' }} />
+            <Bar dataKey="value" name="Densidade" barSize={20}>
               {chartData.map((entry) => (
                 <Cell key={`cell-${entry.name}`} fill={entry.color} />
               ))}
             </Bar>
-            <Line type="monotone" dataKey="value" name="Densidade (Linha)" stroke="#ff7300" />
+            <Line type="monotone" dataKey="lineValue" name="Densidade (Linha)" stroke="#ff7300" dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

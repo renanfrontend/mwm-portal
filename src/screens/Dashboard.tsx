@@ -1,34 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import { fetchDashboardData, type DashboardData } from '../services/api';
+import { MdDensityMedium, MdWaterDrop, MdTimer, MdPowerSettingsNew } from "react-icons/md";
 
-const iconMap: { [key: string]: string } = {
-  density_medium: 'density_medium',
-  water_drop: 'water_drop',
-  timer: 'timer',
-  power_settings_new: 'power_settings_new',
+const iconMap: { [key: string]: React.ReactNode } = {
+  density_medium: <MdDensityMedium data-testid="metric-icon" />,
+  water_drop: <MdWaterDrop data-testid="metric-icon" />,
+  timer: <MdTimer data-testid="metric-icon" />,
+  power_settings_new: <MdPowerSettingsNew data-testid="metric-icon" />,
 };
 
 const trendToColorMap: { [key: string]: string } = {
-  up: 'green',
-  down: 'red',
-  neutral: 'grey',
+  up: '#48c774', // Bulma success green
+  down: '#f14668', // Bulma danger red
+  neutral: '#b5b5b5', // Bulma grey
 };
 
-const trendToIconMap: { [key: string]: string } = {
-  up: 'trending_up',
-  down: 'trending_down',
-  neutral: 'trending_flat',
-};
+type Theme = 'light' | 'dark';
 
 const Dashboard = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,10 +44,18 @@ const Dashboard = () => {
 
     loadData();
   }, []);
+  
+  useEffect(() => {
+    document.body.className = `theme-${theme}`;
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   return (
     <div>
-      <Header />
+      <Header theme={theme} toggleTheme={toggleTheme} />
       {loading && (
         <section className="section">
           <div className="container has-text-centered">
@@ -71,28 +76,36 @@ const Dashboard = () => {
         <section className="section">
           <div className="container">
             <div className="columns is-multiline">
-              {data.metrics.map(metric => (
-                <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
+              {data.metrics.map((metric, index) => (
+                <div
+                  key={metric.id}
+                  className="column is-12 is-6-tablet is-3-desktop card-animation"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <MetricCard
                     title={metric.label} 
                     value={`${metric.value}${metric.unit || ''}`}
-                    iconName={iconMap[metric.icon] || 'question_mark'}
+                    icon={iconMap[metric.icon] || <span className="material-symbols-outlined">help</span>}
                     iconColor={trendToColorMap[metric.trend] || 'grey'}
-                    // A prop trend não é usada pelo MetricCard, mas pode ser útil para outros fins.
-                    icon={iconMap[metric.icon] || null}
-                    trend={metric.trend}
                   />
                 </div>
               ))}
             </div>
             <div className="columns mt-4">
-              <div className="column is-4">
+              <div
+                className="column is-4 card-animation"
+                style={{ animationDelay: `${(data.metrics.length) * 100}ms` }}
+              >
                 <StockStatus stockItems={data.stock} />
               </div>
-              <div className="column is-8">
+              <div
+                className="column is-8 card-animation"
+                style={{ animationDelay: `${(data.metrics.length + 1) * 100}ms` }}
+              >
                 <CooperativeAnalysisChart
-                  chartData={data.cooperativeAnalysis}
+                  chartData={data.cooperativeAnalysis.map(item => ({ ...item, lineValue: item.value }))}
                   title="Análise de Cooperados"
+                  theme={theme}
                 />
               </div>
             </div>
