@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import MonthlyBarChart from '../components/MonthlyBarChart';
-import { fetchFaturamentoData } from '../services/api';
-
-// Define a interface para os dados que o MonthlyBarChart espera
-interface ChartDataItem {
-  name: string;
-  value: number;
-  [key: string]: unknown; // Para permitir outras propriedades como 'faturamento'
-}
+import { fetchFaturamentoData, fetchAbastecimentoVolumeData, type FaturamentoItem, type AbastecimentoVolumeItem } from '../services/api';
 
 const Faturamentos = () => {
-  const [data, setData] = useState<ChartDataItem[]>([]);
+  const [faturamentoData, setFaturamentoData] = useState<FaturamentoItem[]>([]);
+  const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoVolumeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const fetchedData = await fetchFaturamentoData();
-      // Mapeia os dados para o formato esperado pelo MonthlyBarChart
-      const mappedData: ChartDataItem[] = fetchedData.map(item => ({
-        name: item.name, // 'name' para o eixo X
-        value: item.faturamento, // 'value' para o gráfico
-        faturamento: item.faturamento, // Mantém 'faturamento' para o dataKey
-      }));
-      setData(mappedData);
+      const [faturamentos, abastecimentos] = await Promise.all([
+        fetchFaturamentoData(),
+        fetchAbastecimentoVolumeData()
+      ]);
+      setFaturamentoData(faturamentos);
+      setAbastecimentoData(abastecimentos);
       setLoading(false);
     };
     loadData();
@@ -36,14 +28,23 @@ const Faturamentos = () => {
         {loading ? (
           <progress className="progress is-large is-info" max="100"></progress>
         ) : (
-          <div className="card">
-            <div className="card-content">
+          <div className="columns">
+            <div className="column">
               <MonthlyBarChart
-                chartData={data}
+                chartData={faturamentoData.map(item => ({ name: item.name, value: item.faturamento }))}
                 title="Faturamentos Realizados (mês)"
-                dataKey="faturamento"
+                dataKey="value"
                 barColor="#007bff"
                 yAxisLabel="(R$)"
+              />
+            </div>
+            <div className="column">
+              <MonthlyBarChart
+                chartData={abastecimentoData.map(item => ({ name: item.name, value: item.volume }))}
+                title="Abastecimentos Realizados (m³)"
+                dataKey="value"
+                barColor="#3298dc"
+                yAxisLabel="(M³)"
               />
             </div>
           </div>

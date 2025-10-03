@@ -1,24 +1,33 @@
+// src/screens/Dashboard.tsx
+
 import React, { useState, useEffect } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import AbastecimentoPieChart from '../components/AbastecimentoPieChart';
-import { fetchDashboardData, fetchAbastecimentoData, type DashboardData, type AbastecimentoItem } from '../services/api'; // Removido Header
+import { fetchDashboardData, fetchAbastecimentoSummaryData, type DashboardData, type AbastecimentoSummaryItem } from '../services/api';
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
 
+// Mapeamento de ícones para componentes React
 const iconMap = {
   'density_medium': <MdAnalytics />,
   'water_drop': <MdWaterDrop />,
   'timer': <MdTimer />,
   'power_settings_new': <MdPowerSettingsNew />,
-  'water_do': <MdWater />
+  'water_do': <MdWater />,
 };
 
-const Dashboard: React.FC = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoItem[]>([]); // Adicione a tipagem correta
-  const [loading, setLoading] = useState(true);
+// Mapeamento de tendência para cor
+const trendColorMap = {
+  up: 'var(--trend-up-color)',
+  down: 'var(--trend-down-color)',
+  neutral: 'var(--text-color-secondary)',
+};
 
+const Dashboard = () => {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoSummaryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,10 +35,9 @@ const Dashboard: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        // Use Promise.all para carregar os dois conjuntos de dados em paralelo
         const [fetchedDashboardData, fetchedAbastecimentoData] = await Promise.all([
           fetchDashboardData(),
-          fetchAbastecimentoData()
+          fetchAbastecimentoSummaryData()
         ]);
         setData(fetchedDashboardData);
         setAbastecimentoData(fetchedAbastecimentoData);
@@ -46,7 +54,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      {loading && ( // Renderiza o estado de carregamento
+      {loading && (
         <section className="section">
           <div className="container has-text-centered">
             <p className="title is-4">Carregando dados...</p>
@@ -54,7 +62,7 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
       )}
-      {error && ( // Renderiza o estado de erro
+      {error && (
         <section className="section">
           <div className="container has-text-centered">
             <p className="title is-4 has-text-danger">Erro</p>
@@ -72,7 +80,7 @@ const Dashboard: React.FC = () => {
                     title={metric.label}
                     value={`${metric.value}${metric.unit || ''}`}
                     icon={iconMap[metric.icon as keyof typeof iconMap]}
-                    iconColor={metric.color}
+                    iconColor={trendColorMap[metric.trend]}
                   />
                 </div>
               ))}
@@ -85,11 +93,10 @@ const Dashboard: React.FC = () => {
                 <CooperativeAnalysisChart
                   chartData={data.cooperativeAnalysis}
                   title="Análise de Cooperados"
-                  // theme={theme} // Removido: 'theme' não é uma prop esperada pelo CooperativeAnalysisChart
                 />
               </div>
             </div>
-            {/* Linha para o gráfico de pizza */}
+
             <div className="columns mt-4">
               <div className="column is-8 is-offset-2">
                 <AbastecimentoPieChart

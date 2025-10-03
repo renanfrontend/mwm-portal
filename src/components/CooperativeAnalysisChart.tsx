@@ -9,8 +9,8 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import useTheme from '../hooks/useTheme';
 import type { CooperativeAnalysisItem } from '../services/api';
+import useTheme from '../hooks/useTheme';
 
 interface Props {
   chartData: CooperativeAnalysisItem[];
@@ -20,7 +20,10 @@ interface Props {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'var(--tooltip-bg)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px' }}>
+      <div
+ className="custom-tooltip"
+ style={{ backgroundColor: 'var(--tooltip-bg)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px' }}
+      >
         <p className="label" style={{ color: 'var(--text-color)' }}>{`${label} : ${payload[0].value}`}</p>
       </div>
     );
@@ -29,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const CooperativeAnalysisChart = ({ chartData, title = 'Análise' }: Props) => {
-  const { theme } = useTheme();
+  const { theme } = useTheme(); // Assuming useTheme is correctly imported and provides 'theme'
   const axisColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
 
   return (
@@ -47,7 +50,7 @@ const CooperativeAnalysisChart = ({ chartData, title = 'Análise' }: Props) => {
             barGap={10}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} angle={-45} textAnchor="end" height={70} interval={0} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} angle={-45} textAnchor="end" height={70} interval={0} minTickGap={5} />
             <YAxis tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} />
             <Tooltip cursor={{ fill: 'rgba(206, 206, 206, 0.2)' }} content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontFamily: 'Quicksand', color: 'var(--text-color)' }} />

@@ -9,10 +9,12 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
+import useTheme from '../hooks/useTheme';
 
 interface DataItem {
   name: string;
   value: number;
+  [key: string]: any; // Para permitir outras propriedades como 'volume' ou 'faturamento'
 }
 
 interface Props {
@@ -24,6 +26,10 @@ interface Props {
 }
 
 const MonthlyBarChart: React.FC<Props> = ({ chartData, title, dataKey, barColor, yAxisLabel, }) => {
+  const { theme } = useTheme();
+  const axisColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
+  const textColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const value = payload[0].value.toLocaleString('pt-BR', {
@@ -48,11 +54,11 @@ const MonthlyBarChart: React.FC<Props> = ({ chartData, title, dataKey, barColor,
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis label={{ value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }} />
+            <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} />
+            <YAxis label={{ value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: axisColor, fontSize: 12 } }} tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar dataKey={dataKey} fill={barColor} name={dataKey === 'faturamento' ? 'Valor (R$)' : 'Volume (M³)'} />
+            <Legend wrapperStyle={{ fontFamily: 'Quicksand', color: textColor }} />
+            <Bar dataKey="value" fill={barColor} name={yAxisLabel === '(R$)' ? 'Valor (R$)' : 'Volume (M³)'} />
           </BarChart>
         </ResponsiveContainer>
       </div>
