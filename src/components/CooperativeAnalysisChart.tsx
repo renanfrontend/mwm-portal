@@ -1,22 +1,20 @@
 import {
   ResponsiveContainer,
   ComposedChart,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   Bar,
   Cell,
-  Line,
   Legend
 } from 'recharts';
+import useTheme from '../hooks/useTheme';
 import type { CooperativeAnalysisItem } from '../services/api';
-
- 
 
 interface Props {
   chartData: CooperativeAnalysisItem[];
   title?: string;
-  theme: 'light' | 'dark';
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -30,7 +28,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const CooperativeAnalysisChart = ({ chartData, title = 'Análise', theme }: Props) => {
+const CooperativeAnalysisChart = ({ chartData, title = 'Análise' }: Props) => {
+  const { theme } = useTheme();
   const axisColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
 
   return (
@@ -47,6 +46,7 @@ const CooperativeAnalysisChart = ({ chartData, title = 'Análise', theme }: Prop
             }}
             barGap={10}
           >
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} angle={-45} textAnchor="end" height={70} interval={0} />
             <YAxis tick={{ fontFamily: 'Quicksand', fontSize: 12, fill: axisColor }} />
             <Tooltip cursor={{ fill: 'rgba(206, 206, 206, 0.2)' }} content={<CustomTooltip />} />
@@ -56,7 +56,6 @@ const CooperativeAnalysisChart = ({ chartData, title = 'Análise', theme }: Prop
                 <Cell key={`cell-${entry.name}`} fill={entry.color} />
               ))}
             </Bar>
-            <Line type="monotone" dataKey="lineValue" name="Densidade (Linha)" stroke="#ff7300" dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

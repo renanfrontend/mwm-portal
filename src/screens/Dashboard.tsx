@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
-import { fetchDashboardData, type DashboardData } from '../services/api';
+import AbastecimentoPieChart from '../components/AbastecimentoPieChart';
+import { fetchDashboardData, fetchAbastecimentoData, type DashboardData, type AbastecimentoItem } from '../services/api'; // Removido Header
+import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
 
-const Dashboard = () => {
+const iconMap = {
+  'density_medium': <MdAnalytics />,
+  'water_drop': <MdWaterDrop />,
+  'timer': <MdTimer />,
+  'power_settings_new': <MdPowerSettingsNew />,
+  'water_do': <MdWater />
+};
+
+const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoItem[]>([]); // Adicione a tipagem correta
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -15,8 +26,13 @@ const Dashboard = () => {
       try {
         setLoading(true);
         setError(null);
-        const fetchedData = await fetchDashboardData();
-        setData(fetchedData);
+        // Use Promise.all para carregar os dois conjuntos de dados em paralelo
+        const [fetchedDashboardData, fetchedAbastecimentoData] = await Promise.all([
+          fetchDashboardData(),
+          fetchAbastecimentoData()
+        ]);
+        setData(fetchedDashboardData);
+        setAbastecimentoData(fetchedAbastecimentoData);
       } catch (err) {
         setError("Ocorreu um erro ao buscar os dados do dashboard.");
         console.error(err);
@@ -30,8 +46,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Header />
-      {loading && (
+      {loading && ( // Renderiza o estado de carregamento
         <section className="section">
           <div className="container has-text-centered">
             <p className="title is-4">Carregando dados...</p>
@@ -39,7 +54,7 @@ const Dashboard = () => {
           </div>
         </section>
       )}
-      {error && (
+      {error && ( // Renderiza o estado de erro
         <section className="section">
           <div className="container has-text-centered">
             <p className="title is-4 has-text-danger">Erro</p>
@@ -54,10 +69,10 @@ const Dashboard = () => {
               {data.metrics.map(metric => (
                 <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
                   <MetricCard
-                    title={metric.label} 
+                    title={metric.label}
                     value={`${metric.value}${metric.unit || ''}`}
-                    icon={iconMap[metric.icon] || null}
-                    trend={metric.trend}
+                    icon={iconMap[metric.icon as keyof typeof iconMap]}
+                    iconColor={metric.color}
                   />
                 </div>
               ))}
@@ -70,6 +85,16 @@ const Dashboard = () => {
                 <CooperativeAnalysisChart
                   chartData={data.cooperativeAnalysis}
                   title="Análise de Cooperados"
+                  // theme={theme} // Removido: 'theme' não é uma prop esperada pelo CooperativeAnalysisChart
+                />
+              </div>
+            </div>
+            {/* Linha para o gráfico de pizza */}
+            <div className="columns mt-4">
+              <div className="column is-8 is-offset-2">
+                <AbastecimentoPieChart
+                  chartData={abastecimentoData}
+                  title="Abastecimento em M³ por Veículo - Primato"
                 />
               </div>
             </div>
@@ -77,7 +102,7 @@ const Dashboard = () => {
         </section>
       )}
     </div>
-  )
-}
+  );
+};
 
 export default Dashboard;
