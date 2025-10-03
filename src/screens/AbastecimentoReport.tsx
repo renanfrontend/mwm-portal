@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import {
+import { 
   fetchAbastecimentoReportData,
   fetchAbastecimentoSummaryData,
   fetchAbastecimentoVolumePorDiaData,
@@ -9,6 +9,7 @@ import {
   type AbastecimentoSummaryItem,
   type AbastecimentoVolumePorDiaItem
 } from '../services/api';
+import useTheme from '../hooks/useTheme';
 import MonthlyBarChart from '../components/MonthlyBarChart';
 import DetailedSupplyChart from '../components/DetailedSupplyChart';
 import AbastecimentoFormModal from '../components/AbastecimentoFormModal';
@@ -26,6 +27,7 @@ const AbastecimentoReport = () => {
   const [reportData, setReportData] = useState<AbastecimentoReportItem[]>([]);
   const [summaryData, setSummaryData] = useState<AbastecimentoSummaryItem[]>([]);
   const [volumePorDiaData, setVolumePorDiaData] = useState<AbastecimentoVolumePorDiaItem[]>([]);
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>(getDefaultStartDate());
@@ -155,7 +157,7 @@ const AbastecimentoReport = () => {
   const renderVolumePorDiaChart = () => (
     <div className="card">
       <header className="card-header">
-        <p className="card-header-title">Volume de Abastecimento por Dia</p>
+        <p className="card-header-title" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Volume de Abastecimento por Dia</p>
       </header>
       <div className="card-content">
         <ResponsiveContainer width="100%" height={300}>
@@ -185,7 +187,7 @@ const AbastecimentoReport = () => {
     const chartData = Object.values(dataByProduct);
 
     return (
-      <div className="card">
+      <div className="card" style={{ height: '100%' }}>
         <header className="card-header"><p className="card-header-title">Volume por Produto</p></header>
         <div className="card-content">
           <ResponsiveContainer width="100%" height={300}>
@@ -340,7 +342,7 @@ const AbastecimentoReport = () => {
 
         <div className="card mb-4">
           <header className="card-header">
-            <p className="card-header-title">Filtro por Período</p>
+            <p className="card-header-title" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Filtro por Período</p>
           </header>
           <div className="card-content">
             <div className="field is-horizontal">
@@ -365,7 +367,7 @@ const AbastecimentoReport = () => {
 
         <div className="card mb-4">
           <div className="card-content">
-            <h2 className="subtitle is-5">Sumário por Veículo e Placa</h2>
+            <h2 className="subtitle is-5" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Sumário por Veículo e Placa</h2>
             {loading
               ? (<progress className="progress is-large is-info" max="100"></progress>)
               : (
@@ -397,7 +399,7 @@ const AbastecimentoReport = () => {
         <div className="card">
           <div className="card-content">
             <div className="level">
-              <div className="level-left">
+              <div className="level-left" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>
                 <h2 className="subtitle is-5">Relatório Completo</h2>
               </div>
               <div className="level-right">

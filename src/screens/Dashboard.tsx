@@ -10,11 +10,11 @@ import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from '
 
 // Mapeamento de ícones para componentes React
 const iconMap = {
-  'density_medium': <MdAnalytics />,
-  'water_drop': <MdWaterDrop />,
-  'timer': <MdTimer />,
-  'power_settings_new': <MdPowerSettingsNew />,
-  'water_do': <MdWater />,
+  'density_medium': <MdAnalytics/>,
+  'water_drop': <MdWaterDrop/>,
+  'timer': <MdTimer/>,
+  'power_settings_new': <MdPowerSettingsNew/>,
+  'water_do': <MdWater/>,
 };
 
 // Mapeamento de tendência para cor

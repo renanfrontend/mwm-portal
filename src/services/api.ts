@@ -441,6 +441,26 @@ export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[
   });
 };
 
+export const addAbastecimentoReportItem = (
+  item: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>
+): Promise<AbastecimentoReportItem> => {
+  console.log('Adding new abastecimento report item...', item);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newItem: AbastecimentoReportItem = {
+        ...item,
+        status: 'Concluído',
+        cliente: 'Primato Cooperativa Agroindustrial',
+        horaTermino: item.horaInicio, // Simulação simples
+      };
+      // Adiciona no início da lista para ser visível imediatamente
+      abastecimentoReportMockData.unshift(newItem);
+      console.log('New item added:', newItem);
+      resolve(newItem);
+    }, 500);
+  });
+};
+
 export const fetchAbastecimentoReportData = (startDate?: string | null, endDate?: string | null): Promise<AbastecimentoReportItem[]> => {
   console.log('Fetching abastecimento report mock data...');
   return new Promise(resolve => {
@@ -460,7 +480,7 @@ export const fetchAbastecimentoReportData = (startDate?: string | null, endDate?
   });
 };
 
-export const fetchAbastecimentoSummaryData = (): Promise<AbastecimentoSummaryItem[]> => {
+export const fetchAbastecimentoSummaryData = (startDate?: string | null, endDate?: string | null): Promise<AbastecimentoSummaryItem[]> => {
   console.log('Fetching abastecimento summary mock data...');
   return new Promise(resolve => {
     setTimeout(() => {
@@ -486,25 +506,5 @@ export const fetchAbastecimentoSummaryData = (): Promise<AbastecimentoSummaryIte
 
       resolve(Object.values(summary));
     }, 800);
-  });
-};
-
-export const addAbastecimentoReportItem = (
-  item: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>
-): Promise<AbastecimentoReportItem> => {
-  console.log('Adding new abastecimento report item...', item);
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newItem: AbastecimentoReportItem = {
-        ...item,
-        status: 'Concluído',
-        cliente: 'Primato Cooperativa Agroindustrial',
-        horaTermino: item.horaInicio, // Simulação simples
-      };
-      // Adiciona no início da lista para ser visível imediatamente
-      abastecimentoReportMockData.unshift(newItem);
-      console.log('New item added:', newItem);
-      resolve(newItem);
-    }, 500);
   });
 };

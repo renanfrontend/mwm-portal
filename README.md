@@ -1,6 +1,6 @@
 # MWM Portal - Dashboard de Monitoramento
 
-Este é o repositório para o MWM Portal, uma aplicação web moderna e interativa para monitoramento de dados e métricas de abastecimento e faturamento em tempo real.
+Este é o repositório para o MWM Portal, uma aplicação web moderna e interativa para monitoramento de dados e métricas de abastecimento e faturamento em tempo real, construída com as melhores práticas de engenharia de software.
 
 ## Visão Geral do Projeto
 
@@ -8,12 +8,14 @@ O projeto consiste em um portal de Business Intelligence que oferece uma visão 
 
 ## Tecnologias Utilizadas
 
-- **React**: Biblioteca principal para a construção da interface de usuário.
-- **TypeScript**: Para adicionar tipagem estática ao JavaScript, aumentando a robustez e a manutenibilidade do código.
-- **Vite**: Ferramenta de build moderna que oferece um ambiente de desenvolvimento rápido.
-- **Bulma**: Framework CSS leve e baseado em Flexbox para estilização.
-- **Recharts**: Biblioteca de gráficos para visualização de dados.
-- **Vitest & React Testing Library**: Para a suíte de testes unitários e de integração.
+| Tecnologia | Descrição |
+|---|---|
+| **React** | Biblioteca principal para a construção da interface de usuário. |
+| **TypeScript** | Adiciona tipagem estática ao JavaScript, aumentando a robustez e a manutenibilidade do código. |
+| **Vite** | Ferramenta de build moderna que oferece um ambiente de desenvolvimento rápido. |
+| **Bulma** | Framework CSS leve e baseado em Flexbox para estilização. |
+| **Recharts** | Biblioteca de gráficos para visualização de dados. |
+| **Vitest & React Testing Library** | Para a suíte de testes unitários e de integração. |
 
 ## Estrutura de Pastas
 
