@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
 import Faturamentos from './screens/Faturamentos';
 import Abastecimentos from './screens/Abastecimentos';
 import AbastecimentoReport from './screens/AbastecimentoReport';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginScreen from "./screens/auth/LoginScreen";
-import ForgotPasswordScreen from "./screens/auth/ForgotPasswordScreen";
-import NewPasswordScreen from "./screens/auth/NewPasswordScreen";
+import LoginScreen from './screens/auth/LoginScreen';
+import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
+import NewPasswordScreen from './screens/auth/NewPasswordScreen';
+import { MdMenu } from 'react-icons/md';
+
+// Importa os novos componentes de tela
+import Coleta from './screens/Coleta';
+import Qualidade from './screens/Qualidade';
+import Cooperados from './screens/Cooperados';
+import Conta from './screens/Conta';
 
 const AppContent = () => {
   const { isAuthenticated, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     return isAuthenticated ? children : <Navigate to="/login" />;
@@ -23,29 +32,31 @@ const AppContent = () => {
 
   return (
     <>
-      {isAuthenticated && <Header />}
-      {isAuthenticated && (
-        <nav className="tabs is-fullwidth">
-          <div className="container">
-            <ul>
-              <li><Link to="/">Dashboard</Link></li>
-              <li><Link to="/faturamentos">Faturamentos</Link></li>
-              <li><Link to="/abastecimentos">Abastecimentos</Link></li>
-              <li><Link to="/abastecimento-report">Relatório de Abastecimento</Link></li>
-              <li><a onClick={logout}>Sair</a></li>
-            </ul>
-          </div>
-        </nav>
-      )}
-      <Routes>
-        <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
-        <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
-        <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
-        <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
-        <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
-      </Routes>
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={logout} />
+      {isSidebarOpen && <div className="overlay" onClick={() => setIsSidebarOpen(false)}></div>}
+      
+      <div className={`app-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        {isAuthenticated && (
+          <Header>
+            <button className="button is-light" onClick={() => setIsSidebarOpen(true)}>
+              <span className="icon"><MdMenu /></span>
+            </button>
+          </Header>
+        )}
+        <Routes>
+          <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
+          <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
+          <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
+          <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
+          <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
+          <Route path="/coleta" element={<ProtectedRoute><Coleta /></ProtectedRoute>} />
+          <Route path="/qualidade" element={<ProtectedRoute><Qualidade /></ProtectedRoute>} />
+          <Route path="/cooperados" element={<ProtectedRoute><Cooperados /></ProtectedRoute>} />
+          <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
+        </Routes>
+      </div>
     </>
   );
 };

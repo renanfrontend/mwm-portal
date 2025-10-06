@@ -10,6 +10,11 @@ body.theme-light {
   --button-bg: #f5f5f5;
   --button-text: #363636;
   --tooltip-bg: #ffffff;
+  /* Variáveis para o sidebar no tema claro */
+  --sidebar-bg: #e6e6e6; /* Cor de fundo mais clara para o sidebar */
+  --sidebar-text: #363636; /* Cor do texto e ícones */
+  --sidebar-divider: rgba(0, 0, 0, 0.1); /* Divisores mais escuros */
+  --sidebar-hover: rgba(0, 0, 0, 0.05); /* Cor ao passar o mouse */
 }
 
 body.theme-dark {
@@ -23,54 +28,69 @@ body.theme-dark {
   --button-bg: #4a5568;
   --button-text: #e2e8f0;
   --tooltip-bg: #1a202c;
+  /* Variáveis para o sidebar no tema escuro */
+  --sidebar-bg: #1a202c;
+  --sidebar-text: #fff;
+  --sidebar-divider: rgba(255, 255, 255, 0.3);
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
 }
 
-body {
-  background-color: var(--body-bg);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+/* ... (o restante do código do tema permanece o mesmo) ... */
+
+/* Estilos da barra lateral */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100%;
+  background-color: var(--sidebar-bg); /* Usa a variável de cor */
+  color: var(--sidebar-text); /* Usa a variável de cor */
+  padding: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
 
-.card, .box {
-  background-color: var(--card-bg) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: background-color 0.3s;
+.sidebar-header .delete {
+  background: none;
+  border: none;
+  color: var(--sidebar-text); /* Adicionado para garantir a cor correta */
 }
 
-.title, .card-header-title {
-  color: var(--title-color) !important;
-  transition: color 0.3s;
+.sidebar-header .delete::before,
+.sidebar-header .delete::after {
+  background-color: var(--sidebar-text); /* Adicionado para garantir a cor correta */
 }
 
-.is-size-7, .help, .subtitle, .label {
-  color: var(--subtitle-color) !important;
-  transition: color 0.3s;
+/* Estilos para os itens do menu e divisores */
+.menu-list a {
+  color: var(--sidebar-text); /* Usa a variável de cor */
+  padding: 1rem;
+  border-bottom: 1px dotted var(--sidebar-divider); /* Usa a variável de cor */
+  display: flex;
+  align-items: center;
+  font-weight: bold;
 }
 
-.navbar, .card-header {
-  background-color: var(--header-bg) !important;
-  border-bottom-color: var(--border-color) !important;
-  transition: background-color 0.3s, border-bottom-color 0.3s;
+.menu-list a:hover {
+  background-color: var(--sidebar-hover); /* Usa a variável de cor */
 }
 
-.button.is-light {
-  background-color: var(--button-bg) !important;
-  color: var(--button-text) !important;
+.menu-list .icon {
+  margin-right: 1rem;
+  color: var(--sidebar-text); /* Garante que os ícones tenham a cor correta */
 }
 
-/* Animação de Fade-in */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sidebar-divider {
+  border-top: 1px dotted var(--sidebar-divider); /* Usa a variável de cor */
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-.card-animation {
-  animation: fadeInUp 0.5s ease-out forwards;
-  opacity: 0; /* Garante que o estado inicial seja invisível antes da animação */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--subtitle-color); /* Usa a cor de subtítulo do tema atual */
 }
