@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdDarkMode, MdLightMode, MdNotifications, MdMenu, MdFilterList } from 'react-icons/md';
+import { MdDarkMode, MdLightMode, MdNotifications, MdMenu } from 'react-icons/md';
 import useTheme from '../hooks/useTheme';
 
 interface HeaderProps {
@@ -9,7 +9,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ children }) => {
   const { theme, toggleTheme } = useTheme();
   return (
-    <nav className="navbar" role="navigation" aria-label="main navigation"> {/* Removido a classe has-background-white para usar as variáveis */}
+    <nav className="navbar" role="navigation" aria-label="main navigation">
       <div className="container">
         <div className="navbar-brand">
           <a className="navbar-item" href="#">

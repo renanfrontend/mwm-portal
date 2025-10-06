@@ -33,30 +33,27 @@ const AppContent = () => {
   return (
     <>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={logout} />
-      {isSidebarOpen && <div className="overlay" onClick={() => setIsSidebarOpen(false)}></div>}
-      
-      <div className={`app-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-        {isAuthenticated && (
-          <Header>
-            <button className="button is-light" onClick={() => setIsSidebarOpen(true)}>
-              <span className="icon"><MdMenu /></span>
-            </button>
-          </Header>
-        )}
-        <Routes>
-          <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
-          <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
-          <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
-          <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
-          <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
-          <Route path="/coleta" element={<ProtectedRoute><Coleta /></ProtectedRoute>} />
-          <Route path="/qualidade" element={<ProtectedRoute><Qualidade /></ProtectedRoute>} />
-          <Route path="/cooperados" element={<ProtectedRoute><Cooperados /></ProtectedRoute>} />
-          <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
-        </Routes>
-      </div>
+      {isAuthenticated && (
+        <Header>
+          <button className="button is-light" onClick={() => setIsSidebarOpen(true)}>
+            <span className="icon"><MdMenu /></span>
+          </button>
+        </Header>
+      )}
+      <Routes>
+        <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
+        <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
+        <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
+        <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
+        <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
+        {/* Novas rotas adicionadas para os links do menu lateral */}
+        <Route path="/coleta" element={<ProtectedRoute><Coleta /></ProtectedRoute>} />
+        <Route path="/qualidade" element={<ProtectedRoute><Qualidade /></ProtectedRoute>} />
+        <Route path="/cooperados" element={<ProtectedRoute><Cooperados /></ProtectedRoute>} />
+        <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
+      </Routes>
     </>
   );
 };
