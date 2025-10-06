@@ -16,25 +16,33 @@ O projeto consiste em um portal de Business Intelligence que oferece uma visão 
 | **Bulma** | Framework CSS leve e baseado em Flexbox para estilização. |
 | **Recharts** | Biblioteca de gráficos para visualização de dados. |
 | **Vitest & React Testing Library** | Para a suíte de testes unitários e de integração. |
+| **react-router-dom** | Gerenciamento de rotas e navegação na aplicação. |
 
 ## Estrutura de Pastas
 
 A organização do projeto segue um padrão modular para facilitar a localização de arquivos e a escalabilidade.
 
-```
 src/
 ├── components/   # Componentes reutilizáveis (gráficos, cards, modais, etc.)
 ├── hooks/        # Hooks customizados (ex: useTheme).
 ├── screens/      # Componentes de página (telas principais da aplicação).
 ├── services/     # Lógica de acesso a dados (atualmente, a API mockada).
+├── context/      # Contexto global da aplicação (ex: AuthContext).
 └── styles/       # Arquivos de estilização globais e temas.
-```
 
 ## Funcionalidades Implementadas
 
 A aplicação conta com diversas telas e funcionalidades para análise de dados:
 
-### 1. Dashboard (`Dashboard.tsx`)
+### 1. Sistema de Autenticação e Proteção de Rotas
+Uma nova camada foi adicionada para controlar o acesso à aplicação.
+- **Login**: Tela inicial para acesso do usuário, com validação de credenciais.
+- **Recuperação de Senha**: Tela para solicitação de redefinição de senha por e-mail.
+- **Criação de Nova Senha**: Tela para criar uma nova senha a partir de um link de redefinição.
+- **Proteção de Rotas**: As telas de Dashboard, Relatórios e Faturamentos são acessíveis apenas a usuários autenticados, redirecionando-os para a tela de login caso a sessão não esteja ativa.
+- **Estado Global**: O estado de autenticação é gerenciado globalmente com o React Context, persistindo a sessão mesmo após um refresh da página.
+
+### 2. Dashboard (`Dashboard.tsx`)
 A tela principal, que oferece uma visão geral e consolidada dos indicadores mais importantes.
 - **Busca de Dados**: Busca dados de forma assíncrona da API mockada (`/src/services/api.ts`), exibindo estados de "Carregando..." e de erro.
 - **Cards de Métricas**: Exibem os principais KPIs, como densidade, volume e status operacional.
@@ -42,7 +50,7 @@ A tela principal, que oferece uma visão geral e consolidada dos indicadores mai
 - **Análise de Cooperados**: Um gráfico de barras que apresenta a "Análise de Cooperados", permitindo uma visualização rápida do desempenho.
 - **Gráfico de Abastecimento**: Um gráfico de pizza (Donut Chart) que exibe o volume total abastecido por veículo.
 
-### 2. Relatório de Abastecimento (`AbastecimentoReport.tsx`)
+### 3. Relatório de Abastecimento (`AbastecimentoReport.tsx`)
 Uma tela detalhada para análise aprofundada dos dados de abastecimento, contendo múltiplas visualizações e interações.
 
 - **Busca de Dados Otimizada**: Carrega todos os dados necessários para a tela em paralelo (`Promise.all`), melhorando a performance de carregamento.
@@ -56,12 +64,12 @@ Uma tela detalhada para análise aprofundada dos dados de abastecimento, contend
   - Uma tabela exibe todos os registros de abastecimento.
   - Um botão **"Adicionar Registro"** abre um modal (`AbastecimentoFormModal.tsx`) com um formulário para cadastrar um novo abastecimento. Ao submeter, o novo dado é "salvo" na API mockada e **toda a tela de relatório é atualizada em tempo real**, refletindo a nova entrada em todas as tabelas e gráficos.
 
-### 3. Tela de Abastecimentos (`Abastecimentos.tsx`)
+### 4. Tela de Abastecimentos (`Abastecimentos.tsx`)
 Focada na análise temporal dos volumes de abastecimento.
 - **Filtros por Período**: Permite ao usuário alternar a visualização dos dados por **Dia, Semana ou Mês**.
 - **Gráfico de Linhas Dinâmico**: Exibe o volume total abastecido, agregado de acordo com o período selecionado no filtro. A API mockada foi aprimorada para fornecer esses dados já agrupados.
 
-### 4. Tela de Faturamentos (`Faturamentos.tsx`)
+### 5. Tela de Faturamentos (`Faturamentos.tsx`)
 Oferece uma visão comparativa entre faturamento e abastecimento.
 - **Gráficos Comparativos**: Exibe dois gráficos de barras lado a lado:
   1. Faturamentos Realizados (R$) por mês.
