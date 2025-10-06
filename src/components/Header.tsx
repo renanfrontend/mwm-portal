@@ -37,8 +37,6 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
               </button>
               <div className="buttons are-small">
                 <button className="button is-light"><span className="icon"><MdNotifications /></span></button>
-                <button className="button is-light"><span className="icon"><MdMenu /></span></button>
-                <button className="button is-light"><span className="icon"><MdFilterList /></span><span>Filtrar</span></button>
               </div>
             </div>
           </div>
