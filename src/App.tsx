@@ -6,13 +6,13 @@ import Abastecimentos from './screens/Abastecimentos';
 import AbastecimentoReport from './screens/AbastecimentoReport';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import PageLayout from './components/PageLayout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginScreen from './screens/auth/LoginScreen';
 import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
 import NewPasswordScreen from './screens/auth/NewPasswordScreen';
 import { MdMenu } from 'react-icons/md';
 
-// Importa os novos componentes de tela
 import Coleta from './screens/Coleta';
 import Qualidade from './screens/Qualidade';
 import Cooperados from './screens/Cooperados';
@@ -23,7 +23,7 @@ const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    return isAuthenticated ? <PageLayout>{children}</PageLayout> : <Navigate to="/login" />;
   };
 
   const AuthRoute = ({ children }: { children: JSX.Element }) => {
@@ -35,25 +35,26 @@ const AppContent = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={logout} />
       {isAuthenticated && (
         <Header>
-          <button className="button is-light" onClick={() => setIsSidebarOpen(true)}>
+          <button className="button is-light" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             <span className="icon"><MdMenu /></span>
           </button>
         </Header>
       )}
-      <Routes>
-        <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
-        <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
-        <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
-        <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
-        <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
-        {/* Novas rotas adicionadas para os links do menu lateral */}
-        <Route path="/coleta" element={<ProtectedRoute><Coleta /></ProtectedRoute>} />
-        <Route path="/qualidade" element={<ProtectedRoute><Qualidade /></ProtectedRoute>} />
-        <Route path="/cooperados" element={<ProtectedRoute><Cooperados /></ProtectedRoute>} />
-        <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
-      </Routes>
+      <div className={`app-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <Routes>
+          <Route path="/login" element={<AuthRoute><LoginScreen /></AuthRoute>} />
+          <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordScreen /></AuthRoute>} />
+          <Route path="/new-password" element={<AuthRoute><NewPasswordScreen /></AuthRoute>} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/faturamentos" element={<ProtectedRoute><Faturamentos /></ProtectedRoute>} />
+          <Route path="/abastecimentos" element={<ProtectedRoute><Abastecimentos /></ProtectedRoute>} />
+          <Route path="/abastecimento-report" element={<ProtectedRoute><AbastecimentoReport /></ProtectedRoute>} />
+          <Route path="/coleta" element={<ProtectedRoute><Coleta /></ProtectedRoute>} />
+          <Route path="/qualidade" element={<ProtectedRoute><Qualidade /></ProtectedRoute>} />
+          <Route path="/cooperados" element={<ProtectedRoute><Cooperados /></ProtectedRoute>} />
+          <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
+        </Routes>
+      </div>
     </>
   );
 };
