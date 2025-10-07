@@ -1,28 +1,62 @@
-import React, { useState } from 'react';
-import { MdSearch, MdFilterList, MdEdit, MdLocationPin, MdCheckCircle, MdOutlineWatchLater, MdArrowForwardIos, MdOutlineCloudUpload } from 'react-icons/md';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { MdSearch, MdFilterList, MdEdit, MdLocationPin, MdArrowForwardIos, MdOutlineCloudUpload, MdArrowBack } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 import useTheme from '../hooks/useTheme';
-
-// Interface para um item da lista de coleta
-interface ColetaItem {
-  id: number;
-  cooperado: string;
-  motorista: string;
-  status: 'Pendente' | 'Entregue' | 'Atrasado';
-}
-
-// Dados mockados para a lista de coleta
-const mockColetaData: ColetaItem[] = [
-  { id: 1, cooperado: 'Primato', motorista: 'Luiz Carlos', status: 'Pendente' },
-  { id: 2, cooperado: 'Primato', motorista: 'Marcos Paulo', status: 'Entregue' },
-  { id: 3, cooperado: 'Primato', motorista: 'Ana Cássia', status: 'Atrasado' },
-];
+import ColetaFormModal from '../components/ColetaFormModal';
+import CheckInModal from '../components/CheckInModal';
+import { fetchColetaData, updateColetaItem, createColetaItem, type ColetaItem } from '../services/api';
 
 const Coleta = () => {
+  const [coletaData, setColetaData] = useState<ColetaItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const { theme } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ColetaItem | null>(null);
+  const navigate = useNavigate();
 
-  const filteredData = mockColetaData.filter(item =>
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    const data = await fetchColetaData();
+    setColetaData(data);
+    setLoading(false);
+  };
+
+  const handleEdit = (item: ColetaItem) => {
+    setSelectedItem(item);
+    setIsFormModalOpen(true);
+  };
+
+  const handleFormSubmit = async (item: ColetaItem) => {
+    if (item.id) {
+      await updateColetaItem(item);
+    } else {
+      await createColetaItem(item);
+    }
+    await loadData();
+    setIsFormModalOpen(false);
+    setSelectedItem(null); // Limpar item selecionado
+  };
+
+  const handleCheckInClick = (item: ColetaItem) => {
+    setSelectedItem(item);
+    setIsCheckInModalOpen(true);
+  };
+
+  const handleCheckIn = async () => {
+    if (!selectedItem) return;
+    const updatedItem = { ...selectedItem, status: 'Entregue' as const };
+    await updateColetaItem(updatedItem);
+    await loadData();
+    setIsCheckInModalOpen(false);
+  };
+
+  const filteredData = coletaData.filter(item =>
     item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -40,20 +74,48 @@ const Coleta = () => {
     }
   };
 
-  const getStatusIcon = (status: ColetaItem['status']) => {
-    switch (status) {
-      case 'Pendente':
-        return <MdOutlineWatchLater />;
-      case 'Entregue':
-        return <MdCheckCircle />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <>
-      <h1 className="title is-4">Coleta de dejetos</h1>
+      <div className="level is-mobile mb-4">
+        <div className="level-left">
+          <div className="level-item">
+            <button className="button is-light" onClick={() => navigate(-1)}>
+              <span className="icon"><MdArrowBack /></span>
+            </button>
+          </div>
+          <div className="level-item">
+            <h1 className="title is-4">Coleta de dejetos</h1>
+          </div>
+        </div>
+        <div className="level-right">
+          <div className="level-item">
+            <button className="button is-primary" onClick={() => {
+              setSelectedItem(null); // Limpar item selecionado para o modo de adição
+              setIsFormModalOpen(true);
+            }}>
+              + Coleta
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <ColetaFormModal
+        isActive={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        onSubmit={handleFormSubmit}
+        initialData={selectedItem}
+      />
+      <CheckInModal
+        isActive={isCheckInModalOpen}
+        onClose={() => setIsCheckInModalOpen(false)}
+        onEdit={() => {
+          setIsCheckInModalOpen(false);
+          setIsFormModalOpen(true);
+        }}
+        onCheckIn={handleCheckIn}
+        data={selectedItem}
+      />
 
       {/* Campo de busca */}
       <div className="field has-addons">
@@ -79,7 +141,7 @@ const Coleta = () => {
       {/* Lista de cooperados */}
       <div className="list-header level is-mobile mt-5">
         <div className="level-left">
-          <p className="subtitle is-6">Primato</p>
+          <p className="subtitle is-6">Cooperados</p>
         </div>
         <div className="level-right">
           <div className="buttons">
@@ -90,50 +152,54 @@ const Coleta = () => {
           </div>
         </div>
       </div>
-
-      <div className="list-container">
-        {filteredData.map(item => (
-          <div className="card mb-3" key={item.id}>
-            <div className="card-content">
-              <div className="level is-mobile is-align-items-center">
-                <div className="level-left">
-                  <div className="level-item has-text-left">
-                    <div>
-                      <p className="title is-5">{item.cooperado}</p>
-                      <p className="subtitle is-6 mt-1">Motorista: {item.motorista}</p>
+      
+      {loading ? (
+        <progress className="progress is-large is-info" max="100"></progress>
+      ) : (
+        <div className="list-container">
+          {filteredData.map(item => (
+            <div className="card mb-3" key={item.id}>
+              <div className="card-content">
+                <div className="level is-mobile is-align-items-center">
+                  <div className="level-left">
+                    <div className="level-item has-text-left">
+                      <div>
+                        <p className="title is-5">{item.cooperado}</p>
+                        <p className="subtitle is-6 mt-1">Motorista: {item.motorista}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="level-right">
-                  <div className="level-item has-text-right is-hidden-touch">
-                    <div className={`tag is-large ${getStatusClass(item.status)}`}>
-                      {item.status}
+                  <div className="level-right">
+                    <div className="level-item has-text-right is-hidden-touch">
+                      <div className={`tag is-large ${getStatusClass(item.status)}`}>
+                        {item.status}
+                      </div>
                     </div>
-                  </div>
-                  <div className="level-item buttons is-hidden-touch ml-4">
-                    <button className="button is-light">
-                      <span className="icon has-text-link">
-                        <MdLocationPin />
+                    <div className="level-item buttons is-hidden-touch ml-4">
+                      <button className="button is-light" onClick={() => handleCheckInClick(item)}>
+                        <span className="icon has-text-link">
+                          <MdLocationPin />
+                        </span>
+                      </button>
+                      <button className="button is-light" onClick={() => handleEdit(item)}>
+                        <span className="icon has-text-link">
+                          <MdEdit />
+                        </span>
+                      </button>
+                    </div>
+                    <div className="level-item is-hidden-desktop">
+                      <span className="icon is-medium">
+                        <MdArrowForwardIos />
                       </span>
-                    </button>
-                    <button className="button is-light">
-                      <span className="icon has-text-link">
-                        <MdEdit />
-                      </span>
-                    </button>
-                  </div>
-                  <div className="level-item is-hidden-desktop">
-                    <span className="icon is-medium">
-                      <MdArrowForwardIos />
-                    </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-      
+          ))}
+        </div>
+      )}
+
       {/* Botão para instalar o app */}
       <div className="mt-6 has-text-centered">
         <button className="button is-link is-large">

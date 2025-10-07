@@ -85,33 +85,23 @@ export interface AbastecimentoVolumePorDiaItem {
   volumeTotal: number;
 }
 
+// Interface para um item da lista de coleta
+export interface ColetaItem {
+  id: string; // Usar UUID para ID único
+  cooperado: string;
+  motorista: string;
+  tipoVeiculo: string;
+  placa: string;
+  odometro: number;
+  dataPrevisao: string;
+  horaPrevisao: string;
+  status: 'Pendente' | 'Entregue' | 'Atrasado';
+}
+
 /**
  * Dados Mockados
  */
-const faturamentoMockData: FaturamentoItem[] = [
-  { name: 'Janeiro', faturamento: 2774.38, label: '3.50' },
-  { name: 'Fevereiro', faturamento: 2637.99, label: '3.72' },
-  { name: 'Março', faturamento: 5027.00, label: '3.70' },
-  { name: 'Abril', faturamento: 3847.00, label: '3.60' },
-  { name: 'Maio', faturamento: 5122.71, label: '3.50' },
-  { name: 'Junho', faturamento: 18231.53, label: '3.46' },
-  { name: 'Julho', faturamento: 26145.70, label: '3.46' },
-  { name: 'Agosto', faturamento: 30948.37, label: '3.47' },
-  { name: 'Setembro', faturamento: 0, label: '0.0' },
-  { name: 'Outubro', faturamento: 0, label: '0.0' },
-  { name: 'Novembro', faturamento: 0, label: '0.0' },
-  { name: 'Dezembro', faturamento: 0, label: '0.0' },
-];
-
-const abastecimentoMockData: AbastecimentoItem[] = [
-  { veiculo: 'Veículo 1', m3: 2500 },
-  { veiculo: 'Veículo 2', m3: 1500 },
-  { veiculo: 'Veículo 3', m3: 800 },
-  { veiculo: 'Veículo 4', m3: 4200 },
-  { veiculo: 'Veículo 5', m3: 1000 }
-];
-
-const abastecimentoReportMockData: AbastecimentoReportItem[] = [
+let abastecimentoReportMockData: AbastecimentoReportItem[] = [
   {
     status: 'Concluído',
     cliente: 'Primato Cooperativa Agroindustrial',
@@ -247,7 +237,6 @@ const abastecimentoReportMockData: AbastecimentoReportItem[] = [
     cliente: 'Primato Cooperativa Agroindustrial',
     veiculo: 'Caminhão (Dejeto)',
     placa: 'BBW-9C55',
-    produto: 'Biometano',
     data: '2025-09-25',
     horaInicio: '17:01:34',
     horaTermino: '17:01:34',
@@ -255,6 +244,29 @@ const abastecimentoReportMockData: AbastecimentoReportItem[] = [
     odometro: 399959,
     usuario: 'vanessa',
   },
+];
+
+const faturamentoMockData: FaturamentoItem[] = [
+  { name: 'Janeiro', faturamento: 2774.38, label: '3.50' },
+  { name: 'Fevereiro', faturamento: 2637.99, label: '3.72' },
+  { name: 'Março', faturamento: 5027.00, label: '3.70' },
+  { name: 'Abril', faturamento: 3847.00, label: '3.60' },
+  { name: 'Maio', faturamento: 5122.71, label: '3.50' },
+  { name: 'Junho', faturamento: 18231.53, label: '3.46' },
+  { name: 'Julho', faturamento: 26145.70, label: '3.46' },
+  { name: 'Agosto', faturamento: 30948.37, label: '3.47' },
+  { name: 'Setembro', faturamento: 0, label: '0.0' },
+  { name: 'Outubro', faturamento: 0, label: '0.0' },
+  { name: 'Novembro', faturamento: 0, label: '0.0' },
+  { name: 'Dezembro', faturamento: 0, label: '0.0' },
+];
+
+const abastecimentoMockData: AbastecimentoItem[] = [
+  { veiculo: 'Veículo 1', m3: 2500 },
+  { veiculo: 'Veículo 2', m3: 1500 },
+  { veiculo: 'Veículo 3', m3: 800 },
+  { veiculo: 'Veículo 4', m3: 4200 },
+  { veiculo: 'Veículo 5', m3: 1000 }
 ];
 
 const mockData: DashboardData = {
@@ -301,15 +313,51 @@ const mockData: DashboardData = {
     { name: 'Nelson B.', value: 4.5, color: '#334bff' },
     { name: 'Oswaldo G.', value: 4.5, color: '#334bff' },
     { name: 'Renato I.', value: 1.5, color: '#334bff' },
-    { name: 'Sueli L.', value: -11.5, color: '#ef4444' },
-    { name: 'Valdecir', value: 0.5, color: '#334bff' },
-    { name: 'Valdir K.', value: 4.5, color: '#334bff' },
-    { name: 'Vilmar M.', value: 5.5, color: '#334bff' },
-    { name: 'Vilson S.', value: 2.5, color: '#334bff' },
-    { name: 'Zaura32', value: 1.5, color: '#334bff' },
+    ['Sueli L.', -11.5, '#ef4444'],
+    ['Valdecir', 0.5, '#334bff'],
+    ['Valdir K.', 4.5, '#334bff'],
+    ['Vilmar M.', 5.5, '#334bff'],
+    ['Vilson S.', 2.5, '#334bff'],
+    ['Zaura32', 1.5, '#334bff'],
   ],
   abastecimentos: [],
 };
+
+let mockColetaData: ColetaItem[] = [
+  {
+    id: '1',
+    cooperado: 'Primato',
+    motorista: 'Luiz Carlos',
+    tipoVeiculo: 'Caminhão de dejetos',
+    placa: 'ABC-1D23',
+    odometro: 123456,
+    dataPrevisao: '2025-01-01',
+    horaPrevisao: '15:00',
+    status: 'Pendente',
+  },
+  {
+    id: '2',
+    cooperado: 'Primato',
+    motorista: 'Marcos Paulo',
+    tipoVeiculo: 'Caminhão de ração',
+    placa: 'XYZ-4567',
+    odometro: 234567,
+    dataPrevisao: '2025-01-02',
+    horaPrevisao: '10:00',
+    status: 'Entregue',
+  },
+  {
+    id: '3',
+    cooperado: 'Primato',
+    motorista: 'Ana Cássia',
+    tipoVeiculo: 'Caminhão de dejetos',
+    placa: 'GHI-7890',
+    odometro: 345678,
+    dataPrevisao: '2025-01-03',
+    horaPrevisao: '11:30',
+    status: 'Atrasado',
+  },
+];
 
 
 /**
@@ -382,7 +430,7 @@ export const fetchAbastecimentoAggregatedVolumeData = (
     setTimeout(() => {
       const aggregatedData = abastecimentoReportMockData.reduce((acc, item) => {
         const date = new Date(item.data);
-        let key: string;
+        let key: string = '';
 
         switch (period) {
           case 'day':
@@ -506,5 +554,59 @@ export const fetchAbastecimentoSummaryData = (startDate?: string | null, endDate
 
       resolve(Object.values(summary));
     }, 800);
+  });
+};
+
+/**
+ * Funções da API Mockada para Coleta
+ */
+
+export const fetchColetaData = (): Promise<ColetaItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([...mockColetaData]);
+    }, 500);
+  });
+};
+
+export const createColetaItem = (item: Omit<ColetaItem, 'id' | 'status'>): Promise<ColetaItem> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newItem = {
+        ...item,
+        id: (mockColetaData.length + 1).toString(),
+        status: 'Pendente' as 'Pendente',
+      };
+      mockColetaData.push(newItem);
+      resolve(newItem);
+    }, 500);
+  });
+};
+
+export const updateColetaItem = (updatedItem: ColetaItem): Promise<ColetaItem> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const index = mockColetaData.findIndex((item) => item.id === updatedItem.id);
+      if (index !== -1) {
+        mockColetaData[index] = updatedItem;
+        resolve(updatedItem);
+      } else {
+        reject(new Error('Item não encontrado.'));
+      }
+    }, 500);
+  });
+};
+
+export const deleteColetaItem = (id: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const initialLength = mockColetaData.length;
+      mockColetaData = mockColetaData.filter((item) => item.id !== id);
+      if (mockColetaData.length < initialLength) {
+        resolve();
+      } else {
+        reject(new Error('Item não encontrado.'));
+      }
+    }, 500);
   });
 };

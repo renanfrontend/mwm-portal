@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdDarkMode, MdLightMode, MdNotifications, MdMenu } from 'react-icons/md';
+import { MdDarkMode, MdLightMode, MdNotifications } from 'react-icons/md';
 import useTheme from '../hooks/useTheme';
 
 interface HeaderProps {
