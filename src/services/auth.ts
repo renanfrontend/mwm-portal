@@ -6,7 +6,7 @@ export interface MockUser {
   id: string;
   username: string;
   email: string;
-  password?: string; // Usamos opcional para simular a ausência de senha em alguns fluxos
+  password?: string;
   role: 'administrador' | 'editor' | 'leitor';
   filiais?: string[];
 }

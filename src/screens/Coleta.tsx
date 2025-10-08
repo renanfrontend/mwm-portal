@@ -184,12 +184,12 @@ const Coleta = () => {
                     <div className="level-item buttons is-hidden-touch ml-4">
                       <button className="button is-light" onClick={() => handleCheckInClick(item)}>
                         <span className="icon has-text-link">
-                          <MdLocationPin />
+                          <MdLocationOn />
                         </span>
                       </button>
                       <button className="button is-light" onClick={() => handleEdit(item)}>
                         <span className="icon has-text-link">
-                          <MdEdit />
+                          <MdModeEdit />
                         </span>
                       </button>
                     </div>
