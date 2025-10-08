@@ -34,13 +34,13 @@ src/
 
 A aplicação conta com diversas telas e funcionalidades para análise de dados:
 
-### 1. Sistema de Autenticação e Proteção de Rotas
-Uma nova camada foi adicionada para controlar o acesso à aplicação.
-- **Login**: Tela inicial para acesso do usuário, com validação de credenciais.
+### 1. Sistema de Autenticação e Controle de Acesso (RBAC)
+A camada de autenticação foi aprimorada para um modelo de controle de acesso baseado em perfis (RBAC - Role-Based Access Control) e filiais.
+- **Login**: Tela inicial para acesso do usuário.
 - **Recuperação de Senha**: Tela para solicitação de redefinição de senha por e-mail.
 - **Criação de Nova Senha**: Tela para criar uma nova senha a partir de um link de redefinição.
-- **Proteção de Rotas**: As telas de Dashboard, Relatórios e Faturamentos são acessíveis apenas a usuários autenticados, redirecionando-os para a tela de login caso a sessão não esteja ativa.
-- **Estado Global**: O estado de autenticação é gerenciado globalmente com o React Context, persistindo a sessão mesmo após um refresh da página.
+- **Proteção de Rotas**: O acesso às telas principais é restrito a usuários autenticados.
+- **Controle de Acesso por Perfil**: As permissões de acesso a funcionalidades (como adicionar ou editar registros) são controladas pelo perfil do usuário (`administrador`, `editor`, `leitor`).
 
 ### 2. Dashboard (`Dashboard.tsx`)
 A tela principal, que oferece uma visão geral e consolidada dos indicadores mais importantes.
@@ -76,9 +76,16 @@ Oferece uma visão comparativa entre faturamento e abastecimento.
   2. Abastecimentos Realizados (m³) por mês.
 - **Sincronização de Dados**: A API foi atualizada para que os dados de abastecimento desta tela sejam consistentes com os do restante da aplicação, garantindo uma fonte de verdade única.
 
+### 6. Módulo de Coleta (`Coleta.tsx`)
+Um novo módulo foi adicionado para gerenciar o processo de coleta.
+- **Visualização de Coletas**: A tela exibe uma lista de coletas agendadas com seu status atual.
+- **Adição de Nova Coleta**: Um botão `+ Coleta` no cabeçalho permite adicionar novos registros, que são salvos na API mockada.
+- **Edição de Coleta**: Um botão de edição em cada card permite modificar as informações de uma coleta.
+- **Check-in de Coleta**: O botão com o ícone de localização abre um modal de confirmação para realizar o check-in, alterando o status da coleta para `Entregue`.
+
 ## Backend Integration (Próximos Passos)
 
-Atualmente, a aplicação utiliza uma camada de serviço mockada (`src/services/api.ts`) que simula o comportamento de uma API real, incluindo latência e agregação de dados.
+Atualmente, a aplicação utiliza uma camada de serviço mockada (`src/services/api.ts` e `src/services/auth.ts`) que simula o comportamento de uma API real.
 
 O próximo passo crucial do projeto é a integração com o backend definitivo, que será desenvolvido em **Java com Spring Boot** e utilizará um banco de dados **SQL Server**. A camada de serviço existente será refatorada para substituir as funções mockadas por chamadas HTTP (utilizando `fetch` ou `axios`) aos endpoints da API real. A estrutura de tipos (interfaces TypeScript) já definida será mantida para garantir a consistência e a segurança dos dados trafegados entre o frontend e o backend.
 
@@ -96,14 +103,18 @@ O próximo passo crucial do projeto é a integração com o backend definitivo, 
 
 A aplicação estará disponível em `http://localhost:5173` (ou na porta que o Vite designar).
 
+### Usuários de Teste (API Mockada)
+
+Para testar as diferentes funcionalidades e perfis, utilize os seguintes usuários de login com a API mockada:
+| Usuário   | Senha     | Perfil        | Filiais                   |
+|-----------|-----------|---------------|---------------------------|
+| `admin`   | `admin123`  | `administrador` | `Toledo - PR`, `Cascavel - PR` |
+| `editor`  | `editor123` | `editor`        | `Toledo - PR`             |
+| `porteiro`| `leitor123` | `leitor`        | `Toledo - PR`             |
+
 ### Testes
 
-O projeto utiliza **Vitest** e **React Testing Library** para testes unitários e de integração. Foram criados testes para os principais componentes e para a página de Dashboard, cobrindo:
-
-- Renderização dos componentes com diferentes props.
-- Lógica de carregamento, sucesso e erro da página de Dashboard.
-
-Para executar os testes, utilize os seguintes comandos:
+O projeto utiliza **Vitest** e **React Testing Library** para testes unitários e de integração. Para executar os testes, utilize os seguintes comandos:
 
 - `npm test`: Roda os testes uma vez no terminal.
 - `npm run test:ui`: Abre a interface gráfica do Vitest para uma experiência de teste interativa.

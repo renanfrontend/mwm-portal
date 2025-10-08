@@ -1,5 +1,5 @@
 // src/services/auth.ts
-import { v4 as uuidv4 } from 'uuid'; // Adicionaremos a dependência uuid mais tarde
+import { v4 as uuidv4 } from 'uuid';
 
 // Interface para um item de usuário mockado
 export interface MockUser {
@@ -7,12 +7,15 @@ export interface MockUser {
   username: string;
   email: string;
   password?: string; // Usamos opcional para simular a ausência de senha em alguns fluxos
+  role: 'administrador' | 'editor' | 'leitor';
+  filiais?: string[];
 }
 
-// Dados de usuário mockados
+// Dados de usuário mockados com perfis e filiais
 const mockUsers: MockUser[] = [
-  { id: uuidv4(), username: 'renan', email: 'teste@mwm.com', password: 'teste123' },
-  { id: uuidv4(), username: 'vanessa', email: 'renan@mwm.com', password: 'renan123' },
+  { id: uuidv4(), username: 'admin', email: 'admin@mwm.com', password: 'admin123', role: 'administrador', filiais: ['Toledo - PR', 'Cascavel - PR'] },
+  { id: uuidv4(), username: 'editor', email: 'editor@mwm.com', password: 'editor123', role: 'editor', filiais: ['Toledo - PR'] },
+  { id: uuidv4(), username: 'porteiro', email: 'porteiro@mwm.com', password: 'leitor123', role: 'leitor', filiais: ['Toledo - PR'] },
 ];
 
 /**

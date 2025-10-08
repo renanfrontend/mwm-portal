@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MdSearch, MdFilterList, MdEdit, MdLocationPin, MdArrowForwardIos, MdOutlineCloudUpload, MdArrowBack } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdEdit, MdLocationPin, MdCheckCircle, MdOutlineWatchLater, MdArrowForwardIos, MdOutlineCloudUpload, MdArrowBack } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import useTheme from '../hooks/useTheme';
+import { useAuth } from '../context/AuthContext';
 import ColetaFormModal from '../components/ColetaFormModal';
 import CheckInModal from '../components/CheckInModal';
 import { fetchColetaData, updateColetaItem, createColetaItem, type ColetaItem } from '../services/api';
@@ -9,12 +9,16 @@ import { fetchColetaData, updateColetaItem, createColetaItem, type ColetaItem } 
 const Coleta = () => {
   const [coletaData, setColetaData] = useState<ColetaItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const { theme } = useTheme();
+  const { user } = useAuth(); // Obtém o usuário do contexto de autenticação
   const [loading, setLoading] = useState(true);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ColetaItem | null>(null);
   const navigate = useNavigate();
+
+  // Permissões baseadas no perfil do usuário
+  const canEdit = user?.role === 'editor' || user?.role === 'administrador';
+  const canAdd = user?.role === 'editor' || user?.role === 'administrador';
 
   useEffect(() => {
     loadData();
@@ -89,12 +93,14 @@ const Coleta = () => {
         </div>
         <div className="level-right">
           <div className="level-item">
-            <button className="button is-primary" onClick={() => {
-              setSelectedItem(null); // Limpar item selecionado para o modo de adição
-              setIsFormModalOpen(true);
-            }}>
-              + Coleta
-            </button>
+            {canAdd && (
+              <button className="button is-primary" onClick={() => {
+                setSelectedItem(null); // Limpar item selecionado para o modo de adição
+                setIsFormModalOpen(true);
+              }}>
+                + Coleta
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -141,7 +147,7 @@ const Coleta = () => {
       {/* Lista de cooperados */}
       <div className="list-header level is-mobile mt-5">
         <div className="level-left">
-          <p className="subtitle is-6">Cooperados</p>
+          <p className="subtitle is-6">Primato</p>
         </div>
         <div className="level-right">
           <div className="buttons">
@@ -176,16 +182,20 @@ const Coleta = () => {
                       </div>
                     </div>
                     <div className="level-item buttons is-hidden-touch ml-4">
+                      {/* Botão de Check-in (ícone de localização) visível para todos */}
                       <button className="button is-light" onClick={() => handleCheckInClick(item)}>
                         <span className="icon has-text-link">
                           <MdLocationPin />
                         </span>
                       </button>
-                      <button className="button is-light" onClick={() => handleEdit(item)}>
-                        <span className="icon has-text-link">
-                          <MdEdit />
-                        </span>
-                      </button>
+                      {/* Botão de Edição visível apenas para editores e administradores */}
+                      {canEdit && (
+                        <button className="button is-light" onClick={() => handleEdit(item)}>
+                          <span className="icon has-text-link">
+                            <MdEdit />
+                          </span>
+                        </button>
+                      )}
                     </div>
                     <div className="level-item is-hidden-desktop">
                       <span className="icon is-medium">
