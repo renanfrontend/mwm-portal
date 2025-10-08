@@ -182,20 +182,16 @@ const Coleta = () => {
                       </div>
                     </div>
                     <div className="level-item buttons is-hidden-touch ml-4">
-                      {/* Botão de Check-in (ícone de localização) visível para todos */}
                       <button className="button is-light" onClick={() => handleCheckInClick(item)}>
                         <span className="icon has-text-link">
                           <MdLocationPin />
                         </span>
                       </button>
-                      {/* Botão de Edição visível apenas para editores e administradores */}
-                      {canEdit && (
-                        <button className="button is-light" onClick={() => handleEdit(item)}>
-                          <span className="icon has-text-link">
-                            <MdEdit />
-                          </span>
-                        </button>
-                      )}
+                      <button className="button is-light" onClick={() => handleEdit(item)}>
+                        <span className="icon has-text-link">
+                          <MdEdit />
+                        </span>
+                      </button>
                     </div>
                     <div className="level-item is-hidden-desktop">
                       <span className="icon is-medium">
@@ -209,16 +205,6 @@ const Coleta = () => {
           ))}
         </div>
       )}
-
-      {/* Botão para instalar o app */}
-      <div className="mt-6 has-text-centered">
-        <button className="button is-link is-large">
-          <span className="icon">
-            <MdOutlineCloudUpload />
-          </span>
-          <span>Instalar APP</span>
-        </button>
-      </div>
     </>
   );
 };
