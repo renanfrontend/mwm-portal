@@ -34,7 +34,7 @@ const AppContent = () => {
     <>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={logout} />
       {isAuthenticated && (
-        <Header>
+        <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <button className="button is-light" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             <span className="icon"><MdMenu /></span>
           </button>

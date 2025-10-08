@@ -18,21 +18,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
   return (
-    <div className={`sidebar ${isOpen ? 'is-open' : ''}`}>
-      <div className="sidebar-header">
-        <div className="level is-mobile">
-          <div className="level-left">
-            <div className="level-item">
-              <img src="/logo.png" alt="MWM Logo" width="100" />
-            </div>
-          </div>
-          <div className="level-right">
-            <div className="level-item">
-              <button className="delete is-large" onClick={onClose}></button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className={`sidebar ${isOpen ? 'is-open' : ''}`} onClick={onClose}>
       <aside className="menu">
         <ul className="menu-list">
           <li>
