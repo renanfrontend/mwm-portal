@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { fetchCooperadosData, fetchCalendarEvents, updateCalendarEvent, type CooperadoItem, type CalendarEvent, createCalendarEvent } from '../services/api';
+import { fetchCooperadosData, fetchCalendarEvents, updateCalendarEvent, fetchAgendaData, createCalendarEvent, type CooperadoItem, type CalendarEvent, type AgendaItem } from '../services/api';
 
 // Imports para o calendário e drag-and-drop
 import { Calendar, momentLocalizer, type View, Navigate } from 'react-big-calendar';
@@ -12,6 +12,10 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import moment from 'moment';
 import 'moment/locale/pt-br';
 import '../styles/calendar.css';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
+// Importa o novo componente de tabela
+import AgendaTable from '../components/AgendaTable';
 
 // Garante que o moment use o idioma português do Brasil globalmente
 moment.locale('pt-br');
@@ -23,6 +27,7 @@ const Cooperados = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [agendaData, setAgendaData] = useState<AgendaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +43,14 @@ const Cooperados = () => {
     try {
       setLoading(true);
       setError(null);
-      const [cooperados, events] = await Promise.all([
+      const [cooperados, events, agenda] = await Promise.all([
         fetchCooperadosData(),
         fetchCalendarEvents(),
+        fetchAgendaData(),
       ]);
       setCooperadosData(cooperados);
       setCalendarEvents(events);
+      setAgendaData(agenda);
     } catch (err) {
       setError("Ocorreu um erro ao buscar os dados.");
       console.error(err);
@@ -161,7 +168,6 @@ const Cooperados = () => {
   );
 
   const { messages, eventPropGetter } = useMemo(() => ({
-    defaultDate: new Date(2025, 9, 1),
     messages: {
       next: 'Próximo',
       previous: 'Anterior',
@@ -216,9 +222,9 @@ const Cooperados = () => {
         </div>
         <div className="level-right">
           <div className="level-item">
-            <button className="button is-primary" onClick={() => handleSelectSlot({ start: new Date(), end: new Date() })}>
+            <button className="button is-primary" onClick={() => setModalState({ isOpen: true, slot: { start: new Date(), end: new Date() } })}>
               <span className="icon"><MdAdd /></span>
-              <span>Cadastrar</span>
+              <span>Adicionar Evento</span>
             </button>
           </div>
         </div>
@@ -231,6 +237,9 @@ const Cooperados = () => {
           </li>
           <li className={activeTab === 'agenda' ? 'is-active' : ''}>
             <a onClick={() => setActiveTab('agenda')}>Agenda</a>
+          </li>
+          <li className={activeTab === 'visaoGeral' ? 'is-active' : ''}>
+            <a onClick={() => setActiveTab('visaoGeral')}>Visão Geral</a>
           </li>
         </ul>
       </div>
@@ -345,9 +354,24 @@ const Cooperados = () => {
                   view={view}
                   messages={messages}
                   eventPropGetter={eventPropGetter}
+                  defaultDate={new Date(2025, 9, 1)}
                   style={{ height: '70vh' }}
                 />
               </DndProvider>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'visaoGeral' && (
+        <div className="card">
+          <div className="card-content" style={{ overflowX: 'auto' }}>
+            {loading ? (
+              <progress className="progress is-large is-info" max="100"></progress>
+            ) : error ? (
+              <div className="notification is-danger">{error}</div>
+            ) : (
+              <AgendaTable data={agendaData} loading={loading} error={error} />
             )}
           </div>
         </div>
@@ -373,15 +397,14 @@ const EventModal = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  // Reset editing state when modal becomes inactive or event changes
   useEffect(() => {
     if (!modalState.isOpen) setIsEditing(false);
   }, [modalState.isOpen]);
 
   if (!modalState.isOpen) return null;
 
-  const isNewEvent = !!modalState.slot; // Modo de criação
-  const canEdit = !isNewEvent && isEditing; // Modo de edição
+  const isNewEvent = !!modalState.slot;
+  const canEdit = !isNewEvent && isEditing;
 
   return (
     <div className="modal is-active">

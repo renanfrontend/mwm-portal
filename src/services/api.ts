@@ -121,6 +121,16 @@ export interface CalendarEvent {
   resource?: any;
 }
 
+// Novo tipo para os dados da agenda customizada
+export interface AgendaItem {
+  id: number;
+  cooperado: string;
+  filial: 'Primato' | 'Agrocampo';
+  coletas: { date: string; value: number | null; fullDate: string }[];
+  somaColetas: number;
+  km: number;
+}
+
 
 /**
  * Dados Mockados
@@ -337,12 +347,12 @@ const mockData: DashboardData = {
     { name: 'Nelson B.', value: 4.5, color: '#334bff' },
     { name: 'Oswaldo G.', value: 4.5, color: '#334bff' },
     { name: 'Renato I.', value: 1.5, color: '#334bff' },
-    ['Sueli L.', -11.5, '#ef4444'],
-    ['Valdecir', 0.5, '#334bff'],
-    ['Valdir K.', 4.5, '#334bff'],
-    ['Vilmar M.', 5.5, '#334bff'],
-    ['Vilson S.', 2.5, '#334bff'],
-    ['Zaura32', 1.5, '#334bff'],
+    { name: 'Sueli L.', value: -11.5, color: '#ef4444' },
+    { name: 'Valdecir', value: 0.5, color: '#334bff' },
+    { name: 'Valdir K.', value: 4.5, color: '#334bff' },
+    { name: 'Vilmar M.', value: 5.5, color: '#334bff' },
+    { name: 'Vilson S.', value: 2.5, color: '#334bff' },
+    { name: 'Zaura32', value: 1.5, color: '#334bff' },
   ],
   abastecimentos: [],
 };
@@ -430,288 +440,155 @@ const mockCooperadosData: CooperadoItem[] = [
   }
 ];
 
+let mockCalendarEvents: CalendarEvent[] = [
+  { id: 1, title: 'Ademir Machioro - Coleta 1', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 11, 0), allDay: false, resource: 'coleta' },
+  { id: 2, title: 'Ademir Machioro - Coleta 2', start: new Date(2025, 9, 2, 14, 0), end: new Date(2025, 9, 2, 16, 0), allDay: false, resource: 'coleta' },
+  { id: 3, title: 'Carlos Jaime Pauly', start: new Date(2025, 9, 3, 9, 0), end: new Date(2025, 9, 3, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 4, title: 'Delcio Rosseto', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 5, title: 'Egon Portz', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: false, resource: 'coleta' },
+  { id: 6, title: 'Manutenção Caminhão ABC-1D23', start: new Date(2025, 9, 5, 8, 0), end: new Date(2025, 9, 5, 12, 0), allDay: false, resource: 'manutencao' },
+  { id: 7, title: 'Marcos Schaub', start: new Date(2025, 9, 7, 9, 0), end: new Date(2025, 9, 7, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 8, title: 'Marlise Kochmann', start: new Date(2025, 9, 8, 9, 0), end: new Date(2025, 9, 8, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 9, title: 'Valdecir Klein', start: new Date(2025, 9, 9, 9, 0), end: new Date(2025, 9, 9, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 10, title: 'Vilson Galiago', start: new Date(2025, 9, 10, 9, 0), end: new Date(2025, 9, 10, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 11, title: 'Francisco', start: new Date(2025, 9, 11, 9, 0), end: new Date(2025, 9, 11, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 12, title: 'Sueli L.', start: new Date(2025, 9, 12, 9, 0), end: new Date(2025, 9, 12, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 13, title: 'Vilmar M.', start: new Date(2025, 9, 13, 9, 0), end: new Date(2025, 9, 13, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 14, title: 'Valdir K.', start: new Date(2025, 9, 14, 9, 0), end: new Date(2025, 9, 14, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 15, title: 'Ademir E.', start: new Date(2025, 9, 15, 9, 0), end: new Date(2025, 9, 15, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 16, title: 'Manutenção Caminhão GHI-7890', start: new Date(2025, 9, 16, 8, 0), end: new Date(2025, 9, 16, 12, 0), allDay: false, resource: 'manutencao' },
+];
 
-/**
- * Funções da API Mockada
- */
+const mockAgendaData: AgendaItem[] = [
+  {
+    id: 1,
+    cooperado: 'Ademir Englesing',
+    filial: 'Primato',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: 2, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 6,
+    km: 28,
+  },
+  {
+    id: 2,
+    cooperado: 'Ademir Machioro',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: null, fullDate: '2025-10-01' },
+      { date: '2/10', value: 4, fullDate: '2025-10-02' },
+      { date: '3/10', value: null, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 4,
+    km: 24,
+  },
+  {
+    id: 3,
+    cooperado: 'Arsenio Weishcheider',
+    filial: 'Primato',
+    coletas: [
+      { date: '1/10', value: 2, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: 2, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 4,
+    km: 20,
+  },
+  {
+    id: 4,
+    cooperado: 'Carlos Jaime Pauly',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: null, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 4,
+    km: 16,
+  },
+  {
+    id: 5,
+    cooperado: 'Delcio Rosseto e Marlize',
+    filial: 'Primato',
+    coletas: [
+      { date: '1/10', value: 2, fullDate: '2025-10-01' },
+      { date: '2/10', value: 2, fullDate: '2025-10-02' },
+      { date: '3/10', value: null, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 4,
+    km: 52,
+  },
+  {
+    id: 6,
+    cooperado: 'Ladir e Neuza Rosseto',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: 2, fullDate: '2025-10-02' },
+      { date: '3/10', value: null, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 6,
+    km: 44,
+  },
+  {
+    id: 7,
+    cooperado: 'Gilberto Heinen',
+    filial: 'Primato',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: 4, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 8,
+    km: 40,
+  },
+  {
+    id: 8,
+    cooperado: 'Guido Dornbach',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: 4, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 8,
+    km: 40,
+  },
+  {
+    id: 9,
+    cooperado: 'Jacir Leopoldo Machado',
+    filial: 'Primato',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '3/10', value: 4, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 8,
+    km: 52,
+  },
+  {
+    id: 10,
+    cooperado: 'Vilson Salvalagio',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: 4, fullDate: '2025-10-01' },
+      { date: '2/10', value: 4, fullDate: '2025-10-02' },
+      { date: '3/10', value: null, fullDate: '2025-10-03' },
+    ],
+    somaColetas: 8,
+    km: 40,
+  },
+];
 
-export const fetchDashboardData = (): Promise<DashboardData> => {
-  console.log('Fetching mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      console.log('Mock data fetched!');
-      resolve(mockData);
-    }, 1000); // Atraso de 1 segundo
-  });
-};
-
-export const fetchAbastecimentoData = (): Promise<AbastecimentoItem[]> => {
-  console.log('Fetching abastecimento mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(abastecimentoMockData);
-    }, 500); // Atraso menor para simular um endpoint mais rápido
-  });
-};
-
-export const fetchFaturamentoData = (): Promise<FaturamentoItem[]> => {
-  console.log('Fetching faturamento mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(faturamentoMockData);
-    }, 800);
-  });
-};
-
-export const fetchAbastecimentoVolumePorDiaData = (startDate?: string | null, endDate?: string | null): Promise<AbastecimentoVolumePorDiaItem[]> => {
-  console.log('Fetching abastecimento volume por dia mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const dataToProcess = (!startDate || !endDate)
-        ? abastecimentoReportMockData
-        : abastecimentoReportMockData.filter(item => {
-          const itemDate = new Date(item.data);
-          return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-        });
-
-      const volumePorDia = dataToProcess.reduce((acc, item) => {
-        const data = item.data;
-        if (!acc[data]) {
-          acc[data] = {
-            data: data,
-            volumeTotal: 0,
-          };
-        }
-        acc[data].volumeTotal += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoVolumePorDiaItem>);
-
-      const sortedData = Object.values(volumePorDia).sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
-
-      resolve(sortedData);
-    }, 900);
-  });
-};
-
-export const fetchAbastecimentoAggregatedVolumeData = (
-  period: 'day' | 'week' | 'month'
-): Promise<AbastecimentoVolumeItem[]> => {
-  console.log(`Fetching abastecimento aggregated volume mock data for period: ${period}...`);
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const aggregatedData = abastecimentoReportMockData.reduce((acc, item) => {
-        const date = new Date(item.data);
-        let key: string = '';
-
-        switch (period) {
-          case 'day':
-            key = item.data; // YYYY-MM-DD
-            break;
-          case 'month':
-            // Formato 'YYYY-MM' para agrupar por mês
-            key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            break;
-          case 'week':
-            // Pega o primeiro dia da semana (domingo)
-            const firstDay = new Date(date.setDate(date.getDate() - date.getDay()));
-            key = firstDay.toISOString().split('T')[0];
-            break;
-        }
-
-        if (!acc[key]) {
-          acc[key] = { name: key, volume: 0 };
-        }
-        acc[key].volume += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoVolumeItem>);
-
-      resolve(Object.values(aggregatedData).sort((a, b) => a.name.localeCompare(b.name)));
-    }, 700);
-  });
-};
-
-export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[]> => {
-  console.log('Fetching abastecimento volume mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const monthNames = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-      ];
-
-      const monthlyTotals = monthNames.map(name => ({ name, volume: 0 }));
-
-      abastecimentoReportMockData.forEach(item => {
-        const date = new Date(item.data);
-        const monthIndex = date.getMonth();
-        if (monthlyTotals[monthIndex]) {
-          monthlyTotals[monthIndex].volume += item.volume;
-        }
-      });
-
-      // Garante que todos os meses tenham pelo menos o valor 0 e formata o volume
-      const result = monthlyTotals.map(item => ({
-        ...item,
-        volume: parseFloat(item.volume.toFixed(2))
-      }));
-
-      resolve(result);
-    }, 700);
-  });
-};
-
-export const addAbastecimentoReportItem = (
-  item: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>
-): Promise<AbastecimentoReportItem> => {
-  console.log('Adding new abastecimento report item...', item);
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newItem: AbastecimentoReportItem = {
-        ...item,
-        status: 'Concluído',
-        cliente: 'Primato Cooperativa Agroindustrial',
-        horaTermino: item.horaInicio, // Simulação simples
-      };
-      // Adiciona no início da lista para ser visível imediatamente
-      abastecimentoReportMockData.unshift(newItem);
-      console.log('New item added:', newItem);
-      resolve(newItem);
-    }, 500);
-  });
-};
-
-export const fetchAbastecimentoReportData = (startDate?: string | null, endDate?: string | null): Promise<AbastecimentoReportItem[]> => {
-  console.log('Fetching abastecimento report mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      if (!startDate || !endDate) {
-        resolve([...abastecimentoReportMockData]);
-        return;
-      }
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const filteredData = abastecimentoReportMockData.filter(item => {
-        const itemDate = new Date(item.data);
-        return itemDate >= start && itemDate <= end;
-      });
-      resolve(filteredData);
-    }, 1000);
-  });
-};
-
-export const fetchAbastecimentoSummaryData = (startDate?: string | null, endDate?: string | null): Promise<AbastecimentoSummaryItem[]> => {
-  console.log('Fetching abastecimento summary mock data...');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const dataToProcess = (!startDate || !endDate)
-        ? abastecimentoReportMockData
-        : abastecimentoReportMockData.filter(item => {
-          const itemDate = new Date(item.data);
-          return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-        });
-
-      const summary = dataToProcess.reduce((acc, item) => {
-        const key = `${item.veiculo}-${item.placa}`;
-        if (!acc[key]) {
-          acc[key] = {
-            veiculo: item.veiculo,
-            placa: item.placa,
-            volumeTotal: 0,
-          };
-        }
-        acc[key].volumeTotal += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoSummaryItem>);
-
-      resolve(Object.values(summary));
-    }, 800);
-  });
-};
-
-/**
- * Funções da API Mockada para Coleta
- */
-
-export const fetchColetaData = (): Promise<ColetaItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([...mockColetaData]);
-    }, 500);
-  });
-};
-
-export const createColetaItem = (item: Omit<ColetaItem, 'id' | 'status'>): Promise<ColetaItem> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newItem = {
-        ...item,
-        id: (mockColetaData.length + 1).toString(),
-        status: 'Pendente' as 'Pendente',
-      };
-      mockColetaData.push(newItem);
-      resolve(newItem);
-    }, 500);
-  });
-};
-
-export const updateColetaItem = (updatedItem: ColetaItem): Promise<ColetaItem> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const index = mockColetaData.findIndex((item) => item.id === updatedItem.id);
-      if (index !== -1) {
-        mockColetaData[index] = updatedItem;
-        resolve(updatedItem);
-      } else {
-        reject(new Error('Item não encontrado.'));
-      }
-    }, 500);
-  });
-};
-
-export const deleteColetaItem = (id: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const initialLength = mockColetaData.length;
-      mockColetaData = mockColetaData.filter((item) => item.id !== id);
-      if (mockColetaData.length < initialLength) {
-        resolve();
-      } else {
-        reject(new Error('Item não encontrado.'));
-      }
-    }, 500);
-  });
-};
-
-/**
- * Funções da API Mockada para Cooperados
- */
 export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve([...mockCooperadosData]);
-    }, 500); // Atraso de 500ms para simular a chamada de rede
+      resolve(mockCooperadosData);
+    }, 500);
   });
 };
-
-// Dados mockados para o calendário da agenda
-let mockCalendarEvents: CalendarEvent[] = [
-  { id: 1, title: 'Ademir Machioro', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 2, title: 'Carlos Jaime Pauly', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 3, title: 'Delcio Rosseto', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 4, title: 'Egon Portz', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 5, title: 'Gilberto Heinen', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 6, title: 'Manutenção Caminhão ABC-1D23', start: new Date(2025, 9, 5, 8, 0), end: new Date(2025, 9, 5, 12, 0), allDay: false, resource: 'manutencao' },
-  { id: 7, title: 'Marcos Schaub', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 8, title: 'Marlise Kochmann', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 9, title: 'Valdecir Klein', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 10, title: 'Vilson Galiago', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 11, title: 'Francisco', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 12, title: 'Sueli L.', start: new Date(2025, 9, 7, 9, 0), end: new Date(2025, 9, 7, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 13, title: 'Vilmar M.', start: new Date(2025, 9, 8, 9, 0), end: new Date(2025, 9, 8, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 14, title: 'Valdir K.', start: new Date(2025, 9, 9, 9, 0), end: new Date(2025, 9, 9, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 15, title: 'Ademir E.', start: new Date(2025, 9, 10, 9, 0), end: new Date(2025, 9, 10, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 16, title: 'Manutenção Caminhão GHI-7890', start: new Date(2025, 9, 12, 0, 0), end: new Date(2025, 9, 13, 0, 0), allDay: true, resource: 'manutencao' },
-];
 
 export const fetchCalendarEvents = () => {
   return new Promise<CalendarEvent[]>((resolve) => {
@@ -746,6 +623,256 @@ export const createCalendarEvent = (event: Omit<CalendarEvent, 'id'>) => {
       mockCalendarEvents.push(newEvent);
       console.log(`Evento criado: ${newEvent.title}`);
       resolve(newEvent);
+    }, 500);
+  });
+};
+
+export const fetchAgendaData = (): Promise<AgendaItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockAgendaData);
+    }, 500);
+  });
+};
+
+export const fetchColetaData = (): Promise<ColetaItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Retorna uma cópia para evitar mutação direta do array mockado
+      resolve([...mockColetaData]);
+    }, 500);
+  });
+};
+
+export const updateColetaItem = (item: ColetaItem): Promise<ColetaItem> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const index = mockColetaData.findIndex(i => i.id === item.id);
+      if (index !== -1) {
+        mockColetaData[index] = item;
+        resolve(item);
+      } else {
+        reject(new Error('Item de coleta não encontrado.'));
+      }
+    }, 500);
+  });
+};
+
+export const createColetaItem = (item: Omit<ColetaItem, 'id'>): Promise<ColetaItem> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newItem: ColetaItem = {
+        ...item,
+        id: new Date().getTime().toString(), // Gera um ID único
+      };
+      // Adiciona o novo item no início da lista
+      mockColetaData.unshift(newItem);
+      resolve(newItem);
+    }, 500);
+  });
+};
+
+
+export const fetchAbastecimentoReportData = (startDate?: string, endDate?: string): Promise<AbastecimentoReportItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let data = abastecimentoReportMockData;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        data = data.filter(item => {
+          const itemDate = new Date(item.data);
+          return itemDate >= start && itemDate <= end;
+        });
+      }
+      resolve(data);
+    }, 500);
+  });
+};
+
+export const fetchAbastecimentoVolumePorDiaData = (startDate?: string, endDate?: string): Promise<AbastecimentoVolumePorDiaItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let data = abastecimentoReportMockData;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        data = data.filter(item => {
+          const itemDate = new Date(item.data);
+          return itemDate >= start && itemDate <= end;
+        });
+      }
+
+      const volumePorDia = data.reduce((acc, item) => {
+        if (!acc[item.data]) {
+          acc[item.data] = { data: item.data, volumeTotal: 0 };
+        }
+        acc[item.data].volumeTotal += item.volume;
+        return acc;
+      }, {} as Record<string, AbastecimentoVolumePorDiaItem>);
+
+      resolve(Object.values(volumePorDia).sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()));
+    }, 500);
+  });
+};
+
+export const addAbastecimentoReportItem = (
+  item: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>
+): Promise<AbastecimentoReportItem> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newItem: AbastecimentoReportItem = {
+        ...item,
+        status: 'Concluído',
+        cliente: 'Primato Cooperativa Agroindustrial',
+        horaTermino: new Date().toLocaleTimeString('pt-BR', { hour12: false }),
+      };
+      abastecimentoReportMockData.unshift(newItem);
+      resolve(newItem);
+    }, 500);
+  });
+};
+
+
+
+
+
+
+
+
+type Period = 'day' | 'week' | 'month';
+
+export const fetchAbastecimentoAggregatedVolumeData = (period: Period): Promise<AbastecimentoVolumeItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const aggregatedData = abastecimentoReportMockData.reduce((acc, item) => {
+        const date = new Date(item.data);
+        let key: string;
+
+        switch (period) {
+          case 'day':
+            key = item.data;
+            break;
+          case 'month':
+            key = date.toLocaleString('pt-BR', { month: 'long' });
+            key = key.charAt(0).toUpperCase() + key.slice(1);
+            break;
+          case 'week': {
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date.getTime() - startOfYear.getTime()) / 86400000;
+            const weekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+            key = `Semana ${weekNumber}`;
+            break;
+          }
+          default:
+            key = item.data;
+            break;
+        }
+
+        if (!acc[key]) {
+          acc[key] = {
+            name: key,
+            volume: 0,
+          };
+        }
+        acc[key].volume += item.volume;
+        return acc;
+      }, {} as Record<string, AbastecimentoVolumeItem>);
+
+      const sortedData = Object.values(aggregatedData).sort((a, b) => {
+        if (period === 'day') return new Date(a.name).getTime() - new Date(b.name).getTime();
+        // Para outros períodos, a ordem pode não ser cronológica, mas isso pode ser ajustado se necessário.
+        return 0;
+      });
+
+      resolve(sortedData);
+    }, 500);
+  });
+};
+
+export const fetchFaturamentoData = (): Promise<FaturamentoItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(faturamentoMockData);
+    }, 500);
+  });
+};
+
+export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Agrupa os dados de abastecimento por mês para consistência
+      const volumePorMes = abastecimentoReportMockData.reduce((acc, item) => {
+        const month = new Date(item.data).toLocaleString('pt-BR', { month: 'long' });
+        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        
+        if (!acc[capitalizedMonth]) {
+          acc[capitalizedMonth] = {
+            name: capitalizedMonth,
+            volume: 0,
+          };
+        }
+        acc[capitalizedMonth].volume += item.volume;
+        return acc;
+      }, {} as Record<string, AbastecimentoVolumeItem>);
+
+      // Garante que todos os meses do faturamento estejam presentes, mesmo que com volume 0
+      const finalData = faturamentoMockData.map(fatura => {
+        return volumePorMes[fatura.name] || { name: fatura.name, volume: 0 };
+      });
+
+      resolve(finalData);
+    }, 500);
+  });
+};
+
+
+
+
+
+
+export const fetchDashboardData = (): Promise<DashboardData> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Garante que os dados de abastecimento sejam incluídos para o gráfico de pizza
+      const dashboardDataWithAbastecimentos = { ...mockData };
+      if (!dashboardDataWithAbastecimentos.abastecimentos || dashboardDataWithAbastecimentos.abastecimentos.length === 0) {
+        dashboardDataWithAbastecimentos.abastecimentos = abastecimentoMockData;
+      }
+      resolve(dashboardDataWithAbastecimentos);
+    }, 500);
+  });
+};
+
+export const fetchAbastecimentoSummaryData = (startDate?: string, endDate?: string): Promise<AbastecimentoSummaryItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let data = abastecimentoReportMockData;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        data = data.filter(item => {
+          const itemDate = new Date(item.data);
+          return itemDate >= start && itemDate <= end;
+        });
+      }
+      const summary = data.reduce((acc, item) => {
+        const key = `${item.veiculo}-${item.placa}`;
+        if (!acc[key]) {
+          acc[key] = {
+            veiculo: item.veiculo,
+            placa: item.placa,
+            volumeTotal: 0,
+          };
+        }
+        // A API pode não retornar 'produto', então tratamos o caso
+        if (item.produto) {
+            acc[key].volumeTotal += item.volume;
+        }
+        return acc;
+      }, {} as Record<string, AbastecimentoSummaryItem>);
+
+      resolve(Object.values(summary));
     }, 500);
   });
 };
