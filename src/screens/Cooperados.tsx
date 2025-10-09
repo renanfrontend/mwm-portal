@@ -1,11 +1,22 @@
+// src/screens/Cooperados.tsx
 import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { fetchCooperadosData, type CooperadoItem } from '../services/api';
+import { fetchCooperadosData, fetchCalendarEvents, type CooperadoItem, type CalendarEvent } from '../services/api';
+
+// Imports para o calendário
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'moment/locale/pt-br';
+import '../styles/calendar.css'; // Estilos personalizados para o calendário
+
+moment.locale('pt-br');
+const localizer = momentLocalizer(moment);
 
 const Cooperados = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -16,10 +27,14 @@ const Cooperados = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchCooperadosData();
-        setCooperadosData(data);
+        const [cooperados, events] = await Promise.all([
+          fetchCooperadosData(),
+          fetchCalendarEvents(),
+        ]);
+        setCooperadosData(cooperados);
+        setCalendarEvents(events);
       } catch (err) {
-        setError("Ocorreu um erro ao buscar os dados dos cooperados.");
+        setError("Ocorreu um erro ao buscar os dados.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -28,14 +43,14 @@ const Cooperados = () => {
     loadData();
   }, []);
 
+  const getCertificadoClass = (status: CooperadoItem['certificado']) => {
+    return status === 'Ativo' ? 'is-success' : 'is-danger';
+  };
+
   const filteredData = cooperadosData.filter(item =>
     item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.filial.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const getCertificadoClass = (status: CooperadoItem['certificado']) => {
-    return status === 'Ativo' ? 'is-success' : 'is-danger';
-  };
 
   return (
     <>
@@ -156,8 +171,31 @@ const Cooperados = () => {
       )}
 
       {activeTab === 'agenda' && (
-        <div className="content">
-          <p>Conteúdo da aba de Agenda.</p>
+        <div className="card">
+          <div className="card-content">
+            {loading ? (
+              <progress className="progress is-large is-info" max="100"></progress>
+            ) : error ? (
+              <div className="notification is-danger">{error}</div>
+            ) : (
+              <Calendar
+                localizer={localizer}
+                events={calendarEvents}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: '70vh' }}
+                messages={{
+                  next: 'Próximo',
+                  previous: 'Anterior',
+                  today: 'Hoje',
+                  month: 'Mês',
+                  week: 'Semana',
+                  day: 'Dia',
+                  agenda: 'Agenda',
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
     </>

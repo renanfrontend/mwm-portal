@@ -111,6 +111,16 @@ export interface CooperadoItem {
   fase: string;
 }
 
+// Novo tipo para os eventos do calendário
+export interface CalendarEvent {
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+  resource?: any;
+}
+
+
 /**
  * Dados Mockados
  */
@@ -679,5 +689,102 @@ export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
     setTimeout(() => {
       resolve([...mockCooperadosData]);
     }, 500); // Atraso de 500ms para simular a chamada de rede
+  });
+};
+
+// Novos dados mockados para o calendário da agenda
+export const mockCalendarData = [
+  {
+    title: 'Ademir Machioro',
+    start: '2025-10-02',
+    end: '2025-10-02',
+  },
+  {
+    title: 'Carlos Jaime Pauly',
+    start: '2025-10-02',
+    end: '2025-10-02',
+  },
+  {
+    title: 'Delcio Rosseto',
+    start: '2025-10-02',
+    end: '2025-10-02',
+  },
+  {
+    title: 'Egon Portz',
+    start: '2025-10-04',
+    end: '2025-10-04',
+  },
+  {
+    title: 'Gilberto Heinen',
+    start: '2025-10-04',
+    end: '2025-10-04',
+  },
+  {
+    title: 'Jacir Leopoldo Machado',
+    start: '2025-10-04',
+    end: '2025-10-04',
+  },
+  {
+    title: 'Marcos Schaub',
+    start: '2025-10-04',
+    end: '2025-10-04',
+  },
+  {
+    title: 'Marlise Kochmann',
+    start: '2025-10-04',
+    end: '2025-10-04',
+  },
+  {
+    title: 'Valdecir Klein',
+    start: '2025-10-06',
+    end: '2025-10-06',
+  },
+  {
+    title: 'Vilson Galiago',
+    start: '2025-10-06',
+    end: '2025-10-06',
+  },
+  {
+    title: 'Francisco',
+    start: '2025-10-06',
+    end: '2025-10-06',
+  },
+  {
+    title: 'Sueli L.',
+    start: '2025-10-07',
+    end: '2025-10-07',
+  },
+  {
+    title: 'Vilmar M.',
+    start: '2025-10-08',
+    end: '2025-10-08',
+  },
+  {
+    title: 'Valdir K.',
+    start: '2025-10-09',
+    end: '2025-10-09',
+  },
+  {
+    title: 'Ademir E.',
+    start: '2025-10-10',
+    end: '2025-10-10',
+  },
+  {
+    title: 'Ademir R.',
+    start: '2025-10-10',
+    end: '2025-10-10',
+  },
+];
+
+export const fetchCalendarEvents = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockCalendarData.map(event => ({
+        ...event,
+        start: new Date(event.start + 'T09:00:00'),
+        end: new Date(event.end + 'T17:00:00'),
+        allDay: true,
+      })));
+    }, 500);
   });
 };

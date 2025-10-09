@@ -1,0 +1,87 @@
+/* src/styles/calendar.css */
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+/* Estilos de responsividade e mobile */
+.rbc-calendar {
+  height: 70vh;
+}
+
+.rbc-toolbar-label {
+  font-size: 1rem !important;
+}
+
+/* Esconde as visualizações que podem sobrecarregar a tela em dispositivos móveis */
+@media (max-width: 768px) {
+  .rbc-toolbar button {
+    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  .rbc-toolbar .rbc-btn-group button:last-child {
+    display: none;
+  }
+
+  .rbc-agenda-view .rbc-agenda-table {
+    font-size: 0.8rem;
+  }
+}
+
+/* Customizações de cor utilizando as variáveis do tema global */
+.rbc-calendar {
+  color: var(--text-color);
+  background-color: var(--card-bg);
+}
+
+.rbc-toolbar button {
+  background-color: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border: 1px solid var(--border-color) !important;
+  font-family: var(--quicksand);
+}
+
+.rbc-btn-group .rbc-active {
+  background-color: #3298dc !important;
+  color: white !important;
+  border-color: #3298dc !important;
+}
+
+.rbc-toolbar button:hover {
+  background-color: var(--sidebar-hover) !important;
+}
+
+.rbc-header {
+  background-color: var(--card-bg) !important;
+  color: var(--title-color) !important;
+  font-family: var(--bricolage);
+}
+
+.rbc-today {
+  background-color: var(--button-bg) !important;
+}
+
+.rbc-event {
+  background-color: #00C49F !important;
+  color: white !important;
+  font-family: var(--quicksand);
+}
+
+.rbc-day-bg.rbc-off-range-bg {
+  background-color: var(--card-bg) !important;
+}
+
+.rbc-off-range-bg {
+  opacity: 0.5;
+}
+
+.rbc-event-label,
+.rbc-row-segment .rbc-event-content {
+  color: white;
+}
+
+/* Garante que o texto dentro do calendário use as fontes globais */
+.rbc-header,
+.rbc-toolbar,
+.rbc-event-label,
+.rbc-agenda-table {
+  font-family: "Quicksand", sans-serif;
+}
