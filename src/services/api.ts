@@ -113,10 +113,11 @@ export interface CooperadoItem {
 
 // Novo tipo para os eventos do calendário
 export interface CalendarEvent {
+  id: string | number;
   title: string;
   start: Date;
   end: Date;
-  allDay: boolean;
+  allDay?: boolean;
   resource?: any;
 }
 
@@ -692,99 +693,59 @@ export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
   });
 };
 
-// Novos dados mockados para o calendário da agenda
-export const mockCalendarData = [
-  {
-    title: 'Ademir Machioro',
-    start: '2025-10-02',
-    end: '2025-10-02',
-  },
-  {
-    title: 'Carlos Jaime Pauly',
-    start: '2025-10-02',
-    end: '2025-10-02',
-  },
-  {
-    title: 'Delcio Rosseto',
-    start: '2025-10-02',
-    end: '2025-10-02',
-  },
-  {
-    title: 'Egon Portz',
-    start: '2025-10-04',
-    end: '2025-10-04',
-  },
-  {
-    title: 'Gilberto Heinen',
-    start: '2025-10-04',
-    end: '2025-10-04',
-  },
-  {
-    title: 'Jacir Leopoldo Machado',
-    start: '2025-10-04',
-    end: '2025-10-04',
-  },
-  {
-    title: 'Marcos Schaub',
-    start: '2025-10-04',
-    end: '2025-10-04',
-  },
-  {
-    title: 'Marlise Kochmann',
-    start: '2025-10-04',
-    end: '2025-10-04',
-  },
-  {
-    title: 'Valdecir Klein',
-    start: '2025-10-06',
-    end: '2025-10-06',
-  },
-  {
-    title: 'Vilson Galiago',
-    start: '2025-10-06',
-    end: '2025-10-06',
-  },
-  {
-    title: 'Francisco',
-    start: '2025-10-06',
-    end: '2025-10-06',
-  },
-  {
-    title: 'Sueli L.',
-    start: '2025-10-07',
-    end: '2025-10-07',
-  },
-  {
-    title: 'Vilmar M.',
-    start: '2025-10-08',
-    end: '2025-10-08',
-  },
-  {
-    title: 'Valdir K.',
-    start: '2025-10-09',
-    end: '2025-10-09',
-  },
-  {
-    title: 'Ademir E.',
-    start: '2025-10-10',
-    end: '2025-10-10',
-  },
-  {
-    title: 'Ademir R.',
-    start: '2025-10-10',
-    end: '2025-10-10',
-  },
+// Dados mockados para o calendário da agenda
+let mockCalendarEvents: CalendarEvent[] = [
+  { id: 1, title: 'Ademir Machioro', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 2, title: 'Carlos Jaime Pauly', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 3, title: 'Delcio Rosseto', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 4, title: 'Egon Portz', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 5, title: 'Gilberto Heinen', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 6, title: 'Manutenção Caminhão ABC-1D23', start: new Date(2025, 9, 5, 8, 0), end: new Date(2025, 9, 5, 12, 0), allDay: false, resource: 'manutencao' },
+  { id: 7, title: 'Marcos Schaub', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 8, title: 'Marlise Kochmann', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 9, title: 'Valdecir Klein', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 10, title: 'Vilson Galiago', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 11, title: 'Francisco', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 12, title: 'Sueli L.', start: new Date(2025, 9, 7, 9, 0), end: new Date(2025, 9, 7, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 13, title: 'Vilmar M.', start: new Date(2025, 9, 8, 9, 0), end: new Date(2025, 9, 8, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 14, title: 'Valdir K.', start: new Date(2025, 9, 9, 9, 0), end: new Date(2025, 9, 9, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 15, title: 'Ademir E.', start: new Date(2025, 9, 10, 9, 0), end: new Date(2025, 9, 10, 17, 0), allDay: true, resource: 'coleta' },
+  { id: 16, title: 'Manutenção Caminhão GHI-7890', start: new Date(2025, 9, 12, 0, 0), end: new Date(2025, 9, 13, 0, 0), allDay: true, resource: 'manutencao' },
 ];
 
 export const fetchCalendarEvents = () => {
-  return new Promise((resolve) => {
+  return new Promise<CalendarEvent[]>((resolve) => {
     setTimeout(() => {
-      resolve(mockCalendarData.map(event => ({
+      resolve([...mockCalendarEvents]);
+    }, 500);
+  });
+};
+
+export const updateCalendarEvent = (event: CalendarEvent) => {
+  return new Promise<CalendarEvent>((resolve, reject) => {
+    setTimeout(() => {
+      const index = mockCalendarEvents.findIndex(e => e.id === event.id);
+      if (index !== -1) {
+        mockCalendarEvents[index] = event;
+        console.log(`Evento atualizado: ${event.title}`);
+        resolve(event);
+      } else {
+        reject(new Error('Evento não encontrado.'));
+      }
+    }, 500);
+  });
+};
+
+export const createCalendarEvent = (event: Omit<CalendarEvent, 'id'>) => {
+  return new Promise<CalendarEvent>((resolve) => {
+    setTimeout(() => {
+      const newEvent: CalendarEvent = {
         ...event,
-        start: new Date(event.start + 'T09:00:00'),
-        end: new Date(event.end + 'T17:00:00'),
-        allDay: true,
-      })));
+        id: new Date().getTime(), // ID simples baseado no timestamp
+      };
+      mockCalendarEvents.push(newEvent);
+      console.log(`Evento criado: ${newEvent.title}`);
+      resolve(newEvent);
     }, 500);
   });
 };

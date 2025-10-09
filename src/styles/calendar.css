@@ -1,42 +1,42 @@
-/* src/styles/calendar.css */
 @import 'react-big-calendar/lib/css/react-big-calendar.css';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
-/* Estilos de responsividade e mobile */
+
+/* Garante que o calendário ocupe uma altura visível na tela e utilize a cor de fundo do card */
 .rbc-calendar {
   height: 70vh;
-}
-
-.rbc-toolbar-label {
-  font-size: 1rem !important;
-}
-
-/* Esconde as visualizações que podem sobrecarregar a tela em dispositivos móveis */
-@media (max-width: 768px) {
-  .rbc-toolbar button {
-    font-size: 0.8rem !important;
-    padding: 0.25rem 0.5rem !important;
-  }
-
-  .rbc-toolbar .rbc-btn-group button:last-child {
-    display: none;
-  }
-
-  .rbc-agenda-view .rbc-agenda-table {
-    font-size: 0.8rem;
-  }
-}
-
-/* Customizações de cor utilizando as variáveis do tema global */
-.rbc-calendar {
   color: var(--text-color);
   background-color: var(--card-bg);
+  font-family: "Quicksand", sans-serif;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+/* Customização da barra de ferramentas (toolbar) */
+.rbc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .rbc-toolbar button {
   background-color: var(--button-bg) !important;
   color: var(--button-text) !important;
   border: 1px solid var(--border-color) !important;
-  font-family: var(--quicksand);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
+.rbc-toolbar button:hover {
+  background-color: var(--sidebar-hover) !important;
+  border-color: var(--sidebar-divider) !important;
 }
 
 .rbc-btn-group .rbc-active {
@@ -45,43 +45,79 @@
   border-color: #3298dc !important;
 }
 
-.rbc-toolbar button:hover {
-  background-color: var(--sidebar-hover) !important;
+.rbc-toolbar-label {
+  font-size: 1.25rem !important;
+  font-family: "Bricolage Grotesque", sans-serif !important;
+  color: var(--title-color) !important;
 }
 
+/* Estilos de cabeçalho do calendário (dias da semana) */
 .rbc-header {
   background-color: var(--card-bg) !important;
   color: var(--title-color) !important;
-  font-family: var(--bricolage);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 700;
+  font-family: "Bricolage Grotesque", sans-serif !important;
 }
 
+/* Estilo para o dia atual */
 .rbc-today {
-  background-color: var(--button-bg) !important;
+  background-color: #e6f7ff !important; /* Um azul claro neutro para o tema light */
 }
 
+body.theme-dark .rbc-today {
+  background-color: rgba(50, 152, 220, 0.2) !important; /* Um azul escuro suave para o tema dark */
+}
+
+/* Estilo para eventos no calendário */
 .rbc-event {
   background-color: #00C49F !important;
   color: white !important;
-  font-family: var(--quicksand);
+  border-radius: 4px;
+  font-size: 0.9em;
+  padding: 2px 5px;
+  font-family: "Quicksand", sans-serif;
+  border: none;
 }
 
-.rbc-day-bg.rbc-off-range-bg {
-  background-color: var(--card-bg) !important;
+.rbc-event, .rbc-day-slot .rbc-background-event {
+  border-color: #00a383 !important;
 }
+
 
 .rbc-off-range-bg {
+  background-color: var(--card-bg) !important;
   opacity: 0.5;
-}
-
-.rbc-event-label,
-.rbc-row-segment .rbc-event-content {
-  color: white;
 }
 
 /* Garante que o texto dentro do calendário use as fontes globais */
 .rbc-header,
 .rbc-toolbar,
 .rbc-event-label,
-.rbc-agenda-table {
-  font-family: "Quicksand", sans-serif;
+.rbc-agenda-table,
+.rbc-day-bg {
+  font-family: inherit;
+  color: var(--text-color);
+}
+
+/* Responsividade para telas pequenas */
+@media (max-width: 768px) {
+  .rbc-toolbar button {
+    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  .rbc-toolbar .rbc-btn-group {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  /* Oculta as visualizações que podem sobrecarregar a tela em dispositivos móveis */
+  .rbc-toolbar .rbc-btn-group button:nth-child(2),
+  .rbc-toolbar .rbc-btn-group button:nth-child(3),
+  .rbc-toolbar .rbc-btn-group button:last-child {
+    display: none;
+  }
 }

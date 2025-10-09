@@ -1,17 +1,23 @@
 // src/screens/Cooperados.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { fetchCooperadosData, fetchCalendarEvents, type CooperadoItem, type CalendarEvent } from '../services/api';
+import { fetchCooperadosData, fetchCalendarEvents, updateCalendarEvent, type CooperadoItem, type CalendarEvent, createCalendarEvent } from '../services/api';
 
-// Imports para o calendário
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+// Imports para o calendário e drag-and-drop
+import { Calendar, momentLocalizer, type View, Navigate } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import moment from 'moment';
 import 'moment/locale/pt-br';
-import '../styles/calendar.css'; // Estilos personalizados para o calendário
+import '../styles/calendar.css';
 
+// Garante que o moment use o idioma português do Brasil globalmente
 moment.locale('pt-br');
+// Configura o moment para usar o idioma português do Brasil
 const localizer = momentLocalizer(moment);
+const DragAndDropCalendar = withDragAndDrop(Calendar);
 
 const Cooperados = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
@@ -20,28 +26,130 @@ const Cooperados = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [modalState, setModalState] = useState<{ isOpen: boolean; event?: CalendarEvent; slot?: { start: Date, end: Date } }>({ isOpen: false });
+  const [date, setDate] = useState(new Date(2025, 9, 1));
+  const [view, setView] = useState<View>('month');
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [modalError, setModalError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [cooperados, events] = await Promise.all([
-          fetchCooperadosData(),
-          fetchCalendarEvents(),
-        ]);
-        setCooperadosData(cooperados);
-        setCalendarEvents(events);
-      } catch (err) {
-        setError("Ocorreu um erro ao buscar os dados.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [cooperados, events] = await Promise.all([
+        fetchCooperadosData(),
+        fetchCalendarEvents(),
+      ]);
+      setCooperadosData(cooperados);
+      setCalendarEvents(events);
+    } catch (err) {
+      setError("Ocorreu um erro ao buscar os dados.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleSelectSlot = useCallback(
+    ({ start, end }: { start: Date, end: Date }) => {
+      setNewEventTitle('');
+      setModalError(null);
+      setModalState({ isOpen: true, slot: { start, end } });
+    },
+    []
+  );
+
+  const handleSelectEvent = useCallback(
+    (event: CalendarEvent) => {
+      setNewEventTitle(event.title);
+      setModalError(null);
+      setModalState({ isOpen: true, event });
+    },
+    []
+  );
+
+  const handleNavigate = useCallback((newDate: Date) => setDate(newDate), [setDate]);
+  const handleViewChange = useCallback((newView: View) => setView(newView), [setView]);
+
+  const handleModalClose = () => {
+    setModalState({ isOpen: false });
+    setNewEventTitle('');
+    setModalError(null);
+  };
+
+  const handleModalSave = async () => {
+    if (!newEventTitle.trim()) {
+      setModalError('O título do evento é obrigatório.');
+      return;
+    }
+
+    try {
+      if (modalState.slot) { // Criando novo evento
+        const newEvent: Omit<CalendarEvent, 'id'> = {
+          title: newEventTitle,
+          start: modalState.slot.start,
+          end: modalState.slot.end, // A view 'month' trata slots como o dia inteiro
+          allDay: false,
+          resource: 'coleta',
+        };
+        await createCalendarEvent(newEvent);
+      } else if (modalState.event) { // Atualizando evento existente
+        const updatedEvent = { ...modalState.event, title: newEventTitle };
+        await updateCalendarEvent(updatedEvent);
+      }
+      handleModalClose();
+      await loadData(); // Recarrega os dados
+    } catch (err) {
+      setModalError("Falha ao salvar o evento.");
+      console.error(err);
+    }
+  };
+
+  const onEventDrop = useCallback(
+    async ({ event, start, end, allDay }: { event: CalendarEvent; start: Date; end: Date; allDay?: boolean }) => {
+      const updatedEvent = { ...event, start, end, allDay };
+  
+      setCalendarEvents(prevEvents => {
+        const originalEvents = [...prevEvents];
+        const idx = originalEvents.findIndex(e => e.id === event.id);
+        if (idx === -1) return originalEvents;
+  
+        const newEvents = [...originalEvents];
+        newEvents.splice(idx, 1, updatedEvent);
+        return newEvents;
+      });
+  
+      try {
+        await updateCalendarEvent(updatedEvent);
+      } catch (err) {
+        console.error("Falha ao mover o evento:", err);
+        setError("Não foi possível salvar a alteração. Revertendo.");
+        await loadData(); // Recarrega os dados originais
+      }
+    },
+    [loadData],
+  );
+
+  const onEventResize = useCallback(
+    async ({ event, start, end }: { event: CalendarEvent; start: Date; end: Date }) => {
+      setCalendarEvents(prevEvents => prevEvents.map(existingEvent =>
+        existingEvent.id === event.id ? { ...existingEvent, start, end } : existingEvent));
+      try {
+        await updateCalendarEvent({ ...event, start, end });
+      } catch (err) {
+        console.error("Falha ao redimensionar o evento:", err);
+        setError("Não foi possível salvar a alteração. Revertendo.");
+        await loadData(); // Recarrega os dados originais
+      }
+    },
+    [loadData],
+  );
 
   const getCertificadoClass = (status: CooperadoItem['certificado']) => {
     return status === 'Ativo' ? 'is-success' : 'is-danger';
@@ -52,8 +160,49 @@ const Cooperados = () => {
     item.filial.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const { messages, eventPropGetter } = useMemo(() => ({
+    defaultDate: new Date(2025, 9, 1),
+    messages: {
+      next: 'Próximo',
+      previous: 'Anterior',
+      today: 'Hoje',
+      month: 'Mês',
+      week: 'Semana',
+      day: 'Dia',
+      agenda: 'Agenda',
+      date: 'Data',
+      time: 'Hora',
+      event: 'Evento',
+      allDay: 'Dia Inteiro',
+      noEventsInRange: 'Nenhum evento neste período.',
+      showMore: (total: number) => `+ Ver mais (${total})`,
+    },
+    eventPropGetter: (event: CalendarEvent) => {
+      const style = {
+        backgroundColor: '#00C49F',
+        color: 'white',
+        borderRadius: '4px',
+        border: 'none',
+        cursor: 'pointer',
+      };
+      if (event.resource === 'manutencao') {
+        style.backgroundColor = '#FFBB28';
+      }
+      return { style };
+    }
+  }), []);
+
   return (
     <>
+      <EventModal
+        modalState={modalState}
+        onClose={handleModalClose}
+        onSave={handleModalSave}
+        title={newEventTitle}
+        setTitle={setNewEventTitle}
+        error={modalError}
+      />
+
       <div className="level is-mobile mb-4">
         <div className="level-left">
           <div className="level-item">
@@ -67,7 +216,7 @@ const Cooperados = () => {
         </div>
         <div className="level-right">
           <div className="level-item">
-            <button className="button is-primary">
+            <button className="button is-primary" onClick={() => handleSelectSlot({ start: new Date(), end: new Date() })}>
               <span className="icon"><MdAdd /></span>
               <span>Cadastrar</span>
             </button>
@@ -178,27 +327,115 @@ const Cooperados = () => {
             ) : error ? (
               <div className="notification is-danger">{error}</div>
             ) : (
-              <Calendar
-                localizer={localizer}
-                events={calendarEvents}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: '70vh' }}
-                messages={{
-                  next: 'Próximo',
-                  previous: 'Anterior',
-                  today: 'Hoje',
-                  month: 'Mês',
-                  week: 'Semana',
-                  day: 'Dia',
-                  agenda: 'Agenda',
-                }}
-              />
+              <DndProvider backend={HTML5Backend}>
+                <DragAndDropCalendar
+                  localizer={localizer}
+                  events={calendarEvents}
+                  startAccessor="start"
+                  endAccessor="end"
+                  resizable
+                  selectable
+                  onEventDrop={onEventDrop}
+                  onEventResize={onEventResize}
+                  onSelectEvent={handleSelectEvent}
+                  onSelectSlot={handleSelectSlot}
+                  onNavigate={handleNavigate}
+                  onView={handleViewChange}
+                  date={date}
+                  view={view}
+                  messages={messages}
+                  eventPropGetter={eventPropGetter}
+                  style={{ height: '70vh' }}
+                />
+              </DndProvider>
             )}
           </div>
         </div>
       )}
     </>
+  );
+};
+
+const EventModal = ({
+  modalState,
+  onClose,
+  onSave,
+  title,
+  setTitle,
+  error
+}: {
+  modalState: { isOpen: boolean; event?: CalendarEvent; slot?: { start: Date, end: Date } };
+  onClose: () => void;
+  onSave: () => void;
+  title: string;
+  setTitle: (value: string) => void;
+  error: string | null;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Reset editing state when modal becomes inactive or event changes
+  useEffect(() => {
+    if (!modalState.isOpen) setIsEditing(false);
+  }, [modalState.isOpen]);
+
+  if (!modalState.isOpen) return null;
+
+  const isNewEvent = !!modalState.slot; // Modo de criação
+  const canEdit = !isNewEvent && isEditing; // Modo de edição
+
+  return (
+    <div className="modal is-active">
+      <div className="modal-background" onClick={onClose}></div>
+      <div className="modal-card">
+        <header className="modal-card-head">
+          <p className="modal-card-title">{isNewEvent ? 'Novo Agendamento' : 'Detalhes do Agendamento'}</p>
+          <button className="delete" aria-label="close" onClick={() => {
+            onClose();
+            setIsEditing(false);
+          }}></button>
+        </header>
+        <section className="modal-card-body">
+          {isNewEvent || canEdit ? (
+            <div className="field">
+              <label className="label">Título do Evento</label>
+              <div className="control">
+                <input
+                  className={`input ${error ? 'is-danger' : ''}`}
+                  type="text"
+                  placeholder="Ex: Coleta para Ademir"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              {error && <p className="help is-danger">{error}</p>}
+            </div>
+          ) : (
+            <div>
+              <p><strong>Título:</strong> {modalState.event?.title}</p>
+              <p><strong>Início:</strong> {moment(modalState.event?.start).format('DD/MM/YYYY HH:mm')}</p>
+              <p><strong>Fim:</strong> {moment(modalState.event?.end).format('DD/MM/YYYY HH:mm')}</p>
+            </div>
+          )}
+        </section>
+        <footer className="modal-card-foot">
+          {isNewEvent || canEdit ? (
+            <button className="button is-success" onClick={onSave}>
+              Salvar
+            </button>
+          ) : (
+            <button className="button is-info" onClick={() => setIsEditing(true)}>
+              Editar
+            </button>
+          )}
+          <button className="button" onClick={() => {
+            onClose();
+            setIsEditing(false);
+          }}>
+            {isNewEvent || canEdit ? 'Cancelar' : 'Fechar'}
+          </button>
+        </footer>
+      </div>
+    </div>
   );
 };
 
