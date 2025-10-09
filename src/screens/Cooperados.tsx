@@ -8,14 +8,22 @@ const Cooperados = () => {
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      const data = await fetchCooperadosData();
-      setCooperadosData(data);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchCooperadosData();
+        setCooperadosData(data);
+      } catch (err) {
+        setError("Ocorreu um erro ao buscar os dados dos cooperados.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -98,6 +106,8 @@ const Cooperados = () => {
           
           {loading ? (
             <progress className="progress is-large is-info" max="100"></progress>
+          ) : error ? (
+            <div className="notification is-danger">{error}</div>
           ) : (
             <div className="table-container">
               <table className="table is-striped is-hoverable is-fullwidth">

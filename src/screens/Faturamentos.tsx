@@ -6,17 +6,25 @@ const Faturamentos = () => {
   const [faturamentoData, setFaturamentoData] = useState<FaturamentoItem[]>([]);
   const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoVolumeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      const [faturamentos, abastecimentos] = await Promise.all([
-        fetchFaturamentoData(),
-        fetchAbastecimentoVolumeData()
-      ]);
-      setFaturamentoData(faturamentos);
-      setAbastecimentoData(abastecimentos);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+        const [faturamentos, abastecimentos] = await Promise.all([
+          fetchFaturamentoData(),
+          fetchAbastecimentoVolumeData()
+        ]);
+        setFaturamentoData(faturamentos);
+        setAbastecimentoData(abastecimentos);
+      } catch (err) {
+        setError("Ocorreu um erro ao buscar os dados de faturamento.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -27,6 +35,8 @@ const Faturamentos = () => {
         <h1 className="title is-4">Faturamentos</h1>
         {loading ? (
           <progress className="progress is-large is-info" max="100"></progress>
+        ) : error ? (
+          <div className="notification is-danger">{error}</div>
         ) : (
           <div className="columns">
             <div className="column">

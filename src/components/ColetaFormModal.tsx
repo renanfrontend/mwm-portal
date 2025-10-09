@@ -15,7 +15,7 @@ const ColetaFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit, initial
     motorista: '',
     tipoVeiculo: 'Caminhão de dejetos',
     placa: '',
-    odometro: '0', // Changed to string to match input type
+    odometro: 0,
     dataPrevisao: new Date().toISOString().split('T')[0],
     horaPrevisao: new Date().toTimeString().split(' ')[0].substring(0, 5),
     status: 'Pendente',
@@ -32,9 +32,9 @@ const ColetaFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit, initial
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
- ...prev,
-      [name]: name === 'odometro' ? value : value, // Keep odometro as string
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'odometro' ? parseInt(value, 10) || 0 : value,
     }));
   };
 

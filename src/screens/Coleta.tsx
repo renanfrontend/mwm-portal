@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdSearch, MdFilterList, MdEdit, MdLocationPin, MdCheckCircle, MdOutlineWatchLater, MdArrowForwardIos, MdOutlineCloudUpload, MdArrowBack } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowForwardIos, MdArrowBack, MdLocationOn, MdModeEdit } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ColetaFormModal from '../components/ColetaFormModal';
