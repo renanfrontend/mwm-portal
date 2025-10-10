@@ -1,9 +1,7 @@
-// src/screens/Cooperados.tsx
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd, MdCalendarMonth } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { fetchCooperadosData, fetchAgendaData, type CooperadoItem, type AgendaItem } from '../services/api';
-
 import AgendaTable from '../components/AgendaTable';
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -132,7 +130,7 @@ const Cooperados = () => {
           ) : error ? (
             <div className="notification is-danger">{error}</div>
           ) : (
-            <div className="table-container">
+            <div className="table-container is-hidden-touch">
               <table className="table is-striped is-hoverable is-fullwidth">
                 <thead>
                   <tr>
@@ -163,7 +161,7 @@ const Cooperados = () => {
                       <td>{item.doamDejetos}</td>
                       <td>{item.fase}</td>
                       <td>
-                        <div className="buttons are-small is-flex is-justify-content-space-between">
+                        <div className="buttons are-small is-flex is-justify-content-space-between is-align-items-center">
                           <button className="button is-light"><span className="icon"><MdLocationOn /></span></button>
                           <button className="button is-light"><span className="icon"><MdRemoveRedEye /></span></button>
                           <button className="button is-info is-light"><span className="icon"><MdCalendarMonth /></span></button>
@@ -187,6 +185,7 @@ const Cooperados = () => {
             ) : error ? (
               <div className="notification is-danger">{error}</div>
             ) : (
+              // Agrupa os dados por filial para o novo componente
               groupedAgendaData.map((filialData, index) => (
                 <div key={index} className="mb-5">
                   <AgendaTable data={filialData} loading={loading} error={error} />

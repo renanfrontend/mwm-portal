@@ -20,7 +20,7 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
   if (error) {
     return <div className="notification is-danger">{error}</div>;
   }
-
+  
   if (!data || data.length === 0) {
     return <div className="notification is-info">Nenhum dado de agenda disponível.</div>;
   }
@@ -29,49 +29,42 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
   const product = filial === 'Agrocampo' ? 'Bio Metano' : 'Diesel';
   const isCompleted = filial === 'Agrocampo';
 
-  // Mapeia os dados da API para o formato de exibição com cores do protótipo
-  const mappedData = data.map(item => {
-    let backgroundColor = theme === 'dark' ? 'transparent' : 'white';
-    if (item.cooperado.includes('Ademir Englesing')) {
-      backgroundColor = '#ffb3b3';
-    } else if (item.cooperado.includes('Ademir Machioro')) {
-      backgroundColor = '#fffacd';
-    }
-    return {
-      ...item,
-      backgroundColor,
-      textColor: theme === 'dark' && backgroundColor === 'transparent' ? '#e2e8f0' : '#363636',
-    };
-  });
+  // Cores de destaque para thead e tfoot
+  const headerFooterHighlightClass = isCompleted ? 'has-background-success' : 'has-background-info';
+  const headerFooterTextColor = 'has-text-white';
 
-  const renderHeaders = () => {
-    const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-    return (
-      <>
-        <tr>
-          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '150px' }}>Cooperado</th>
-          <th colSpan={7} className="has-text-centered">Semana</th>
-          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '80px' }}>Soma</th>
-          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '80px' }}>KM</th>
-        </tr>
-        <tr>
-          {weekdays.map((day, index) => (
-            <th key={`header-${day}-${index}`}>{day}</th>
-          ))}
-        </tr>
-      </>
-    );
+  // Cores de fundo do wrapper, adaptadas para o tema dark
+  const wrapperBgColor = isCompleted
+    ? (theme === 'dark' ? 'has-background-success-dark' : 'has-background-success-light')
+    : (theme === 'dark' ? 'has-background-info-dark' : 'has-background-light');
+
+  const statusTagClass = isCompleted ? 'is-success' : 'is-info';
+
+  const getRowBackgroundColor = (cooperadoName: string) => {
+    const isEnglesing = cooperadoName.includes('Ademir Englesing');
+    const isMachioro = cooperadoName.includes('Ademir Machioro');
+
+    if (isEnglesing) return '#ffb3b3';
+    if (isMachioro) return '#fffacd';
+    return theme === 'dark' ? '#2d3748' : 'white';
   };
-
+  
   const totalColetas = data.reduce((acc, item) => acc + item.somaColetas, 0);
-  const totalKm = data.reduce((acc, item) => acc + item.km, 0);
-  const dailyTotals = data[0].coletas.map((_, i) =>
-    data.reduce((acc, item) => acc + (item.coletas[i].value || 0), 0)
-  );
+  const totalKm = isCompleted ? data.reduce((acc, item) => acc + item.km, 0) : 0;
+  
+  const dailyTotals = [
+    data.reduce((acc, item) => acc + (item.coletas[0]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[1]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[2]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[3]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[4]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[5]?.value || 0), 0),
+    data.reduce((acc, item) => acc + (item.coletas[6]?.value || 0), 0),
+  ];
 
   return (
-    <div className="table-container mb-5">
-      <div className={`level is-mobile px-4 py-2 is-size-6 ${isCompleted ? 'has-background-success-light' : 'has-background-info-light'}`}>
+    <div className={`table-container mb-5 p-0 ${wrapperBgColor}`}>
+      <div className={`level is-mobile px-4 py-2 is-size-6`}>
         <div className="level-left">
           <span className="icon mr-2"><FaCalendarAlt /></span>
           <span className="has-text-weight-bold">{filial}</span>
@@ -81,38 +74,50 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
           <span className="has-text-weight-bold">{product}</span>
         </div>
         <div className="level-right">
-          <span className={`tag ml-4 ${isCompleted ? 'is-success' : 'is-info'}`}>{isCompleted ? 'Realizado' : 'Planejado'}</span>
+          <span className={`tag ml-4 ${statusTagClass}`}>{isCompleted ? 'Realizado' : 'Planejado'}</span>
         </div>
       </div>
       <table className="table is-bordered is-hoverable is-fullwidth is-narrow" style={{ minWidth: '1000px', tableLayout: 'fixed' }}>
-        <thead className={theme === 'dark' ? 'has-background-dark' : ''}>
-          {renderHeaders()}
+        <thead className={`${headerFooterHighlightClass} ${headerFooterTextColor}`}>
+          <tr>
+            <th style={{ verticalAlign: 'middle', minWidth: '150px', whiteSpace: 'nowrap' }} className={headerFooterTextColor}>Cooperado</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Seg</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Ter</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Qua</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Qui</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Sex</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Sáb</th>
+            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Dom</th>
+            <th style={{ verticalAlign: 'middle', minWidth: '80px' }} className={headerFooterTextColor}>Soma</th>
+            <th style={{ verticalAlign: 'middle', minWidth: '80px' }} className={headerFooterTextColor}>KM</th>
+          </tr>
         </thead>
         <tbody>
-          {mappedData.map(item => (
-            <tr key={item.id} style={{ backgroundColor: item.backgroundColor, color: item.textColor }}>
+          {data.map(item => (
+            <tr key={item.id} style={{ backgroundColor: getRowBackgroundColor(item.cooperado), color: theme === 'dark' && getRowBackgroundColor(item.cooperado) === 'transparent' ? '#e2e8f0' : 'inherit' }}>
               <td>
                 <span className="is-size-6 has-text-weight-bold">{item.cooperado}</span>
               </td>
               {item.coletas.map((coleta, index) => (
-                <td key={`coleta-${item.id}-${index}`} className="has-text-centered">
+                <td key={`coleta-${item.id}-${index}`} className="has-text-centered is-hidden-touch">
                   {coleta.value !== null ? coleta.value : ''}
                 </td>
               ))}
               <td className="has-text-centered">{item.somaColetas}</td>
-              <td className="has-text-centered">{item.km}</td>
+              <td className="has-text-centered">{isCompleted ? item.km : '-'}</td>
             </tr>
           ))}
-          {/* Linha de Totais */}
-          <tr className={`has-text-weight-bold ${isCompleted ? 'has-background-success' : 'has-background-info'}`} style={{ color: 'white' }}>
-            <td>Total</td>
-            {dailyTotals.map((total, index) => (
-              <td key={`total-dia-${index}`} className="has-text-centered">{total}</td>
-            ))}
-            <td className="has-text-centered">{totalColetas}</td>
-            <td className="has-text-centered">{totalKm}</td>
-          </tr>
         </tbody>
+        <tfoot className={`${headerFooterHighlightClass} ${headerFooterTextColor}`}>
+          <tr>
+            <th className={headerFooterTextColor}>Total</th>
+            {dailyTotals.map((total, index) => (
+              <th key={`total-dia-${index}`} className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>{total}</th>
+            ))}
+            <th className={`has-text-centered ${headerFooterTextColor}`}>{totalColetas}</th>
+            <th className={`has-text-centered ${headerFooterTextColor}`}>{isCompleted ? totalKm : '-'}</th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

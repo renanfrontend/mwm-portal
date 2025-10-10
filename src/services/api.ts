@@ -266,18 +266,6 @@ let abastecimentoReportMockData: AbastecimentoReportItem[] = [
     odometro: 389858,
     usuario: 'vanessa',
   },
-  {
-    status: 'Concluído',
-    cliente: 'Primato Cooperativa Agroindustrial',
-    veiculo: 'Caminhão (Dejeto)',
-    placa: 'BBW-9C55',
-    data: '2025-09-25',
-    horaInicio: '17:01:34',
-    horaTermino: '17:01:34',
-    volume: 94.72,
-    odometro: 399959,
-    usuario: 'vanessa',
-  },
 ];
 
 const faturamentoMockData: FaturamentoItem[] = [
@@ -347,12 +335,6 @@ const mockData: DashboardData = {
     { name: 'Nelson B.', value: 4.5, color: '#334bff' },
     { name: 'Oswaldo G.', value: 4.5, color: '#334bff' },
     { name: 'Renato I.', value: 1.5, color: '#334bff' },
-    { name: 'Sueli L.', value: -11.5, color: '#ef4444' },
-    { name: 'Valdecir', value: 0.5, color: '#334bff' },
-    { name: 'Valdir K.', value: 4.5, color: '#334bff' },
-    { name: 'Vilmar M.', value: 5.5, color: '#334bff' },
-    { name: 'Vilson S.', value: 2.5, color: '#334bff' },
-    { name: 'Zaura32', value: 1.5, color: '#334bff' },
   ],
   abastecimentos: [],
 };
@@ -440,145 +422,166 @@ const mockCooperadosData: CooperadoItem[] = [
   }
 ];
 
-let mockCalendarEvents: CalendarEvent[] = [
-  { id: 1, title: 'Ademir Machioro - Coleta 1', start: new Date(2025, 9, 2, 9, 0), end: new Date(2025, 9, 2, 11, 0), allDay: false, resource: 'coleta' },
-  { id: 2, title: 'Ademir Machioro - Coleta 2', start: new Date(2025, 9, 2, 14, 0), end: new Date(2025, 9, 2, 16, 0), allDay: false, resource: 'coleta' },
-  { id: 3, title: 'Carlos Jaime Pauly', start: new Date(2025, 9, 3, 9, 0), end: new Date(2025, 9, 3, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 4, title: 'Delcio Rosseto', start: new Date(2025, 9, 4, 9, 0), end: new Date(2025, 9, 4, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 5, title: 'Egon Portz', start: new Date(2025, 9, 6, 9, 0), end: new Date(2025, 9, 6, 17, 0), allDay: false, resource: 'coleta' },
-  { id: 6, title: 'Manutenção Caminhão ABC-1D23', start: new Date(2025, 9, 5, 8, 0), end: new Date(2025, 9, 5, 12, 0), allDay: false, resource: 'manutencao' },
-  { id: 7, title: 'Marcos Schaub', start: new Date(2025, 9, 7, 9, 0), end: new Date(2025, 9, 7, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 8, title: 'Marlise Kochmann', start: new Date(2025, 9, 8, 9, 0), end: new Date(2025, 9, 8, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 9, title: 'Valdecir Klein', start: new Date(2025, 9, 9, 9, 0), end: new Date(2025, 9, 9, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 10, title: 'Vilson Galiago', start: new Date(2025, 9, 10, 9, 0), end: new Date(2025, 9, 10, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 11, title: 'Francisco', start: new Date(2025, 9, 11, 9, 0), end: new Date(2025, 9, 11, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 12, title: 'Sueli L.', start: new Date(2025, 9, 12, 9, 0), end: new Date(2025, 9, 12, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 13, title: 'Vilmar M.', start: new Date(2025, 9, 13, 9, 0), end: new Date(2025, 9, 13, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 14, title: 'Valdir K.', start: new Date(2025, 9, 14, 9, 0), end: new Date(2025, 9, 14, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 15, title: 'Ademir E.', start: new Date(2025, 9, 15, 9, 0), end: new Date(2025, 9, 15, 17, 0), allDay: true, resource: 'coleta' },
-  { id: 16, title: 'Manutenção Caminhão GHI-7890', start: new Date(2025, 9, 16, 8, 0), end: new Date(2025, 9, 16, 12, 0), allDay: false, resource: 'manutencao' },
-];
-
 const mockAgendaData: AgendaItem[] = [
   {
     id: 1,
     cooperado: 'Ademir Englesing',
     filial: 'Primato',
     coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
-      { date: '3/10', value: 2, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 6,
-    km: 28,
+    somaColetas: 50,
+    km: 300,
   },
   {
     id: 2,
     cooperado: 'Ademir Machioro',
-    filial: 'Agrocampo',
+    filial: 'Primato',
     coletas: [
-      { date: '1/10', value: null, fullDate: '2025-10-01' },
-      { date: '2/10', value: 4, fullDate: '2025-10-02' },
-      { date: '3/10', value: null, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 4,
-    km: 24,
+    somaColetas: 50,
+    km: 300,
   },
   {
     id: 3,
-    cooperado: 'Arsenio Weishcheider',
+    cooperado: 'Arsenio Wescheider',
     filial: 'Primato',
     coletas: [
-      { date: '1/10', value: 2, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
-      { date: '3/10', value: 2, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 4,
-    km: 20,
+    somaColetas: 50,
+    km: 300,
   },
   {
     id: 4,
     cooperado: 'Carlos Jaime Pauly',
-    filial: 'Agrocampo',
+    filial: 'Primato',
     coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
-      { date: '3/10', value: null, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 9, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 4,
-    km: 16,
+    somaColetas: 49,
+    km: 300,
   },
   {
     id: 5,
-    cooperado: 'Delcio Rosseto e Marlize',
+    cooperado: 'Delcio Rossetto',
     filial: 'Primato',
     coletas: [
-      { date: '1/10', value: 2, fullDate: '2025-10-01' },
-      { date: '2/10', value: 2, fullDate: '2025-10-02' },
-      { date: '3/10', value: null, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 4,
-    km: 52,
+    somaColetas: 50,
+    km: 300,
   },
   {
     id: 6,
-    cooperado: 'Ladir e Neuza Rosseto',
+    cooperado: 'Ademir Englesing',
+    filial: 'Agrocampo',
+    coletas: [
+      { date: '1/10', value: 0, fullDate: '2025-10-01' },
+      { date: '2/10', value: 2, fullDate: '2025-10-02' },
+      { date: '3/10', value: 0, fullDate: '2025-10-03' },
+      { date: '4/10', value: 0, fullDate: '2025-10-04' },
+      { date: '5/10', value: 0, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
+    ],
+    somaColetas: 2,
+    km: 300,
+  },
+  {
+    id: 7,
+    cooperado: 'Ademir Machioro',
     filial: 'Agrocampo',
     coletas: [
       { date: '1/10', value: 4, fullDate: '2025-10-01' },
       { date: '2/10', value: 2, fullDate: '2025-10-02' },
-      { date: '3/10', value: null, fullDate: '2025-10-03' },
+      { date: '3/10', value: 0, fullDate: '2025-10-03' },
+      { date: '4/10', value: 4, fullDate: '2025-10-04' },
+      { date: '5/10', value: 0, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 6,
-    km: 44,
-  },
-  {
-    id: 7,
-    cooperado: 'Gilberto Heinen',
-    filial: 'Primato',
-    coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
-      { date: '3/10', value: 4, fullDate: '2025-10-03' },
-    ],
-    somaColetas: 8,
-    km: 40,
+    somaColetas: 10,
+    km: 300,
   },
   {
     id: 8,
-    cooperado: 'Guido Dornbach',
+    cooperado: 'Arsenio Wescheider',
     filial: 'Agrocampo',
     coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
       { date: '3/10', value: 4, fullDate: '2025-10-03' },
+      { date: '4/10', value: 4, fullDate: '2025-10-04' },
+      { date: '5/10', value: 6, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 8,
-    km: 40,
+    somaColetas: 34,
+    km: 300,
   },
   {
     id: 9,
-    cooperado: 'Jacir Leopoldo Machado',
-    filial: 'Primato',
+    cooperado: 'Carlos Jaime Pauly',
+    filial: 'Agrocampo',
     coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: null, fullDate: '2025-10-02' },
-      { date: '3/10', value: 4, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 9, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 8,
-    km: 52,
+    somaColetas: 49,
+    km: 300,
   },
   {
     id: 10,
-    cooperado: 'Vilson Salvalagio',
+    cooperado: 'Delcio Rossetto',
     filial: 'Agrocampo',
     coletas: [
-      { date: '1/10', value: 4, fullDate: '2025-10-01' },
-      { date: '2/10', value: 4, fullDate: '2025-10-02' },
-      { date: '3/10', value: null, fullDate: '2025-10-03' },
+      { date: '1/10', value: 10, fullDate: '2025-10-01' },
+      { date: '2/10', value: 10, fullDate: '2025-10-02' },
+      { date: '3/10', value: 10, fullDate: '2025-10-03' },
+      { date: '4/10', value: 10, fullDate: '2025-10-04' },
+      { date: '5/10', value: 10, fullDate: '2025-10-05' },
+      { date: '6/10', value: 0, fullDate: '2025-10-06' },
+      { date: '7/10', value: 0, fullDate: '2025-10-07' },
     ],
-    somaColetas: 8,
-    km: 40,
+    somaColetas: 50,
+    km: 300,
   },
 ];
 
@@ -586,43 +589,6 @@ export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockCooperadosData);
-    }, 500);
-  });
-};
-
-export const fetchCalendarEvents = () => {
-  return new Promise<CalendarEvent[]>((resolve) => {
-    setTimeout(() => {
-      resolve([...mockCalendarEvents]);
-    }, 500);
-  });
-};
-
-export const updateCalendarEvent = (event: CalendarEvent) => {
-  return new Promise<CalendarEvent>((resolve, reject) => {
-    setTimeout(() => {
-      const index = mockCalendarEvents.findIndex(e => e.id === event.id);
-      if (index !== -1) {
-        mockCalendarEvents[index] = event;
-        console.log(`Evento atualizado: ${event.title}`);
-        resolve(event);
-      } else {
-        reject(new Error('Evento não encontrado.'));
-      }
-    }, 500);
-  });
-};
-
-export const createCalendarEvent = (event: Omit<CalendarEvent, 'id'>) => {
-  return new Promise<CalendarEvent>((resolve) => {
-    setTimeout(() => {
-      const newEvent: CalendarEvent = {
-        ...event,
-        id: new Date().getTime(), // ID simples baseado no timestamp
-      };
-      mockCalendarEvents.push(newEvent);
-      console.log(`Evento criado: ${newEvent.title}`);
-      resolve(newEvent);
     }, 500);
   });
 };
@@ -671,7 +637,6 @@ export const createColetaItem = (item: Omit<ColetaItem, 'id'>): Promise<ColetaIt
     }, 500);
   });
 };
-
 
 export const fetchAbastecimentoReportData = (startDate?: string, endDate?: string): Promise<AbastecimentoReportItem[]> => {
   return new Promise((resolve) => {
@@ -733,13 +698,6 @@ export const addAbastecimentoReportItem = (
   });
 };
 
-
-
-
-
-
-
-
 type Period = 'day' | 'week' | 'month';
 
 export const fetchAbastecimentoAggregatedVolumeData = (period: Period): Promise<AbastecimentoVolumeItem[]> => {
@@ -781,7 +739,6 @@ export const fetchAbastecimentoAggregatedVolumeData = (period: Period): Promise<
 
       const sortedData = Object.values(aggregatedData).sort((a, b) => {
         if (period === 'day') return new Date(a.name).getTime() - new Date(b.name).getTime();
-        // Para outros períodos, a ordem pode não ser cronológica, mas isso pode ser ajustado se necessário.
         return 0;
       });
 
@@ -801,7 +758,6 @@ export const fetchFaturamentoData = (): Promise<FaturamentoItem[]> => {
 export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Agrupa os dados de abastecimento por mês para consistência
       const volumePorMes = abastecimentoReportMockData.reduce((acc, item) => {
         const month = new Date(item.data).toLocaleString('pt-BR', { month: 'long' });
         const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
@@ -816,7 +772,6 @@ export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[
         return acc;
       }, {} as Record<string, AbastecimentoVolumeItem>);
 
-      // Garante que todos os meses do faturamento estejam presentes, mesmo que com volume 0
       const finalData = faturamentoMockData.map(fatura => {
         return volumePorMes[fatura.name] || { name: fatura.name, volume: 0 };
       });
@@ -826,15 +781,9 @@ export const fetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeItem[
   });
 };
 
-
-
-
-
-
 export const fetchDashboardData = (): Promise<DashboardData> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Garante que os dados de abastecimento sejam incluídos para o gráfico de pizza
       const dashboardDataWithAbastecimentos = { ...mockData };
       if (!dashboardDataWithAbastecimentos.abastecimentos || dashboardDataWithAbastecimentos.abastecimentos.length === 0) {
         dashboardDataWithAbastecimentos.abastecimentos = abastecimentoMockData;
@@ -865,7 +814,6 @@ export const fetchAbastecimentoSummaryData = (startDate?: string, endDate?: stri
             volumeTotal: 0,
           };
         }
-        // A API pode não retornar 'produto', então tratamos o caso
         if (item.produto) {
             acc[key].volumeTotal += item.volume;
         }

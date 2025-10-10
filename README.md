@@ -76,12 +76,11 @@ Oferece uma visão comparativa entre faturamento e abastecimento.
   2. Abastecimentos Realizados (m³) por mês.
 - **Sincronização de Dados**: A API foi atualizada para que os dados de abastecimento desta tela sejam consistentes com os do restante da aplicação, garantindo uma fonte de verdade única.
 
-### 6. Módulo de Coleta (`Coleta.tsx`)
-Um novo módulo foi adicionado para gerenciar o processo de coleta.
-- **Visualização de Coletas**: A tela exibe uma lista de coletas agendadas com seu status atual.
-- **Adição de Nova Coleta**: Um botão `+ Coleta` no cabeçalho permite adicionar novos registros, que são salvos na API mockada.
-- **Edição de Coleta**: Um botão de edição em cada card permite modificar as informações de uma coleta.
-- **Check-in de Coleta**: O botão com o ícone de localização abre um modal de confirmação para realizar o check-in, alterando o status da coleta para `Entregue`.
+### 6. Módulo de Cooperados (`Cooperados.tsx`)
+O módulo foi refatorado para ter um novo layout de tabela na aba "Agenda".
+- **Abas de Navegação**: A tela agora possui abas "Cadastro" e "Agenda".
+- **Tabela de Cadastro**: O layout da tabela de cooperados foi ajustado para ser mais responsivo e fiel ao design, com botões de ação alinhados.
+- **Tabela da Agenda**: A antiga visualização de calendário foi substituída por um layout de tabela detalhada, com a grade completa dos dias da semana. A hierarquia de cores no tema claro e escuro foi aprimorada para destacar o status "Realizado" (Agrocampo) com verde e "Planejado" (Primato) com azul. A linha de total da tabela "Planejado" foi ajustada para não somar a coluna de KM, refletindo as regras de negócio.
 
 ## Backend Integration (Próximos Passos)
 
