@@ -1,7 +1,8 @@
-// src/components/AgendaTable.tsx
 import React from 'react';
 import type { AgendaItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
+import { FaCalendarAlt, FaGasPump } from 'react-icons/fa';
+import { BsFillFuelPumpFill } from 'react-icons/bs';
 
 interface Props {
   data: AgendaItem[];
@@ -20,49 +21,80 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
     return <div className="notification is-danger">{error}</div>;
   }
 
-  const getFilialColor = (filial: 'Primato' | 'Agrocampo') => {
-    return filial === 'Primato' ? 'has-text-danger-dark' : 'has-text-info-dark';
-  };
+  if (!data || data.length === 0) {
+    return <div className="notification is-info">Nenhum dado de agenda disponível.</div>;
+  }
+
+  const filial = data[0].filial;
+  const product = filial === 'Agrocampo' ? 'Bio Metano' : 'Diesel';
+  const isCompleted = filial === 'Agrocampo';
+
+  // Mapeia os dados da API para o formato de exibição com cores do protótipo
+  const mappedData = data.map(item => {
+    let backgroundColor = theme === 'dark' ? 'transparent' : 'white';
+    if (item.cooperado.includes('Ademir Englesing')) {
+      backgroundColor = '#ffb3b3';
+    } else if (item.cooperado.includes('Ademir Machioro')) {
+      backgroundColor = '#fffacd';
+    }
+    return {
+      ...item,
+      backgroundColor,
+      textColor: theme === 'dark' && backgroundColor === 'transparent' ? '#e2e8f0' : '#363636',
+    };
+  });
 
   const renderHeaders = () => {
-    // Supondo que todos os itens tenham a mesma estrutura de 'coletas'
-    const dates = data.length > 0 ? data[0].coletas.map(c => c.date) : [];
-    const monthName = data.length > 0 ? 
-      new Date(data[0].coletas[0].fullDate).toLocaleString('pt-BR', { month: 'long' }) : 
-      'Mês';
-
+    const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     return (
       <>
         <tr>
-          <th rowSpan={2} style={{ verticalAlign: 'middle', width: '25%', minWidth: '200px' }}>Cooperado</th>
-          <th colSpan={dates.length} className="has-text-centered">{monthName.charAt(0).toUpperCase() + monthName.slice(1)}</th>
-          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '100px' }}>Soma Coletas</th>
+          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '150px' }}>Cooperado</th>
+          <th colSpan={7} className="has-text-centered">Semana</th>
+          <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '80px' }}>Soma</th>
           <th rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '80px' }}>KM</th>
         </tr>
         <tr>
-          {dates.map((date, index) => (
-            // Usar uma chave mais estável que o índice
-            <th key={`header-${date}-${index}`}>{date}</th>
+          {weekdays.map((day, index) => (
+            <th key={`header-${day}-${index}`}>{day}</th>
           ))}
         </tr>
       </>
     );
   };
 
+  const totalColetas = data.reduce((acc, item) => acc + item.somaColetas, 0);
+  const totalKm = data.reduce((acc, item) => acc + item.km, 0);
+  const dailyTotals = data[0].coletas.map((_, i) =>
+    data.reduce((acc, item) => acc + (item.coletas[i].value || 0), 0)
+  );
+
   return (
-    <div className="table-container">
+    <div className="table-container mb-5">
+      <div className={`level is-mobile px-4 py-2 is-size-6 ${isCompleted ? 'has-background-success-light' : 'has-background-info-light'}`}>
+        <div className="level-left">
+          <span className="icon mr-2"><FaCalendarAlt /></span>
+          <span className="has-text-weight-bold">{filial}</span>
+          <span className="icon mr-2 ml-4">
+            {product === 'Diesel' ? <BsFillFuelPumpFill /> : <FaGasPump />}
+          </span>
+          <span className="has-text-weight-bold">{product}</span>
+        </div>
+        <div className="level-right">
+          <span className={`tag ml-4 ${isCompleted ? 'is-success' : 'is-info'}`}>{isCompleted ? 'Realizado' : 'Planejado'}</span>
+        </div>
+      </div>
       <table className="table is-bordered is-hoverable is-fullwidth is-narrow" style={{ minWidth: '1000px', tableLayout: 'fixed' }}>
         <thead className={theme === 'dark' ? 'has-background-dark' : ''}>
           {renderHeaders()}
         </thead>
         <tbody>
-          {data.map(item => (
-            <tr key={item.id}>
+          {mappedData.map(item => (
+            <tr key={item.id} style={{ backgroundColor: item.backgroundColor, color: item.textColor }}>
               <td>
-                <span className={`is-size-6 has-text-weight-bold ${getFilialColor(item.filial)}`}>{item.cooperado}</span>
+                <span className="is-size-6 has-text-weight-bold">{item.cooperado}</span>
               </td>
               {item.coletas.map((coleta, index) => (
-                // Usar uma chave mais estável que o índice
                 <td key={`coleta-${item.id}-${index}`} className="has-text-centered">
                   {coleta.value !== null ? coleta.value : ''}
                 </td>
@@ -71,6 +103,15 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
               <td className="has-text-centered">{item.km}</td>
             </tr>
           ))}
+          {/* Linha de Totais */}
+          <tr className={`has-text-weight-bold ${isCompleted ? 'has-background-success' : 'has-background-info'}`} style={{ color: 'white' }}>
+            <td>Total</td>
+            {dailyTotals.map((total, index) => (
+              <td key={`total-dia-${index}`} className="has-text-centered">{total}</td>
+            ))}
+            <td className="has-text-centered">{totalColetas}</td>
+            <td className="has-text-centered">{totalKm}</td>
+          </tr>
         </tbody>
       </table>
     </div>
