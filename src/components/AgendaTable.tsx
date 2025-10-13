@@ -26,7 +26,7 @@ const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
   }
 
   const filial = data[0].filial;
-  const product = filial === 'Agrocampo' ? 'Bio Metano' : 'Diesel';
+  const product = filial === 'Primato' ? 'Bio Metano' : 'Diesel';
   const isCompleted = filial === 'Agrocampo';
 
   // Cores de destaque para thead e tfoot
