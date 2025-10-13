@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoSummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

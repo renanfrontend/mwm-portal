@@ -16,7 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Partial<MockUser> | null>(null);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('jwtToken');
+    const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
       setToken(storedToken);
       const decodedUser = decodeJwt(storedToken);
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const handleLogin = (newToken: string) => {
-    localStorage.setItem('jwtToken', newToken);
+    localStorage.setItem('authToken', newToken);
     setToken(newToken);
     const decodedUser = decodeJwt(newToken);
     setUser(decodedUser);
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleLogout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('authToken');
   };
 
   const isAuthenticated = !!token;
