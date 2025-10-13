@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd, MdCalendarMonth } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd, MdCalendarMonth, MdDelete } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { fetchCooperadosData, fetchAgendaData, type CooperadoItem, type AgendaItem } from '../services/api';
+import { fetchCooperadosData, fetchAgendaData, clearAgendaData, type CooperadoItem, type AgendaItem } from '../services/api';
 import AgendaTable from '../components/AgendaTable';
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -45,18 +45,37 @@ const Cooperados = () => {
     return status === 'Ativo' ? 'is-success' : 'is-danger';
   };
 
-  const filteredData = cooperadosData.filter(item =>
+  const filteredCooperadosData = cooperadosData.filter(item =>
     item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.filial.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const groupedAgendaData = Object.values(agendaData.reduce((acc, item) => {
+  const filteredAgendaData = agendaData.filter(item =>
+    item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.filial.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const groupedAgendaData = Object.values(filteredAgendaData.reduce((acc, item) => {
     if (!acc[item.filial]) {
       acc[item.filial] = [];
     }
     acc[item.filial].push(item);
     return acc;
   }, {} as Record<string, AgendaItem[]>));
+
+  const handleClearAgenda = async () => {
+    if (window.confirm('Tem certeza que deseja excluir todos os eventos da agenda?')) {
+      try {
+        setLoading(true);
+        await clearAgendaData();
+        await loadData();
+      } catch (err) {
+        setError("Ocorreu um erro ao limpar a agenda.");
+        console.error(err);
+        setLoading(false);
+      }
+    }
+  };
 
   return (
     <>
@@ -146,7 +165,7 @@ const Cooperados = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map(item => (
+                  {filteredCooperadosData.map(item => (
                     <tr key={item.id}>
                       <td>{item.matricula}</td>
                       <td>{item.filial}</td>
@@ -178,20 +197,57 @@ const Cooperados = () => {
       )}
 
       {activeTab === 'agenda' && (
-        <div className="card">
-          <div className="card-content" style={{ overflowX: 'auto' }}>
-            {loading ? (
-              <progress className="progress is-large is-info" max="100"></progress>
-            ) : error ? (
-              <div className="notification is-danger">{error}</div>
-            ) : (
-              // Agrupa os dados por filial para o novo componente
-              groupedAgendaData.map((filialData, index) => (
-                <div key={index} className="mb-5">
-                  <AgendaTable data={filialData} loading={loading} error={error} />
+        <div className="content">
+          <div className="level is-mobile mt-5 mb-4">
+            <div className="level-left">
+              <div className="level-item">
+                <div className="field has-addons">
+                  <div className="control is-expanded">
+                    <input
+                      className="input"
+                      type="text"
+                      placeholder="Digite nome do cooperado, filial..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="control">
+                    <button className="button is-info">
+                      <span className="icon"><MdSearch /></span>
+                    </button>
+                  </div>
                 </div>
-              ))
-            )}
+              </div>
+            </div>
+            <div className="level-right">
+              <div className="level-item">
+                <button className="button is-danger is-light mr-2" onClick={handleClearAgenda}>
+                  <span className="icon"><MdDelete /></span>
+                  <span>Excluir</span>
+                </button>
+              </div>
+              <div className="level-item">
+                <button className="button is-light">
+                  <span className="icon"><MdFilterList /></span>
+                  <span>Filtrar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-content" style={{ overflowX: 'auto' }}>
+              {loading ? (
+                <progress className="progress is-large is-info" max="100"></progress>
+              ) : error ? (
+                <div className="notification is-danger">{error}</div>
+              ) : (
+                groupedAgendaData.map((filialData, index) => (
+                  <div key={index} className="mb-5">
+                    <AgendaTable data={filialData} loading={loading} error={error} />
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
