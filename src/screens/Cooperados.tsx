@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCooperadosData, fetchAgendaData, clearAgendaData, type CooperadoItem, type AgendaItem } from '../services/api';
 import AgendaTable from '../components/AgendaTable';
 import moment from 'moment';
-import 'moment/locale/pt-br';
 import '../styles/calendar.css';
 
 moment.locale('pt-br');

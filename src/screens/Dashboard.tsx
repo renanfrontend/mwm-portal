@@ -7,6 +7,8 @@ import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import AbastecimentoPieChart from '../components/AbastecimentoPieChart';
 import { fetchDashboardData, fetchAbastecimentoSummaryData, type DashboardData, type AbastecimentoSummaryItem } from '../services/api';
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 // Mapeamento de ícones para componentes React
 const iconMap = {
@@ -29,8 +31,15 @@ const Dashboard = () => {
   const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoSummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     const loadData = async () => {
       try {
         setLoading(true);
@@ -50,7 +59,7 @@ const Dashboard = () => {
     };
 
     loadData();
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   return (
     <div>

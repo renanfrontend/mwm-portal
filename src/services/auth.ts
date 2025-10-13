@@ -22,18 +22,18 @@ const mockUsers: MockUser[] = [
  * Simula a autenticação de login.
  * @param username O nome de usuário para autenticar.
  * @param password A senha fornecida.
- * @returns Um Promise que resolve com o usuário mockado se o login for bem-sucedido, ou rejeita em caso de falha.
+ * @returns Um Promise que resolve com o token JWT mockado se o login for bem-sucedido, ou rejeita em caso de falha.
  */
-export const login = (username: string, password: string): Promise<MockUser> => {
+export const login = (username: string, password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const user = mockUsers.find(
         (u) => u.username === username && u.password === password
       );
       if (user) {
-        // Remove a senha antes de retornar o objeto para a aplicação
-        const { password, ...userWithoutPassword } = user;
-        resolve(userWithoutPassword);
+        // Simula a criação de um token JWT (na prática, isso viria do backend)
+        const token = `mock-jwt-token.${btoa(JSON.stringify({ user: user.username, role: user.role, filiais: user.filiais }))}.signature`;
+        resolve(token);
       } else {
         reject(new Error('Usuário ou senha inválidos.'));
       }
@@ -79,4 +79,21 @@ export const createNewPassword = (email: string, newPassword: string): Promise<v
       }
     }, 1000);
   });
+};
+
+/**
+ * Decodifica um token JWT mockado para obter os dados do usuário.
+ * @param token O token JWT a ser decodificado.
+ * @returns O objeto do usuário decodificado ou null se o token for inválido.
+ */
+export const decodeJwt = (token: string): Partial<MockUser> | null => {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = atob(payload);
+    const data = JSON.parse(decoded);
+    return data;
+  } catch (error) {
+    console.error('Failed to decode JWT:', error);
+    return null;
+  }
 };
