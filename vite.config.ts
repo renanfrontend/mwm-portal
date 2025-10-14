@@ -11,4 +11,9 @@ export default defineConfig({
     setupFiles: './src/setupTests.ts',
     css: true,
   },
+  server: {
+    deps: {
+      inline: ['./src/setupTests.ts'],
+    },
+  },
 });

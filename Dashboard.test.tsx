@@ -51,6 +51,22 @@ describe('Dashboard Screen', () => {
     expect(screen.queryByText('Carregando dados...')).not.toBeInTheDocument();
   });
 
+  it('deve tentar buscar os dados novamente ao clicar em "Tentar Novamente"', async () => {
+    const user = userEvent.setup();
+    // Primeira chamada falha
+    vi.mocked(api.fetchDashboardData).mockRejectedValueOnce(new Error('API Error'));
+    
+    render(<Dashboard />);
+    
+    // Espera o botão "Tentar Novamente" aparecer
+    const retryButton = await screen.findByRole('button', { name: /Tentar Novamente/i });
+    
+    // Segunda chamada tem sucesso
+    vi.mocked(api.fetchDashboardData).mockResolvedValueOnce(mockDashboardData);
+    await user.click(retryButton);
+    expect(await screen.findByTestId('header-mock')).toBeInTheDocument();
+  });
+
   it('deve renderizar os dados do dashboard com sucesso', async () => {
     vi.mocked(api.fetchDashboardData).mockResolvedValue(mockDashboardData);
 
