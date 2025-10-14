@@ -16,6 +16,8 @@ O projeto consiste em um portal de Business Intelligence que oferece uma visão 
 | **Bulma** | Framework CSS leve e baseado em Flexbox para estilização. |
 | **Recharts** | Biblioteca de gráficos para visualização de dados. |
 | **Vitest & React Testing Library** | Para a suíte de testes unitários e de integração. |
+| **Redux Toolkit** | Para um gerenciamento de estado global eficiente e previsível. |
+| **React-Redux** | Integração oficial do Redux com o React. |
 | **react-router-dom** | Gerenciamento de rotas e navegação na aplicação. |
 
 ## Estrutura de Pastas
@@ -23,11 +25,13 @@ O projeto consiste em um portal de Business Intelligence que oferece uma visão 
 A organização do projeto segue um padrão modular para facilitar a localização de arquivos e a escalabilidade.
 
 src/
-├── components/   # Componentes reutilizáveis (gráficos, cards, modais, etc.)
-├── hooks/        # Hooks customizados (ex: useTheme).
+├── app/          # Configuração da store e hooks do Redux.
+├── components/   # Componentes reutilizáveis (gráficos, cards, modais, etc.).
+├── context/      # Provedores de Contexto React (ex: AuthContext, ThemeContext).
+├── features/     # Slices e lógica de estado do Redux (ex: abastecimento, coleta).
+├── hooks/        # Hooks customizados (ex: useTheme, useAuth).
 ├── screens/      # Componentes de página (telas principais da aplicação).
-├── services/     # Lógica de acesso a dados (atualmente, a API mockada).
-├── context/      # Contexto global da aplicação (ex: AuthContext).
+├── services/     # Lógica de acesso a dados (API mockada).
 └── styles/       # Arquivos de estilização globais e temas.
 
 ## Funcionalidades Implementadas
@@ -52,7 +56,7 @@ A tela principal, que oferece uma visão geral e consolidada dos indicadores mai
 
 ### 3. Relatório de Abastecimento (`AbastecimentoReport.tsx`)
 Uma tela detalhada para análise aprofundada dos dados de abastecimento, contendo múltiplas visualizações e interações.
-
+- **Gerenciamento de Estado com Redux**: O estado da UI (filtros de data, paginação, etc.) foi movido do estado local do React para o Redux, centralizando a lógica e facilitando o gerenciamento.
 - **Busca de Dados Otimizada**: Carrega todos os dados necessários para a tela em paralelo (`Promise.all`), melhorando a performance de carregamento.
 - **Sumário por Veículo**: Apresenta uma tabela e um gráfico de barras lado a lado, mostrando o volume total abastecido por veículo e placa.
 - **Gráficos Detalhados**:
@@ -81,6 +85,10 @@ O módulo foi refatorado para ter um novo layout de tabela na aba "Agenda".
 - **Abas de Navegação**: A tela agora possui abas "Cadastro" e "Agenda".
 - **Tabela de Cadastro**: O layout da tabela de cooperados foi ajustado para ser mais responsivo e fiel ao design, com botões de ação alinhados.
 - **Tabela da Agenda**: A antiga visualização de calendário foi substituída por um layout de tabela detalhada, com a grade completa dos dias da semana. A hierarquia de cores no tema claro e escuro foi aprimorada para destacar o status "Realizado" (Agrocampo) com verde e "Planejado" (Primato) com azul. A linha de total da tabela "Planejado" foi ajustada para não somar a coluna de KM, refletindo as regras de negócio.
+
+### 7. Gerenciamento de Estado com Redux
+- **Estado Centralizado**: O estado da aplicação, antes gerenciado localmente em componentes, foi refatorado para usar o Redux Toolkit. Isso centraliza a lógica de estado, tornando-a mais previsível e fácil de depurar.
+- **Tela de Relatório de Abastecimento**: A tela `AbastecimentoReport.tsx` foi completamente refatorada para utilizar o Redux. Estados como filtros de data, paginação e visibilidade de modais agora são gerenciados pelo *slice* `abastecimentoSlice`, e as ações são despachadas para atualizar o estado global.
 
 ## Backend Integration (Próximos Passos)
 
@@ -125,5 +133,6 @@ Durante o desenvolvimento, foram aplicadas diversas boas práticas para garantir
 - **Componentização**: A interface foi dividida em componentes pequenos e reutilizáveis.
 - **Tipagem Forte**: O uso de TypeScript e interfaces (`type`) para importação de tipos garante a segurança e a clareza dos dados.
 - **Chaves Estáveis**: Em listas e laços de repetição, foram utilizadas chaves (`key`) únicas e estáveis em vez de índices, prevenindo bugs de renderização e otimizando a performance.
-- **Hooks do React**: O estado e o ciclo de vida dos componentes são gerenciados de forma moderna com `useState` and `useEffect`.
+- **Hooks do React**: O estado e o ciclo de vida dos componentes são gerenciados de forma moderna com `useState`, `useEffect` e hooks customizados.
+- **Gerenciamento de Estado Centralizado**: A utilização do Redux Toolkit para estados globais desacopla a lógica de estado da UI, melhorando a testabilidade e a organização do código.
 - **Tratamento de Estado Assíncrono**: As telas lidam de forma elegante com os estados de carregamento (`loading`) e erro (`error`) durante as buscas de dados.

@@ -1,80 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { 
-  fetchAbastecimentoReportData,
-  fetchAbastecimentoSummaryData,
-  fetchAbastecimentoVolumePorDiaData,
-  addAbastecimentoReportItem,
-  type AbastecimentoReportItem,
-  type AbastecimentoSummaryItem,
-  type AbastecimentoVolumePorDiaItem
-} from '../services/api';
-import useTheme from '../hooks/useTheme';
+import {
+  loadAbastecimentoData,
+  addAbastecimento,
+  setStartDate,
+  setEndDate,
+  setIsModalOpen,
+  setCurrentPage,
+  setItemsPerPage,
+} from '../features/abastecimento/abastecimentoSlice';
+import { type AbastecimentoReportItem } from '../services/api';
 import MonthlyBarChart from '../components/MonthlyBarChart';
 import DetailedSupplyChart from '../components/DetailedSupplyChart';
 import AbastecimentoFormModal from '../components/AbastecimentoFormModal';
+import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
-const getDefaultEndDate = () => new Date().toISOString().split('T')[0];
-const getDefaultStartDate = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 30);
-  return date.toISOString().split('T')[0];
-};
-
 const AbastecimentoReport = () => {
-  const [reportData, setReportData] = useState<AbastecimentoReportItem[]>([]);
-  const [summaryData, setSummaryData] = useState<AbastecimentoSummaryItem[]>([]);
-  const [volumePorDiaData, setVolumePorDiaData] = useState<AbastecimentoVolumePorDiaItem[]>([]);
-  const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [startDate, setStartDate] = useState<string>(getDefaultStartDate());
-  const [endDate, setEndDate] = useState<string>(getDefaultEndDate());
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const dispatch = useAppDispatch();
+  const { reportData, summaryData, volumePorDiaData, loading, error, startDate, endDate, isModalOpen, currentPage, itemsPerPage } = useAppSelector((state) => state.abastecimento);
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [fetchedReportData, fetchedSummaryData, fetchedVolumePorDiaData] = await Promise.all([
-          fetchAbastecimentoReportData(startDate, endDate),
-          fetchAbastecimentoSummaryData(startDate, endDate),
-          fetchAbastecimentoVolumePorDiaData(startDate, endDate),
-        ]);
-        setReportData(fetchedReportData);
-        setSummaryData(fetchedSummaryData);
-        setVolumePorDiaData(fetchedVolumePorDiaData);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, [startDate, endDate]); // A paginação não precisa recarregar os dados
+    dispatch(loadAbastecimentoData({ startDate, endDate }));
+  }, [startDate, endDate, dispatch]);
 
-  const handleFormSubmit = async (formData: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>) => {
-    await addAbastecimentoReportItem(formData);
-    setIsModalOpen(false);
-    // Recarrega todos os dados para refletir a nova entrada
-    setLoading(true);
-    try {
-      const [fetchedReportData, fetchedSummaryData, fetchedVolumePorDiaData] = await Promise.all([
-        fetchAbastecimentoReportData(startDate, endDate),
-        fetchAbastecimentoSummaryData(startDate, endDate),
-        fetchAbastecimentoVolumePorDiaData(startDate, endDate),
-      ]);
-      setReportData(fetchedReportData);
-      setSummaryData(fetchedSummaryData);
-      setVolumePorDiaData(fetchedVolumePorDiaData);
-    } catch (error) {
-      console.error("Failed to refetch data:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleFormSubmit = (formData: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>) => {
+    dispatch(addAbastecimento(formData));
+    dispatch(setIsModalOpen(false));
   };
 
   const handleExportCSV = () => {
@@ -88,7 +41,6 @@ const AbastecimentoReport = () => {
       "Hora Início", "Hora Término", "Volume (m³)", "Odômetro", "Usuário"
     ];
 
-    // Envolve os campos que podem conter vírgulas com aspas duplas
     const csvRows = reportData.map(item => [
       item.status,
       `"${item.cliente}"`,
@@ -112,8 +64,8 @@ const AbastecimentoReport = () => {
   };
 
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Volta para a primeira página ao mudar a quantidade de itens
+    dispatch(setItemsPerPage(Number(e.target.value)));
+    dispatch(setCurrentPage(1));
   };
 
   const renderSummaryTable = () => (
@@ -157,7 +109,7 @@ const AbastecimentoReport = () => {
   const renderVolumePorDiaChart = () => (
     <div className="card">
       <header className="card-header">
-        <p className="card-header-title" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Volume de Abastecimento por Dia</p>
+        <p className="card-header-title">Volume de Abastecimento por Dia</p>
       </header>
       <div className="card-content">
         <ResponsiveContainer width="100%" height={300}>
@@ -278,7 +230,7 @@ const AbastecimentoReport = () => {
 
     const handlePageChange = (pageNumber: number) => {
       if (pageNumber < 1 || pageNumber > totalPages) return;
-      setCurrentPage(pageNumber);
+      dispatch(setCurrentPage(pageNumber));
     };
 
     const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -321,8 +273,6 @@ const AbastecimentoReport = () => {
               Próxima
             </a>
             <ul className="pagination-list">
-              {/* A renderização dos números de página pode ser complexa para muitas páginas,
-                  então a manteremos simples por enquanto, mas pode ser aprimorada. */}
             </ul>
           </nav>
         </div>
@@ -335,14 +285,14 @@ const AbastecimentoReport = () => {
       <div className="container">
         <AbastecimentoFormModal
           isActive={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => dispatch(setIsModalOpen(false))}
           onSubmit={handleFormSubmit}
         />
         <h1 className="title is-4">Relatório de Abastecimento</h1>
 
         <div className="card mb-4">
           <header className="card-header">
-            <p className="card-header-title" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Filtro por Período</p>
+            <p className="card-header-title">Filtro por Período</p>
           </header>
           <div className="card-content">
             <div className="field is-horizontal">
@@ -352,12 +302,12 @@ const AbastecimentoReport = () => {
               <div className="field-body">
                 <div className="field">
                   <p className="control">
-                    <input className="input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                    <input className="input" type="date" value={startDate} onChange={e => dispatch(setStartDate(e.target.value))} />
                   </p>
                 </div>
                 <div className="field">
                   <p className="control">
-                    <input className="input" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                    <input className="input" type="date" value={endDate} onChange={e => dispatch(setEndDate(e.target.value))} />
                   </p>
                 </div>
               </div>
@@ -367,7 +317,7 @@ const AbastecimentoReport = () => {
 
         <div className="card mb-4">
           <div className="card-content">
-            <h2 className="subtitle is-5" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>Sumário por Veículo e Placa</h2>
+            <h2 className="subtitle is-5">Sumário por Veículo e Placa</h2>
             {loading
               ? (<progress className="progress is-large is-info" max="100"></progress>)
               : (
@@ -399,13 +349,13 @@ const AbastecimentoReport = () => {
         <div className="card">
           <div className="card-content">
             <div className="level">
-              <div className="level-left" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>
+              <div className="level-left">
                 <h2 className="subtitle is-5">Relatório Completo</h2>
               </div>
               <div className="level-right">
                 <div className="buttons">
                   <button className="button is-link" onClick={handleExportCSV}>Exportar CSV</button>
-                  <button className="button is-primary" onClick={() => setIsModalOpen(true)}>Adicionar Registro</button>
+                  <button className="button is-primary" onClick={() => dispatch(setIsModalOpen(true))}>Adicionar Registro</button>
                 </div>
               </div>
             </div>

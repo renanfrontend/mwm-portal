@@ -48,7 +48,7 @@ const MonthlyBarChart: React.FC<Props> = ({ chartData, title, dataKey, barColor,
   return (
     <div className="card" style={{ height: '100%' }}>
       <header className="card-header">
-        <p className="card-header-title">{title}</p>
+        <p className="card-header-title" style={{ color: theme === 'dark' ? '#a0aec0' : '#363636' }}>{title}</p>
       </header>
       <div className="card-content">
         <ResponsiveContainer width="100%" height={400}>

@@ -1,29 +1,10 @@
-// src/hooks/useTheme.ts
-
-import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    // Carrega o tema do localStorage ao iniciar
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(currentTheme => {
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', newTheme);
-      document.documentElement.setAttribute('data-theme', newTheme);
-      return newTheme;
-    });
-  };
-
-  return { theme, toggleTheme };
+  const context = useContext(ThemeContext);
+  if (context === undefined) throw new Error('useTheme must be used within a ThemeProvider');
+  return context;
 };
 
 export default useTheme;

@@ -1,16 +1,15 @@
-// src/screens/Dashboard.tsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import AbastecimentoPieChart from '../components/AbastecimentoPieChart';
-import { fetchDashboardData, fetchAbastecimentoSummaryData, type DashboardData, type AbastecimentoSummaryItem } from '../services/api';
+import { loadDashboardData } from '../features/dashboard/dashboardSlice';
+import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
+import useTheme from '../hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 
-// Mapeamento de ícones para componentes React
 const iconMap = {
   'density_medium': <MdAnalytics/>,
   'water_drop': <MdWaterDrop/>,
@@ -19,20 +18,20 @@ const iconMap = {
   'water_do': <MdWater/>,
 };
 
-// Mapeamento de tendência para cor
 const trendColorMap = {
   up: 'var(--trend-up-color)',
   down: 'var(--trend-down-color)',
   neutral: 'var(--text-color-secondary)',
+  
 };
 
+
 const Dashboard = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoSummaryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { data, abastecimentoSummary, loading, error } = useAppSelector((state) => state.dashboard);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -40,30 +39,12 @@ const Dashboard = () => {
       return;
     }
 
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [fetchedDashboardData, fetchedAbastecimentoData] = await Promise.all([
-          fetchDashboardData(),
-          fetchAbastecimentoSummaryData()
-        ]);
-        setData(fetchedDashboardData);
-        setAbastecimentoData(fetchedAbastecimentoData);
-      } catch (err) {
-        setError("Ocorreu um erro ao buscar os dados do dashboard.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [isAuthenticated, navigate]);
+    dispatch(loadDashboardData());
+  }, [isAuthenticated, navigate, dispatch]);
 
   return (
     <div>
-      {loading && (
+      {loading && !data && (
         <section className="section">
           <div className="container has-text-centered">
             <p className="title is-4">Carregando dados...</p>
@@ -74,21 +55,22 @@ const Dashboard = () => {
       {error && (
         <section className="section">
           <div className="container has-text-centered">
-            <p className="title is-4 has-text-danger">Erro</p>
-            <p>{error}</p>
+            <p className="title is-4">Erro</p>
+            <p className="subtitle is-6">{error}</p>
           </div>
         </section>
       )}
-      {!loading && !error && data && (
+      {data && (
         <section className="section">
           <div className="container">
+            <h1 className="title is-4">Dashboard</h1>
             <div className="columns is-multiline">
-              {data.metrics.map(metric => (
+              {data.metrics.map((metric) => (
                 <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
                   <MetricCard
                     title={metric.label}
                     value={`${metric.value}${metric.unit || ''}`}
-                    icon={iconMap[metric.icon as keyof typeof iconMap]}
+                    icon={iconMap[metric.icon]}
                     iconColor={trendColorMap[metric.trend]}
                   />
                 </div>
@@ -99,19 +81,12 @@ const Dashboard = () => {
                 <StockStatus stockItems={data.stock} />
               </div>
               <div className="column is-8">
-                <CooperativeAnalysisChart
-                  chartData={data.cooperativeAnalysis}
-                  title="Análise de Cooperados"
-                />
+                <CooperativeAnalysisChart chartData={data.cooperativeAnalysis} title="Análise de Cooperados" />
               </div>
             </div>
-
             <div className="columns mt-4">
               <div className="column is-8 is-offset-2">
-                <AbastecimentoPieChart
-                  chartData={abastecimentoData}
-                  title="Abastecimento em M³ por Veículo - Primato"
-                />
+                <AbastecimentoPieChart chartData={abastecimentoSummary} title="Abastecimento em M³ por Veículo - Primato" />
               </div>
             </div>
           </div>

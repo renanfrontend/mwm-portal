@@ -4,32 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ColetaFormModal from '../components/ColetaFormModal';
 import CheckInModal from '../components/CheckInModal';
-import { fetchColetaData, updateColetaItem, createColetaItem, type ColetaItem } from '../services/api';
+import { loadColetaData, saveColetaItem, checkInColetaItem } from '../features/coleta/coletaSlice';
+import { useAppDispatch, useAppSelector } from '../hooks/hooks';
+import { type ColetaItem } from '../services/api';
 
 const Coleta = () => {
-  const [coletaData, setColetaData] = useState<ColetaItem[]>([]);
+  const dispatch = useAppDispatch();
+  const { coletaData, loading, error } = useAppSelector((state) => state.coleta);
   const [searchTerm, setSearchTerm] = useState('');
-  const { user } = useAuth(); // Obtém o usuário do contexto de autenticação
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ColetaItem | null>(null);
   const navigate = useNavigate();
 
-  // Permissões baseadas no perfil do usuário
   const canEdit = user?.role === 'editor' || user?.role === 'administrador';
   const canAdd = user?.role === 'editor' || user?.role === 'administrador';
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    const data = await fetchColetaData();
-    setColetaData(data);
-    setLoading(false);
-  };
+    dispatch(loadColetaData());
+  }, [dispatch]);
 
   const handleEdit = (item: ColetaItem) => {
     setSelectedItem(item);
@@ -37,14 +31,9 @@ const Coleta = () => {
   };
 
   const handleFormSubmit = async (item: ColetaItem) => {
-    if (item.id) {
-      await updateColetaItem(item);
-    } else {
-      await createColetaItem(item);
-    }
-    await loadData();
+    dispatch(saveColetaItem(item));
     setIsFormModalOpen(false);
-    setSelectedItem(null); // Limpar item selecionado
+    setSelectedItem(null);
   };
 
   const handleCheckInClick = (item: ColetaItem) => {
@@ -54,9 +43,7 @@ const Coleta = () => {
 
   const handleCheckIn = async () => {
     if (!selectedItem) return;
-    const updatedItem = { ...selectedItem, status: 'Entregue' as const };
-    await updateColetaItem(updatedItem);
-    await loadData();
+    dispatch(checkInColetaItem(selectedItem));
     setIsCheckInModalOpen(false);
   };
 
@@ -95,7 +82,7 @@ const Coleta = () => {
           <div className="level-item">
             {canAdd && (
               <button className="button is-primary" onClick={() => {
-                setSelectedItem(null); // Limpar item selecionado para o modo de adição
+                setSelectedItem(null);
                 setIsFormModalOpen(true);
               }}>
                 + Coleta
@@ -105,7 +92,6 @@ const Coleta = () => {
         </div>
       </div>
 
-      {/* Modals */}
       <ColetaFormModal
         isActive={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
@@ -123,7 +109,6 @@ const Coleta = () => {
         data={selectedItem}
       />
 
-      {/* Campo de busca */}
       <div className="field has-addons">
         <div className="control is-expanded">
           <input
@@ -144,7 +129,6 @@ const Coleta = () => {
         </div>
       </div>
 
-      {/* Lista de cooperados */}
       <div className="list-header level is-mobile mt-5">
         <div className="level-left">
           <p className="subtitle is-6">Primato</p>
@@ -158,9 +142,11 @@ const Coleta = () => {
           </div>
         </div>
       </div>
-      
+
       {loading ? (
         <progress className="progress is-large is-info" max="100"></progress>
+      ) : error ? (
+        <div className="notification is-danger">{error}</div>
       ) : (
         <div className="list-container">
           {filteredData.map(item => (

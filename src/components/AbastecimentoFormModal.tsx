@@ -6,7 +6,7 @@ type FormState = Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermi
 interface Props {
   isActive: boolean;
   onClose: () => void;
-  onSubmit: (data: FormState) => Promise<void>;
+  onSubmit: (data: FormState) => void;
 }
 
 const AbastecimentoFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit }) => {
@@ -32,15 +32,10 @@ const AbastecimentoFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit }
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await onSubmit(formData);
-      setFormData(initialState); // Reset form on successful submission
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSubmit(formData);
+    setFormData(initialState);
   };
 
   return (

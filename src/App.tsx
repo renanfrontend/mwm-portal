@@ -10,6 +10,7 @@ import PageLayout from './components/PageLayout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginScreen from './screens/auth/LoginScreen';
 import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
+import { ThemeProvider } from './context/ThemeContext';
 import NewPasswordScreen from './screens/auth/NewPasswordScreen';
 import { MdMenu } from 'react-icons/md';
 
@@ -63,7 +64,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );
