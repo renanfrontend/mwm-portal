@@ -1,7 +1,15 @@
-import { type Page, expect } from '@playwright/test';
+import { type Page, expect, type Locator } from '@playwright/test';
 
 export class AuthPage {
-  constructor(private readonly page: Page) {}
+  private readonly userInput: Locator;
+  private readonly passwordInput: Locator;
+  private readonly loginButton: Locator;
+
+  constructor(private readonly page: Page) {
+    this.userInput = page.getByPlaceholder('Seu usuário');
+    this.passwordInput = page.getByPlaceholder('Sua senha');
+    this.loginButton = page.getByRole('button', { name: /entrar/i });
+  }
 
   async goto() {
     await this.page.goto('/login');
@@ -11,8 +19,8 @@ export class AuthPage {
   }
 
   async login(user: string, pass: string) {
-    await this.page.getByPlaceholder('Seu usuário').fill(user);
-    await this.page.getByPlaceholder('Sua senha').fill(pass);
-    await this.page.getByRole('button', { name: /entrar/i }).click();
+    await this.userInput.fill(user);
+    await this.passwordInput.fill(pass);
+    await this.loginButton.click();
   }
 }

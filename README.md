@@ -1,4 +1,4 @@
-# MWM Portal - Dashboard de Monitoramento
+# MWM Portal - Plataforma de Monitoramento Agroindustrial
 
 Este é o repositório para o MWM Portal, uma aplicação web moderna e interativa para monitoramento de dados e métricas de abastecimento e faturamento em tempo real, construída com as melhores práticas de engenharia de software.
 
@@ -6,21 +6,22 @@ Este é o repositório para o MWM Portal, uma aplicação web moderna e interati
 
 O projeto consiste em um portal de Business Intelligence que oferece uma visão consolidada e detalhada de operações agroindustriais. A aplicação é construída com tecnologias web modernas para garantir uma experiência de usuário fluida, responsiva e rica em visualizações de dados.
 
-## Tecnologias Utilizadas
+## 🚀 Tecnologias e Ferramentas
 
-| Tecnologia | Descrição |
-|---|---|
-| **React** | Biblioteca principal para a construção da interface de usuário. |
-| **TypeScript** | Adiciona tipagem estática ao JavaScript, aumentando a robustez e a manutenibilidade do código. |
-| **Vite** | Ferramenta de build moderna que oferece um ambiente de desenvolvimento rápido. |
-| **Bulma** | Framework CSS leve e baseado em Flexbox para estilização. |
-| **Recharts** | Biblioteca de gráficos para visualização de dados. |
-| **Vitest & React Testing Library** | Para a suíte de testes unitários e de integração. |
-| **Redux Toolkit** | Para um gerenciamento de estado global eficiente e previsível. |
-| **React-Redux** | Integração oficial do Redux com o React. |
-| **react-router-dom** | Gerenciamento de rotas e navegação na aplicação. |
+| Categoria | Tecnologia/Ferramenta | Descrição |
+|---|---|---|
+| **Core** | React & TypeScript | Base para construção de interfaces de usuário robustas e tipadas. |
+| **Build & Dev** | Vite | Ambiente de desenvolvimento extremamente rápido com HMR (Hot Module Replacement). |
+| **Gerenciamento de Estado**| Redux Toolkit & React-Redux | Para um gerenciamento de estado global eficiente, previsível e escalável. |
+| **Roteamento** | React Router | Navegação declarativa e gerenciamento de rotas na aplicação. |
+| **Estilização** | Bulma & React Icons | Framework CSS moderno e leve, complementado por uma vasta biblioteca de ícones. |
+| **Visualização de Dados**| Recharts | Biblioteca de gráficos para visualização de dados interativos. |
+| **Testes Unitários** | Vitest & React Testing Library | Suíte de testes unitários e de integração rápida, com foco no comportamento do componente. |
+| **Testes E2E** | Playwright | Testes de ponta a ponta (E2E) e de componentes em navegadores reais para máxima confiança. |
+| **Linting** | ESLint & TypeScript ESLint | Análise estática de código para encontrar problemas e manter a consistência. |
+| **Utilitários** | Moment.js & UUID | Manipulação de datas e geração de identificadores únicos. |
 
-## Estrutura de Pastas
+## 🏛️ Estrutura de Pastas
 
 A organização do projeto segue um padrão modular para facilitar a localização de arquivos e a escalabilidade.
 
@@ -33,6 +34,8 @@ src/
 ├── screens/      # Componentes de página (telas principais da aplicação).
 ├── services/     # Lógica de acesso a dados (API mockada).
 └── styles/       # Arquivos de estilização globais e temas.
+e2e/
+└── ...           # Testes de ponta a ponta (E2E) com Playwright.
 
 ## Funcionalidades Implementadas
 
@@ -90,7 +93,7 @@ O módulo foi refatorado para ter um novo layout de tabela na aba "Agenda".
 - **Estado Centralizado**: O estado da aplicação, antes gerenciado localmente em componentes, foi refatorado para usar o Redux Toolkit. Isso centraliza a lógica de estado, tornando-a mais previsível e fácil de depurar.
 - **Tela de Relatório de Abastecimento**: A tela `AbastecimentoReport.tsx` foi completamente refatorada para utilizar o Redux. Estados como filtros de data, paginação e visibilidade de modais agora são gerenciados pelo *slice* `abastecimentoSlice`, e as ações são despachadas para atualizar o estado global.
 
-## Backend Integration (Próximos Passos)
+## 🔌 Integração com Backend (Próximos Passos)
 
 Atualmente, a aplicação utiliza uma camada de serviço mockada (`src/services/api.ts` e `src/services/auth.ts`) que simula o comportamento de uma API real.
 
@@ -98,7 +101,7 @@ O próximo passo crucial do projeto é a integração com o backend definitivo, 
 
 ## Como Executar o Projeto
 
-1.  **Instalar as dependências:**
+1.  **Instalar as dependências**:
     ```bash
     npm install
     ```
@@ -110,7 +113,7 @@ O próximo passo crucial do projeto é a integração com o backend definitivo, 
 
 A aplicação estará disponível em `http://localhost:5173` (ou na porta que o Vite designar).
 
-### Usuários de Teste (API Mockada)
+### 👤 Usuários de Teste (API Mockada)
 
 Para testar as diferentes funcionalidades e perfis, utilize os seguintes usuários de login com a API mockada:
 | Usuário   | Senha     | Perfil        | Filiais                   |
@@ -119,19 +122,26 @@ Para testar as diferentes funcionalidades e perfis, utilize os seguintes usuári
 | `editor`  | `editor123` | `editor`        | `Toledo - PR`             |
 | `porteiro`| `leitor123` | `leitor`        | `Toledo - PR`             |
 
-### Testes
+### 🧪 Testes
 
-O projeto utiliza **Vitest** e **React Testing Library** para testes unitários e de integração. Para executar os testes, utilize os seguintes comandos:
+O projeto possui uma suíte de testes completa para garantir a qualidade e a estabilidade do código.
 
-- `npm test`: Roda os testes uma vez no terminal.
-- `npm run test:ui`: Abre a interface gráfica do Vitest para uma experiência de teste interativa.
+#### Testes Unitários e de Integração (Vitest)
+- **`npm test`**: Roda os testes uma vez no terminal.
+- **`npm run test:ui`**: Abre a interface gráfica do Vitest para uma experiência de teste interativa e visual.
 
-## Qualidade de Código e Boas Práticas
+#### Testes de Componente e Ponta a Ponta (Playwright)
+- **`npm run test:ct`**: Executa os testes de componente com Playwright.
+- **`npm run test:e2e`**: Executa os testes de ponta a ponta (E2E) em modo headless.
+- **`npm run test:e2e:ui`**: Abre a interface do Playwright para executar e depurar os testes E2E visualmente.
+
+## ✨ Qualidade de Código e Boas Práticas
 
 Durante o desenvolvimento, foram aplicadas diversas boas práticas para garantir um código limpo, performático e de fácil manutenção:
 
 - **Componentização**: A interface foi dividida em componentes pequenos e reutilizáveis.
 - **Tipagem Forte**: O uso de TypeScript e interfaces (`type`) para importação de tipos garante a segurança e a clareza dos dados.
+- **Testes Abrangentes**: Cobertura de testes em múltiplas camadas (unitário, integração, E2E) para garantir a funcionalidade de ponta a ponta.
 - **Chaves Estáveis**: Em listas e laços de repetição, foram utilizadas chaves (`key`) únicas e estáveis em vez de índices, prevenindo bugs de renderização e otimizando a performance.
 - **Hooks do React**: O estado e o ciclo de vida dos componentes são gerenciados de forma moderna com `useState`, `useEffect` e hooks customizados.
 - **Gerenciamento de Estado Centralizado**: A utilização do Redux Toolkit para estados globais desacopla a lógica de estado da UI, melhorando a testabilidade e a organização do código.
