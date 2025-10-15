@@ -30,10 +30,9 @@ describe('MetricCard', () => {
 
   it('deve aplicar a cor correta ao ícone', () => {
     render(<MetricCard {...defaultProps} iconColor="red" />);
-    // O ícone está dentro de um span que recebe a cor
-    const iconContainer = screen.getByTestId('metric-icon').parentElement;
-    expect(iconContainer).toBeInTheDocument();
-    expect(iconContainer).toHaveStyle('color: red');
+    // O ícone está dentro de um span que recebe a classe de cor
+    const iconContainer = screen.getByTestId('metric-icon').parentElement?.parentElement;
+    expect(iconContainer).toHaveClass('has-text-red');
   });
 
   it('deve renderizar o link "Detalhar"', () => {

@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:ct": "playwright test -c playwright-ct.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",
@@ -27,6 +30,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@playwright/experimental-ct-react": "^1.56.0",
+    "@playwright/test": "^1.56.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
