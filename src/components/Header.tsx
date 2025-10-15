@@ -3,10 +3,10 @@ import { MdDarkMode, MdLightMode, MdNotifications, MdMenu } from 'react-icons/md
 import useTheme from '../hooks/useTheme';
 
 interface HeaderProps {
-  children?: React.ReactNode;
+  onMenuClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ children }) => {
+const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { theme, toggleTheme } = useTheme();
   return (
     <nav className="navbar" role="navigation" aria-label="main navigation">
@@ -16,13 +16,17 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
             <img src="/logo.png" alt="MWM Logo" width="112" height="28" />
           </a>
           <div className="navbar-item is-hidden-desktop">
-            {children}
+            <button className="button is-light" onClick={onMenuClick}>
+              <span className="icon"><MdMenu /></span>
+            </button>
           </div>
         </div>
         <div className="navbar-menu">
           <div className="navbar-start">
             <div className="navbar-item is-hidden-touch">
-              {children}
+              <button className="button is-light" onClick={onMenuClick}>
+                <span className="icon"><MdMenu /></span>
+              </button>
             </div>
             {/* O item da navbar com o nome da unidade */}
             <div className="navbar-item is-hidden-touch">

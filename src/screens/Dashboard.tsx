@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
@@ -7,7 +7,6 @@ import { loadDashboardData } from '../features/dashboard/dashboardSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
-import useTheme from '../hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 
 const iconMap = {
@@ -18,20 +17,11 @@ const iconMap = {
   'water_do': <MdWater/>,
 };
 
-const trendColorMap = {
-  up: 'var(--trend-up-color)',
-  down: 'var(--trend-down-color)',
-  neutral: 'var(--text-color-secondary)',
-  
-};
-
-
 const Dashboard = () => {
   const dispatch = useAppDispatch();
   const { data, abastecimentoSummary, loading, error } = useAppSelector((state) => state.dashboard);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,7 +61,7 @@ const Dashboard = () => {
                     title={metric.label}
                     value={`${metric.value}${metric.unit || ''}`}
                     icon={iconMap[metric.icon]}
-                    iconColor={trendColorMap[metric.trend]}
+                    trend={metric.trend}
                   />
                 </div>
               ))}

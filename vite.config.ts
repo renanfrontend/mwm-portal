@@ -1,3 +1,4 @@
+// vite.config.ts
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -8,12 +9,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/setupTests.ts',
+    setupFiles: './setupTests.ts', // Caminho relativo ajustado para o diretório raiz
     css: true,
   },
   server: {
-    deps: {
-      inline: ['./src/setupTests.ts'],
-    },
+    // No 'deps' property here; remove invalid configuration
   },
 });

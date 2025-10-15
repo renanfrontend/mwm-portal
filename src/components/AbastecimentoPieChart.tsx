@@ -1,6 +1,7 @@
+import React from 'react';
 import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend, Label } from 'recharts';
 import { type AbastecimentoSummaryItem } from '../services/api';
-import useTheme from '../hooks/useTheme'; // Certifique-se de que este hook existe e está correto
+import useTheme from '../hooks/useTheme';
 
 interface Props {
   chartData: AbastecimentoSummaryItem[];
@@ -10,11 +11,9 @@ interface Props {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 const AbastecimentoPieChart = ({ chartData, title = 'Abastecimento' }: Props) => {
-  // Hook para o tema
   const { theme } = useTheme();
   const textColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
 
-  // Tooltip customizado
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -39,7 +38,7 @@ const AbastecimentoPieChart = ({ chartData, title = 'Abastecimento' }: Props) =>
               dataKey="volumeTotal"
               nameKey="placa"
               outerRadius={150}
-              innerRadius={100} // Transforma em Donut Chart
+              innerRadius={100}
               fill="#8884d8"
               paddingAngle={5}
               labelLine={false}

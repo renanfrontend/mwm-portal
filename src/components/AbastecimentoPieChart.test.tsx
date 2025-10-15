@@ -21,7 +21,7 @@ vi.mock('recharts', async () => {
 });
 
 const mockChartData: AbastecimentoSummaryItem[] = [
-  { veiculo: 'Caminhão', placa: 'ABC-1234', volumeTotal: 150.5 },
+  { veiculo: 'Caminhão (Ração)', placa: 'ABC-1234', volumeTotal: 150.5 },
   { veiculo: 'Carro', placa: 'XYZ-5678', volumeTotal: 50.2 },
 ];
 
