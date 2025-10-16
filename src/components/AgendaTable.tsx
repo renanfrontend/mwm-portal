@@ -1,126 +1,119 @@
-import React from 'react';
-import type { AgendaItem } from '../services/api';
+// src/components/AgendaTable.tsx
+
+import React, { useMemo } from 'react';
+import type { AgendaData } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { FaCalendarAlt, FaGasPump } from 'react-icons/fa';
-import { BsFillFuelPumpFill } from 'react-icons/bs';
+import { FaCheckCircle, FaRegCircle } from 'react-icons/fa';
 
 interface Props {
-  data: AgendaItem[];
-  loading: boolean;
-  error: string | null;
+  data: AgendaData[];
+  isDeleteMode: boolean;
+  selectedItems: (string | number)[];
+  onSelectItem: (id: string | number) => void;
+  onConfirmDelete: () => void;
 }
 
-const AgendaTable: React.FC<Props> = ({ data, loading, error }) => {
+const REALIZADO_ID_COLOR = '#d4edda';
+const PLANEJADO_ID_COLOR = '#cce5ff';
+
+export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems, onSelectItem, onConfirmDelete }) => {
   const { theme } = useTheme();
 
-  if (loading) {
-    return <progress className="progress is-large is-info" max="100"></progress>;
-  }
+  const sortedData = useMemo(() => {
+    const statusPriority = { 'Realizado': 1, 'Planejado': 2 };
+    return [...data].sort((a, b) => {
+      const statusComparison = statusPriority[a.status] - statusPriority[b.status];
+      if (statusComparison !== 0) return statusComparison;
+      return b.qtd - a.qtd;
+    });
+  }, [data]);
 
-  if (error) {
-    return <div className="notification is-danger">{error}</div>;
-  }
-  
-  if (!data || data.length === 0) {
-    return <div className="notification is-info">Nenhum dado de agenda disponível.</div>;
-  }
+  const totals = useMemo(() => {
+    const initial = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0, qtd: 0, km: 0 };
+    return data.reduce((acc, item) => {
+      acc.seg += item.seg; acc.ter += item.ter; acc.qua += item.qua;
+      acc.qui += item.qui; acc.sex += item.sex; acc.qtd += item.qtd; acc.km += item.km;
+      return acc;
+    }, initial);
+  }, [data]);
 
-  const filial = data[0].filial;
-  const product = filial === 'Primato' ? 'Bio Metano' : 'Diesel';
-  const isCompleted = filial === 'Agrocampo';
-
-  // Cores de destaque para thead e tfoot
-  const headerFooterHighlightClass = isCompleted ? 'has-background-success' : 'has-background-info';
-  const headerFooterTextColor = 'has-text-white';
-
-  // Cores de fundo do wrapper, adaptadas para o tema dark
-  const wrapperBgColor = isCompleted
-    ? (theme === 'dark' ? 'has-background-success-dark' : 'has-background-success-light')
-    : (theme === 'dark' ? 'has-background-info-dark' : 'has-background-light');
-
-  const statusTagClass = isCompleted ? 'is-success' : 'is-info';
-
-  const getRowBackgroundColor = (cooperadoName: string) => {
-    const isEnglesing = cooperadoName.includes('Ademir Englesing');
-    const isMachioro = cooperadoName.includes('Ademir Machioro');
-
-    if (isEnglesing) return '#ffb3b3';
-    if (isMachioro) return '#fffacd';
-    return theme === 'dark' ? '#2d3748' : 'white';
+  const getRowClass = (item: AgendaData) => {
+    if (item.status === 'Realizado') {
+      if (item.qtd < 30) return 'has-background-danger-light';
+      return 'has-background-warning-light';
+    }
+    return '';
   };
-  
-  const totalColetas = data.reduce((acc, item) => acc + item.somaColetas, 0);
-  const totalKm = isCompleted ? data.reduce((acc, item) => acc + item.km, 0) : 0;
-  
-  const dailyTotals = [
-    data.reduce((acc, item) => acc + (item.coletas[0]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[1]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[2]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[3]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[4]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[5]?.value || 0), 0),
-    data.reduce((acc, item) => acc + (item.coletas[6]?.value || 0), 0),
-  ];
 
   return (
-    <div className={`table-container mb-5 p-0 ${wrapperBgColor}`}>
-      <div className={`level is-mobile px-4 py-2 is-size-6`}>
-        <div className="level-left">
-          <span className="icon mr-2"><FaCalendarAlt /></span>
-          <span className="has-text-weight-bold">{filial}</span>
-          <span className="icon mr-2 ml-4">
-            {product === 'Diesel' ? <BsFillFuelPumpFill /> : <FaGasPump />}
-          </span>
-          <span className="has-text-weight-bold">{product}</span>
+    <>
+      {isDeleteMode && selectedItems.length > 0 && (
+        <div className="p-3 has-text-right">
+          <button onClick={onConfirmDelete} className="button is-danger">
+            Excluir Selecionados ({selectedItems.length})
+          </button>
         </div>
-        <div className="level-right">
-          <span className={`tag ml-4 ${statusTagClass}`}>{isCompleted ? 'Realizado' : 'Planejado'}</span>
-        </div>
-      </div>
-      <table className="table is-bordered is-hoverable is-fullwidth is-narrow" style={{ minWidth: '1000px', tableLayout: 'fixed' }}>
-        <thead className={`${headerFooterHighlightClass} ${headerFooterTextColor}`}>
-          <tr>
-            <th style={{ verticalAlign: 'middle', minWidth: '150px', whiteSpace: 'nowrap' }} className={headerFooterTextColor}>Cooperado</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Seg</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Ter</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Qua</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Qui</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Sex</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Sáb</th>
-            <th className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>Dom</th>
-            <th style={{ verticalAlign: 'middle', minWidth: '80px' }} className={headerFooterTextColor}>Soma</th>
-            <th style={{ verticalAlign: 'middle', minWidth: '80px' }} className={headerFooterTextColor}>KM</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map(item => (
-            <tr key={item.id} style={{ backgroundColor: getRowBackgroundColor(item.cooperado), color: theme === 'dark' && getRowBackgroundColor(item.cooperado) === 'transparent' ? '#e2e8f0' : 'inherit' }}>
-              <td>
-                <span className="is-size-6 has-text-weight-bold">{item.cooperado}</span>
-              </td>
-              {item.coletas.map((coleta, index) => (
-                <td key={`coleta-${item.id}-${index}`} className="has-text-centered is-hidden-touch">
-                  {coleta.value !== null ? coleta.value : ''}
-                </td>
-              ))}
-              <td className="has-text-centered">{item.somaColetas}</td>
-              <td className="has-text-centered">{isCompleted ? item.km : '-'}</td>
+      )}
+      <div className="table-container">
+        <table className={`table is-hoverable is-fullwidth is-narrow ${theme === 'dark' ? 'is-dark' : ''}`}>
+           <thead>
+            <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
+              {isDeleteMode && <th style={{ width: '40px' }}></th>}
+              <th>Cooperado</th>
+              <th className="has-text-centered">Seg</th><th className="has-text-centered">Ter</th>
+              <th className="has-text-centered">Qua</th><th className="has-text-centered">Qui</th>
+              <th className="has-text-centered">Sex</th><th className="has-text-centered">Sáb</th>
+              <th className="has-text-centered">Dom</th><th className="has-text-centered">Qtd.</th>
+              <th className="has-text-centered">KM</th>
+              <th>Transportadora</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-        <tfoot className={`${headerFooterHighlightClass} ${headerFooterTextColor}`}>
-          <tr>
-            <th className={headerFooterTextColor}>Total</th>
-            {dailyTotals.map((total, index) => (
-              <th key={`total-dia-${index}`} className={`has-text-centered ${headerFooterTextColor} is-hidden-touch`}>{total}</th>
+          </thead>
+          <tbody>
+            {sortedData.map(item => (
+              <tr key={item.id} className={getRowClass(item)}>
+                {isDeleteMode && (
+                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>
+                    <label className="checkbox">
+                      <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => onSelectItem(item.id)} />
+                    </label>
+                  </td>
+                )}
+                <th style={{ verticalAlign: 'middle' }}>{item.cooperado}</th>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.seg}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.ter}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.qua}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.qui}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.sex}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>0</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>-</td>
+                <td className="has-text-centered has-text-weight-bold" style={{ verticalAlign: 'middle' }}>{item.qtd}</td>
+                <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.km}</td>
+                <td style={{ verticalAlign: 'middle' }}><b>{item.transportadora}</b></td>
+                <td style={{ verticalAlign: 'middle', backgroundColor: item.status === 'Realizado' ? REALIZADO_ID_COLOR : PLANEJADO_ID_COLOR}}>
+                  <div className={`icon-text has-text-weight-bold ${item.status === 'Realizado' ? 'has-text-success-dark' : 'has-text-info-dark'}`}>
+                    <span className="icon">
+                      {item.status === 'Realizado' ? <FaCheckCircle /> : <FaRegCircle />}
+                    </span>
+                    <span>{item.status}</span>
+                  </div>
+                </td>
+              </tr>
             ))}
-            <th className={`has-text-centered ${headerFooterTextColor}`}>{totalColetas}</th>
-            <th className={`has-text-centered ${headerFooterTextColor}`}>{isCompleted ? totalKm : '-'}</th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+          </tbody>
+          <tfoot>
+            <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
+              {isDeleteMode && <th></th>}
+              <th>Total Geral</th>
+              <th className="has-text-centered">{totals.seg}</th><th className="has-text-centered">{totals.ter}</th>
+              <th className="has-text-centered">{totals.qua}</th><th className="has-text-centered">{totals.qui}</th>
+              <th className="has-text-centered">{totals.sex}</th><th className="has-text-centered">0</th>
+              <th className="has-text-centered">-</th><th className="has-text-centered">{totals.qtd}</th><th className="has-text-centered">{totals.km}</th>
+              <th colSpan={2}></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </>
   );
 };
-
-export default AgendaTable;

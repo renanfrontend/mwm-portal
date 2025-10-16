@@ -1,255 +1,185 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdLocationOn, MdModeEdit, MdRemoveRedEye, MdAdd, MdCalendarMonth, MdDelete } from 'react-icons/md';
+// src/screens/Cooperados.tsx
+
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { fetchCooperadosData, fetchAgendaData, clearAgendaData, type CooperadoItem, type AgendaItem } from '../services/api';
-import AgendaTable from '../components/AgendaTable';
-import moment from 'moment';
-import '../styles/calendar.css';
+import { toast } from 'react-toastify';
+import { AgendaTable } from '../components/AgendaTable';
+import { CooperadoListItem } from '../components/CooperadoListItem';
+import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
 
-moment.locale('pt-br');
-
-const Cooperados = () => {
+const Cooperados: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
-  const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
-  const [agendaData, setAgendaData] = useState<AgendaItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
   const navigate = useNavigate();
 
+  const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
+  const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string[]>([]);
+  const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]);
+
   const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const [cooperados, agenda] = await Promise.all([
-        fetchCooperadosData(),
-        fetchAgendaData(),
-      ]);
-      setCooperadosData(cooperados);
-      setAgendaData(agenda);
+      if (activeTab === 'agenda') {
+        const data = await fetchNewAgendaData();
+        setAgendaData(data);
+      } else {
+        const data = await fetchCooperadosData();
+        setCooperadosData(data);
+      }
     } catch (err) {
       setError("Ocorreu um erro ao buscar os dados.");
-      console.error(err);
+      toast.error("Falha ao carregar os dados.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
-
-  const getCertificadoClass = (status: CooperadoItem['certificado']) => {
-    return status === 'Ativo' ? 'is-success' : 'is-danger';
-  };
-
-  const filteredCooperadosData = cooperadosData.filter(item =>
-    item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.filial.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredAgendaData = agendaData.filter(item =>
-    item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.filial.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    setSearchTerm('');
+    setSelectedItems([]);
+    setIsDeleteMode(false);
+  }, [activeTab, loadData]);
   
-  const groupedAgendaData = Object.values(filteredAgendaData.reduce((acc, item) => {
-    if (!acc[item.filial]) {
-      acc[item.filial] = [];
-    }
-    acc[item.filial].push(item);
-    return acc;
-  }, {} as Record<string, AgendaItem[]>));
+  const filteredAgendaData = useMemo(() => {
+    return agendaData.filter(item => {
+      const searchMatch = item.cooperado.toLowerCase().includes(searchTerm.toLowerCase());
+      const statusMatch = filterStatus.length === 0 || filterStatus.includes(item.status);
+      const transportadoraMatch = filterTransportadora.length === 0 || filterTransportadora.includes(item.transportadora);
+      return searchMatch && statusMatch && transportadoraMatch;
+    });
+  }, [searchTerm, agendaData, filterStatus, filterTransportadora]);
 
-  const handleClearAgenda = async () => {
-    if (window.confirm('Tem certeza que deseja excluir todos os eventos da agenda?')) {
-      try {
-        setLoading(true);
-        await clearAgendaData();
-        await loadData();
-      } catch (err) {
-        setError("Ocorreu um erro ao limpar a agenda.");
-        console.error(err);
-        setLoading(false);
+  const filteredCooperadosData = useMemo(() => {
+    return cooperadosData.filter(item =>
+        item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.filial.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, cooperadosData]);
+  
+  const handleSelectItem = (id: string | number) => {
+    setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]);
+  };
+
+  const handleConfirmDelete = () => {
+    try {
+      if (activeTab === 'agenda') {
+        setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+      } else {
+        setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
       }
+      toast.success(`${selectedItems.length} item(ns) excluído(s) com sucesso!`);
+      
+      setSelectedItems([]);
+      setIsModalOpen(false);
+      setIsDeleteMode(false);
+    } catch {
+      toast.error("Ocorreu um erro ao excluir os itens.");
+      setIsModalOpen(false);
     }
   };
+  
+  const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); };
+  const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); };
 
   return (
     <>
-      <div className="level is-mobile mb-4">
+      <nav className="level is-mobile mb-4">
         <div className="level-left">
-          <div className="level-item">
-            <button className="button is-light" onClick={() => navigate(-1)}>
-              <span className="icon"><MdArrowBack /></span>
-            </button>
-          </div>
-          <div className="level-item">
-            <h1 className="title is-4">Cooperados</h1>
-          </div>
+            <div className="level-item">
+                <button className="button is-white" onClick={() => navigate(-1)}>
+                    <span className="icon"><MdArrowBack /></span>
+                </button>
+            </div>
+            <div className="level-item">
+                <h1 className="title is-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Cooperados</h1>
+            </div>
         </div>
         <div className="level-right">
-          <div className="level-item">
-            <button className="button is-primary">
-              <span className="icon"><MdAdd /></span>
-              <span>Adicionar Evento</span>
-            </button>
-          </div>
+            <div className="level-item">
+                <button className="button is-link">
+                    <span className="icon"><MdAdd /></span>
+                </button>
+            </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="tabs is-boxed">
-        <ul>
-          <li className={activeTab === 'cadastro' ? 'is-active' : ''}>
-            <a onClick={() => setActiveTab('cadastro')}>Cadastro</a>
-          </li>
-          <li className={activeTab === 'agenda' ? 'is-active' : ''}>
-            <a onClick={() => setActiveTab('agenda')}>Agenda</a>
-          </li>
-        </ul>
-      </div>
+      <section className="section py-0">
+        <div className="tabs is-toggle is-medium is-centered is-fullwidth">
+          <ul>
+            <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cadastro</span></a></li>
+            <li className={activeTab === 'agenda' ? 'is-active' : ''}><a onClick={() => setActiveTab('agenda')}><span>Agenda</span></a></li>
+          </ul>
+        </div>
+      </section>
 
+      {/* --- ABA DE CADASTRO --- */}
       {activeTab === 'cadastro' && (
-        <div className="content">
-          <div className="level is-mobile mt-5 mb-4">
-            <div className="level-left">
-              <div className="level-item">
-                <div className="field has-addons">
-                  <div className="control is-expanded">
-                    <input
-                      className="input"
-                      type="text"
-                      placeholder="Digite nome, empresa, veículo..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <div className="control">
-                    <button className="button is-info">
-                      <span className="icon"><MdSearch /></span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="level-right">
-              <div className="level-item">
-                <button className="button is-light">
-                  <span className="icon"><MdFilterList /></span>
-                  <span>Filtrar</span>
-                </button>
-              </div>
+        <section className="section pt-4 pb-6">
+          <div className="has-background-white-ter p-2 mb-5">
+            <div className="field is-grouped">
+              <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome, empresa, veículo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
+              <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }} title="Ativar modo de seleção"><span className="icon"><MdDelete /></span></button></div>
+              <div className="control"><button className="button is-pill"><span className="icon"><MdFilterList /></span></button></div>
             </div>
           </div>
-          
-          {loading ? (
-            <progress className="progress is-large is-info" max="100"></progress>
-          ) : error ? (
-            <div className="notification is-danger">{error}</div>
-          ) : (
-            <div className="table-container is-hidden-touch">
-              <table className="table is-striped is-hoverable is-fullwidth">
-                <thead>
-                  <tr>
-                    <th>Matrícula</th>
-                    <th>Filial</th>
-                    <th>Motorista</th>
-                    <th>Tipo de Veículo</th>
-                    <th>Placa</th>
-                    <th>Certificado</th>
-                    <th>Doam Dejetos</th>
-                    <th>Fase</th>
-                    <th style={{ width: '150px' }}>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCooperadosData.map(item => (
-                    <tr key={item.id}>
-                      <td>{item.matricula}</td>
-                      <td>{item.filial}</td>
-                      <td>{item.motorista}</td>
-                      <td>{item.tipoVeiculo}</td>
-                      <td>{item.placa}</td>
-                      <td>
-                        <span className={`tag ${getCertificadoClass(item.certificado)}`}>
-                          {item.certificado}
-                        </span>
-                      </td>
-                      <td>{item.doamDejetos}</td>
-                      <td>{item.fase}</td>
-                      <td>
-                        <div className="buttons are-small is-flex is-justify-content-space-between is-align-items-center">
-                          <button className="button is-light"><span className="icon"><MdLocationOn /></span></button>
-                          <button className="button is-light"><span className="icon"><MdRemoveRedEye /></span></button>
-                          <button className="button is-info is-light"><span className="icon"><MdCalendarMonth /></span></button>
-                          <button className="button is-light"><span className="icon"><MdModeEdit /></span></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+          {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir Selecionados</button></div></div>}
+          {loading && <progress className="progress is-small is-info" max="100"></progress>}
+          {error && <div className="notification is-danger">{error}</div>}
+          {!loading && !error && filteredCooperadosData.map(item => <CooperadoListItem key={item.id} item={item} isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem} />)}
+        </section>
       )}
 
+      {/* --- ABA DE AGENDA --- */}
       {activeTab === 'agenda' && (
-        <div className="content">
-          <div className="level is-mobile mt-5 mb-4">
-            <div className="level-left">
-              <div className="level-item">
-                <div className="field has-addons">
-                  <div className="control is-expanded">
-                    <input
-                      className="input"
-                      type="text"
-                      placeholder="Digite nome do cooperado, filial..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <div className="control">
-                    <button className="button is-info">
-                      <span className="icon"><MdSearch /></span>
-                    </button>
-                  </div>
+        <section className="section pt-4 pb-6">
+          <div className="has-background-white-ter p-2 mb-5">
+            <div className="field is-grouped">
+                <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome do cooperado..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
+                <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }} title="Ativar modo de seleção"><span className="icon"><MdDelete /></span></button></div>
+                <div className="control">
+                    <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
+                        <div className="dropdown-trigger"><button className="button is-pill" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => setShowFilters(!showFilters)}><span className="icon"><MdFilterList /></span></button></div>
+                        <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}>
+                            <div className="dropdown-content">
+                                <div className="dropdown-item"><label className="label is-small">STATUS</label><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Planejado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Planejado')} /> Planejado</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Realizado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Realizado')} /> Realizado</label></div><hr className="dropdown-divider" />
+                                <div className="dropdown-item"><label className="label is-small">TRANSPORTADORA</label><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Primato')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Primato')} /> Primato</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Agrocampo')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Agrocampo')} /> Agrocampo</label></div><hr className="dropdown-divider" />
+                                <div className="dropdown-item field is-grouped is-justify-content-space-between"><p className="control"><button className="button is-small is-light" onClick={clearFilters}>Limpar</button></p><p className="control"><button className="button is-small is-info" onClick={() => setShowFilters(false)}>Aplicar</button></p></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-            <div className="level-right">
-              <div className="level-item">
-                <button className="button is-danger is-light mr-2" onClick={handleClearAgenda}>
-                  <span className="icon"><MdDelete /></span>
-                  <span>Excluir</span>
-                </button>
-              </div>
-              <div className="level-item">
-                <button className="button is-light">
-                  <span className="icon"><MdFilterList /></span>
-                  <span>Filtrar</span>
-                </button>
-              </div>
             </div>
           </div>
-          <div className="card">
-            <div className="card-content" style={{ overflowX: 'auto' }}>
-              {loading ? (
-                <progress className="progress is-large is-info" max="100"></progress>
-              ) : error ? (
-                <div className="notification is-danger">{error}</div>
-              ) : (
-                groupedAgendaData.map((filialData, index) => (
-                  <div key={index} className="mb-5">
-                    <AgendaTable data={filialData} loading={loading} error={error} />
-                  </div>
-                ))
-              )}
-            </div>
+          <label className="label">Período: de 13/10/2025 à 17/10/2025</label>
+          <div className="box p-0">
+            {loading && <progress className="progress is-small is-info" max="100"></progress>}
+            {error && <div className="notification is-danger">{error}</div>}
+            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
           </div>
-        </div>
+        </section>
       )}
+
+      {/* --- MODAL DE CONFIRMAÇÃO --- */}
+      <div className={`modal ${isModalOpen ? 'is-active' : ''}`}>
+        <div className="modal-background" onClick={() => setIsModalOpen(false)}></div>
+        <div className="modal-card">
+          <header className="modal-card-head"><p className="modal-card-title">Confirmar Exclusão</p><button className="delete" aria-label="close" onClick={() => setIsModalOpen(false)}></button></header>
+          <section className="modal-card-body"><p>Você tem certeza que deseja excluir {selectedItems.length} item(ns) selecionado(s)? Esta ação não pode ser desfeita.</p></section>
+          <footer className="modal-card-foot is-justify-content-flex-end"><button className="button" onClick={() => setIsModalOpen(false)}>Cancelar</button><button className="button is-danger" onClick={handleConfirmDelete}>Excluir</button></footer>
+        </div>
+      </div>
     </>
   );
 };

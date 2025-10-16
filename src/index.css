@@ -1,4 +1,19 @@
-/* src/index.css */
+html.dark, body.dark {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+/* NOVO ESTILO: Botões "pill" sem fundo */
+.button.is-pill {
+  border-radius: 9999px; /* Arredonda o botão */
+  background-color: transparent;
+  border-color: #dbdbdb;
+}
+
+.button.is-pill:hover {
+  border-color: #b5b5b5;
+}
+
 *, p, ol, li {
   font-family: "Quicksand", sans-serif;
 }
