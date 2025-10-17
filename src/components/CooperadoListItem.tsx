@@ -16,7 +16,7 @@ export const CooperadoListItem: React.FC<Props> = ({ item, isDeleteMode, isSelec
   const doamDejetosClass = item.doamDejetos === 'Sim' ? 'has-text-success' : 'has-text-grey';
 
   return (
-    <div className={`p-2 ${isSelected ? 'has-background-info-light' : ''}`}>
+    <div className={`bioPartner-item p-2 ${isSelected ? 'has-background-info-light' : ''}`}>
       <div className="columns is-vcentered is-mobile">
         {isDeleteMode && (
           <div className="column is-narrow">
@@ -63,17 +63,19 @@ export const CooperadoListItem: React.FC<Props> = ({ item, isDeleteMode, isSelec
           <span className="help">Fase do dejeto</span>
           <span className="subtitle is-6">{item.fase}</span>
         </div>
-        <div className="column is-2-desktop">
-          <div className="buttons are-small is-justify-content-flex-end">
-            <button className="button is-light is-rounded"><span className="icon"><MdPhone /></span></button>
-            <button className="button is-light is-rounded"><span className="icon"><MdLocationOn /></span></button>
-            <button className="button is-light is-rounded"><span className="icon"><MdVisibility /></span></button>
-            <button className="button is-light is-rounded"><span className="icon"><MdEdit /></span></button>
-            <button className="button is-info is-light is-rounded"><span className="icon"><MdCalendarMonth /></span></button>
-          </div>
+        
+        {/* --- CORREÇÃO APLICADA AQUI --- */}
+        <div className="column is-narrow">
+            <div className="is-flex is-justify-content-flex-end">
+                <button className="button is-small is-light is-rounded"><span className="icon"><MdPhone /></span></button>
+                <button className="button is-small is-light is-rounded ml-1"><span className="icon"><MdLocationOn /></span></button>
+                <button className="button is-small is-light is-rounded ml-1"><span className="icon"><MdVisibility /></span></button>
+                <button className="button is-small is-light is-rounded ml-1"><span className="icon"><MdEdit /></span></button>
+                <button className="button is-small is-info is-light is-rounded ml-1"><span className="icon"><MdCalendarMonth /></span></button>
+            </div>
         </div>
       </div>
-      <hr className="mt-0 mb-2" />
+      <div className="divider is-right mb-0"></div>
     </div>
   );
 };

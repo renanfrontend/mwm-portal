@@ -1,5 +1,3 @@
-// src/components/AgendaTable.tsx
-
 import React, { useMemo } from 'react';
 import type { AgendaData } from '../services/api';
 import useTheme from '../hooks/useTheme';
@@ -10,15 +8,16 @@ interface Props {
   isDeleteMode: boolean;
   selectedItems: (string | number)[];
   onSelectItem: (id: string | number) => void;
-  onConfirmDelete: () => void;
+  // A prop 'onConfirmDelete' não é mais necessária aqui
 }
 
 const REALIZADO_ID_COLOR = '#d4edda';
 const PLANEJADO_ID_COLOR = '#cce5ff';
 
-export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems, onSelectItem, onConfirmDelete }) => {
+export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems, onSelectItem }) => {
   const { theme } = useTheme();
 
+  // Ordena os dados: 'Realizado' primeiro, depois por Qtd
   const sortedData = useMemo(() => {
     const statusPriority = { 'Realizado': 1, 'Planejado': 2 };
     return [...data].sort((a, b) => {
@@ -28,15 +27,22 @@ export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems
     });
   }, [data]);
 
+  // Calcula os totais para o rodapé
   const totals = useMemo(() => {
     const initial = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0, qtd: 0, km: 0 };
-    return data.reduce((acc, item) => {
-      acc.seg += item.seg; acc.ter += item.ter; acc.qua += item.qua;
-      acc.qui += item.qui; acc.sex += item.sex; acc.qtd += item.qtd; acc.km += item.km;
+    return (data || []).reduce((acc, item) => {
+      acc.seg += item.seg;
+      acc.ter += item.ter;
+      acc.qua += item.qua;
+      acc.qui += item.qui;
+      acc.sex += item.sex;
+      acc.qtd += item.qtd;
+      acc.km += item.km;
       return acc;
     }, initial);
   }, [data]);
 
+  // Define a classe de cor da linha para itens 'Realizado'
   const getRowClass = (item: AgendaData) => {
     if (item.status === 'Realizado') {
       if (item.qtd < 30) return 'has-background-danger-light';
@@ -46,24 +52,20 @@ export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems
   };
 
   return (
-    <>
-      {isDeleteMode && selectedItems.length > 0 && (
-        <div className="p-3 has-text-right">
-          <button onClick={onConfirmDelete} className="button is-danger">
-            Excluir Selecionados ({selectedItems.length})
-          </button>
-        </div>
-      )}
-      <div className="table-container">
-        <table className={`table is-hoverable is-fullwidth is-narrow ${theme === 'dark' ? 'is-dark' : ''}`}>
-           <thead>
+    <div className="table-container">
+      <table className={`table is-hoverable is-fullwidth is-narrow ${theme === 'dark' ? 'is-dark' : ''}`}>
+          <thead>
             <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
               {isDeleteMode && <th style={{ width: '40px' }}></th>}
               <th>Cooperado</th>
-              <th className="has-text-centered">Seg</th><th className="has-text-centered">Ter</th>
-              <th className="has-text-centered">Qua</th><th className="has-text-centered">Qui</th>
-              <th className="has-text-centered">Sex</th><th className="has-text-centered">Sáb</th>
-              <th className="has-text-centered">Dom</th><th className="has-text-centered">Qtd.</th>
+              <th className="has-text-centered">Seg</th>
+              <th className="has-text-centered">Ter</th>
+              <th className="has-text-centered">Qua</th>
+              <th className="has-text-centered">Qui</th>
+              <th className="has-text-centered">Sex</th>
+              <th className="has-text-centered">Sáb</th>
+              <th className="has-text-centered">Dom</th>
+              <th className="has-text-centered">Qtd.</th>
               <th className="has-text-centered">KM</th>
               <th>Transportadora</th>
               <th>Status</th>
@@ -105,15 +107,19 @@ export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems
             <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
               {isDeleteMode && <th></th>}
               <th>Total Geral</th>
-              <th className="has-text-centered">{totals.seg}</th><th className="has-text-centered">{totals.ter}</th>
-              <th className="has-text-centered">{totals.qua}</th><th className="has-text-centered">{totals.qui}</th>
-              <th className="has-text-centered">{totals.sex}</th><th className="has-text-centered">0</th>
-              <th className="has-text-centered">-</th><th className="has-text-centered">{totals.qtd}</th><th className="has-text-centered">{totals.km}</th>
+              <th className="has-text-centered">{totals.seg}</th>
+              <th className="has-text-centered">{totals.ter}</th>
+              <th className="has-text-centered">{totals.qua}</th>
+              <th className="has-text-centered">{totals.qui}</th>
+              <th className="has-text-centered">{totals.sex}</th>
+              <th className="has-text-centered">0</th>
+              <th className="has-text-centered">-</th>
+              <th className="has-text-centered">{totals.qtd}</th>
+              <th className="has-text-centered">{totals.km}</th>
               <th colSpan={2}></th>
             </tr>
           </tfoot>
-        </table>
-      </div>
-    </>
+      </table>
+    </div>
   );
 };
