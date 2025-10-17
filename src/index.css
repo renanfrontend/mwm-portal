@@ -1,11 +1,22 @@
-html.dark, body.dark {
+/* src/index.css */
+
+/* --- FONTES E ESTILOS GLOBAIS --- */
+html,
+body {
+  font-family: 'Quicksand', sans-serif;
+  /* A linha "background-color: #f5f5f5;" foi REMOVIDA daqui para corrigir o fundo cinza. */
+}
+
+/* Garante que o tema escuro seja aplicado corretamente */
+html.dark,
+body.dark {
   background-color: #1a202c;
   color: #e2e8f0;
 }
 
-/* NOVO ESTILO: Botões "pill" sem fundo */
+/* --- ESTILOS DOS BOTÕES "PILL" --- */
 .button.is-pill {
-  border-radius: 9999px; /* Arredonda o botão */
+  border-radius: 9999px;
   background-color: transparent;
   border-color: #dbdbdb;
 }
@@ -14,109 +25,60 @@ html.dark, body.dark {
   border-color: #b5b5b5;
 }
 
-*, p, ol, li {
-  font-family: "Quicksand", sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6, .title, .subtitle {
-  font-family: "Bricolage Grotesque", sans-serif !important;
-}
-
-/* Container principal que será empurrado pelo menu */
-.app-container {
-  transition: margin-left 0.3s ease-in-out;
-  margin-left: 0;
-}
-
-/* Estado da página quando o sidebar está aberto */
-.app-container.sidebar-open {
-  margin-left: 280px; /* Mesma largura da barra lateral */
-}
-
-/* Estilos da barra lateral */
-.sidebar {
+/* --- ESTILOS DO SIDEBAR E LOGO --- */
+.sidebar-menu {
   position: fixed;
   top: 0;
   left: 0;
-  width: 280px;
-  height: 100%;
-  background-color: var(--sidebar-bg); /* Usa a variável de cor */
-  color: var(--sidebar-text); /* Usa a variável de cor */
-  padding: 1rem;
-  z-index: 1000;
+  height: 100vh;
+  width: 260px;
+  background-color: white;
+  z-index: 100;
+  transition: transform 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
 }
 
-/* Transição do menu, visível/oculto */
-.sidebar {
+.sidebar-menu:not(.is-active) {
   transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
 }
 
-.sidebar.is-open {
-  transform: translateX(0);
+.dark .sidebar-menu {
+  background-color: #2d3748;
 }
 
-.sidebar-header {
-  padding: 1rem 0;
-}
-
-.sidebar-header .delete {
-  background: none;
-  border: none;
-  color: var(--sidebar-text);
-}
-
-.sidebar-header .delete::before,
-.sidebar-header .delete::after {
-  background-color: var(--sidebar-text);
-}
-
-/* Estilos para os itens do menu e divisores */
-.menu-list a {
-  color: var(--sidebar-text); /* Usa a variável de cor */
-  padding: 1rem;
-  border-bottom: 1px dotted var(--sidebar-divider); /* Usa a variável de cor */
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-}
-
-.menu-list a:hover {
-  background-color: var(--sidebar-hover); /* Usa a variável de cor */
-}
-
-.menu-list .icon {
-  margin-right: 1rem;
-  color: var(--sidebar-text); /* Garante que os ícones tenham a cor correta */
-}
-
-.sidebar-divider {
-  border-top: 1px dotted var(--sidebar-divider); /* Usa a variável de cor */
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 1rem 0;
-  text-align: center;
-  color: var(--subtitle-color);
-}
-
-/* Estilos para o overlay (opcional) */
-.overlay {
+.sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  display: none;
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
 }
 
-.overlay.is-active {
+.sidebar-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-logo {
+  max-width: 150px;
   display: block;
+  margin: 20px auto;
+}
+
+.menu-footer {
+  margin-top: auto;
+  padding: 1.5rem;
+}
+
+.menu-header {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

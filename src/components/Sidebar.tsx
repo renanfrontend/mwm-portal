@@ -1,14 +1,23 @@
+// src/components/Sidebar.tsx
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import useTheme from '../hooks/useTheme';
 import {
   MdDashboard,
-  MdOutlineCloudUpload,
-  MdOutlineVerified,
-  MdLocalGasStation,
+  MdLocalShipping,
   MdPeople,
-  MdAccountCircle,
+  MdAttachMoney,
   MdExitToApp,
+  MdLightMode,
+  MdDarkMode,
+  MdClose,
+  MdBuild,
+  MdHandshake,
+  MdMeetingRoom
 } from 'react-icons/md';
+import logo from '../../logo.png';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,73 +26,54 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
+  const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className={`sidebar ${isOpen ? 'is-open' : ''}`} onClick={onClose}>
-      <aside className="menu">
+    <>
+      <div className={`sidebar-overlay ${isOpen ? 'is-active' : ''}`} onClick={onClose}></div>
+      <aside className={`menu sidebar-menu ${isOpen ? 'is-active' : ''}`}>
+        <div className="menu-header">
+          <img src={logo} alt="Logo MWM" className="sidebar-logo" />
+          <button className="button is-light is-small is-pulled-right is-hidden-desktop" onClick={onClose}>
+            <span className="icon"><MdClose /></span>
+          </button>
+        </div>
+        <p className="menu-label">Menu</p>
         <ul className="menu-list">
-          <li>
-            <Link to="/" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdDashboard />
-              </span>
-              <span>PAINEL</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/coleta" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdOutlineCloudUpload />
-              </span>
-              <span>COLETA</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/qualidade" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdOutlineVerified />
-              </span>
-              <span>QUALIDADE</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/abastecimentos" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdLocalGasStation />
-              </span>
-              <span>ABASTECIMENTO</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/cooperados" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdPeople />
-              </span>
-              <span>COOPERADOS</span>
-            </Link>
-          </li>
-          <li className="sidebar-divider"></li>
-          <li>
-            <Link to="/conta" className="sidebar-item" onClick={onClose}>
-              <span className="icon is-medium">
-                <MdAccountCircle />
-              </span>
-              <span>CONTA</span>
-            </Link>
-          </li>
-          <li>
-            <a className="sidebar-item" onClick={onLogout}>
-              <span className="icon is-medium">
-                <MdExitToApp />
-              </span>
-              <span>SAIR</span>
-            </a>
-          </li>
+          <li><NavLink to="/" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdDashboard /></span> Dashboard</NavLink></li>
+          <li><NavLink to="/faturamentos" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdAttachMoney /></span> Faturamentos</NavLink></li>
+          <li><NavLink to="/abastecimentos" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdLocalShipping /></span> Abastecimentos</NavLink></li>
+          <li><NavLink to="/coleta" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdHandshake /></span> Coleta</NavLink></li>
+          <li><NavLink to="/qualidade" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdBuild /></span> Qualidade</NavLink></li>
+          <li><NavLink to="/cooperados" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdPeople /></span> Cooperados</NavLink></li>
+          <li><NavLink to="/portaria" className={({isActive}) => "menu-item" + (isActive ? " is-active" : "")} onClick={onClose}><span className="icon"><MdMeetingRoom /></span> Portaria</NavLink></li>
         </ul>
+
+        <div className="menu-footer">
+          <div className="field">
+            <p className="control">
+              <button className="button is-fullwidth" onClick={toggleTheme}>
+                <span className="icon">{theme === 'light' ? <MdDarkMode /> : <MdLightMode />}</span>
+                <span>{theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}</span>
+              </button>
+            </p>
+          </div>
+          <div className="field">
+            <p className="control">
+              <button className="button is-fullwidth" onClick={onLogout}>
+                <span className="icon"><MdExitToApp /></span>
+                <span>Sair</span>
+              </button>
+            </p>
+          </div>
+          <div className="user-info">
+            <p className="has-text-weight-bold">{user?.name || 'Usuário'}</p>
+            <p className="is-size-7">{user?.email || 'email@exemplo.com'}</p>
+          </div>
+        </div>
       </aside>
-      <div className="sidebar-footer">
-        <small className="has-text-grey">Versão 1.0</small>
-      </div>
-    </div>
+    </>
   );
 };
 

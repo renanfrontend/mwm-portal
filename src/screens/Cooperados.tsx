@@ -12,9 +12,11 @@ const Cooperados: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
   const navigate = useNavigate();
 
+  // --- CORREÇÃO CRÍTICA: INICIALIZAR ESTADOS COM ARRAY VAZIO ---
   const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
   
+  // Estados de UI e Controle
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +24,7 @@ const Cooperados: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
+  // Estados dos Filtros da Agenda
   const [showFilters, setShowFilters] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
   const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]);
@@ -47,6 +50,7 @@ const Cooperados: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    // Reseta a busca e seleção ao trocar de aba
     setSearchTerm('');
     setSelectedItems([]);
     setIsDeleteMode(false);

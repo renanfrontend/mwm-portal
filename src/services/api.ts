@@ -481,28 +481,6 @@ export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
   });
 };
 
-/// ===================================================================
-//  NOVO CÓDIGO ADICIONADO PARA CORRIGIR O ERRO E ATENDER AO NOVO LAYOUT
-// ===================================================================
-
-/**
- * Nova Interface para a Agenda Refatorada
- * Esta interface corresponde à estrutura de dados que a nova tabela espera.
- */
-export interface AgendaData {
-  id: number;
-  cooperado: string;
-  seg: number;
-  ter: number;
-  qua: number;
-  qui: number;
-  sex: number;
-  qtd: number;
-  km: number;
-  transportadora: "Primato" | "Agrocampo";
-  status: "Realizado" | "Planejado";
-}
-
 /**
  * Novos Dados Mocados para a Agenda
  */
@@ -599,17 +577,6 @@ const newMockAgendaData: AgendaData[] = [
     status: "Planejado",
   },
 ];
-
-/**
- * Nova Função Fetch (que estava faltando)
- */
-export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(newMockAgendaData);
-    }, 500); // Simula um delay de rede
-  });
-};
 
 export const fetchColetaData = (): Promise<ColetaItem[]> => {
   return new Promise((resolve) => {
@@ -860,5 +827,70 @@ export const fetchAbastecimentoSummaryData = (
 
       resolve(Object.values(summary));
     }, 500);
+  });
+};
+
+export interface PortariaItem {
+  id: string;
+  categoria: 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
+  data: string;
+  horario: string;
+  empresa: string;
+  motorista: string;
+  tipoVeiculo: string;
+  placa: string;
+  atividade: string;
+  status: 'Concluído' | 'Pendente';
+}
+
+/**
+ * Nova Interface para a Agenda Refatorada
+ * Esta interface corresponde à estrutura de dados que a nova tabela espera.
+ */
+export interface AgendaData {
+  id: number;
+  cooperado: string;
+  seg: number;
+  ter: number;
+  qua: number;
+  qui: number;
+  sex: number;
+  qtd: number;
+  km: number;
+  transportadora: "Primato" | "Agrocampo";
+  status: "Realizado" | "Planejado";
+}
+
+
+
+
+/**
+ * Novos Dados Mocados para a Portaria
+ */
+const mockPortariaData: PortariaItem[] = [
+  { id: 'ENT-001', categoria: 'Entregas', data: '01/01/2026', horario: '10:00H', empresa: 'Primato', motorista: 'Ademir Engelsing', tipoVeiculo: 'Caminhão de dejetos', placa: 'ABC-1D23', atividade: 'Entrega de dejetos', status: 'Concluído' },
+  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Mosaic', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
+  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Transportadora XYZ', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
+];
+
+/**
+ * Nova Função Fetch para a Portaria
+ */
+export const fetchPortariaData = (): Promise<PortariaItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockPortariaData);
+    }, 500);
+  });
+};
+
+/**
+ * Nova Função Fetch (que estava faltando)
+ */
+export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(newMockAgendaData);
+    }, 500); // Simula um delay de rede
   });
 };
