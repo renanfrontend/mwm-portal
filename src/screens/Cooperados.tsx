@@ -161,7 +161,20 @@ const Cooperados: React.FC = () => {
 
       <section className="section pt-1 pb-6">
         <Toolbar />
-        {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir Selecionados</button></div></div>}
+        
+        {/* --- BARRA DE EXCLUSÃO CORRIGIDA --- */}
+        {isDeleteMode && selectedItems.length > 0 && (
+          <div className="level is-mobile mb-4">
+            <div className="level-left">
+              <p>{selectedItems.length} item(s) selecionado(s)</p>
+            </div>
+            <div className="level-right">
+              <button className="button is-danger" onClick={() => setIsModalOpen(true)}>
+                Excluir Selecionados
+              </button>
+            </div>
+          </div>
+        )}
 
         {loading && <progress className="progress is-small is-info" max="100"></progress>}
         {error && <div className="notification is-danger">{error}</div>}
