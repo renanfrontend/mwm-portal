@@ -894,3 +894,68 @@ export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
     }, 500); // Simula um delay de rede
   });
 };
+
+/**
+ * ===================================================================
+ * NOVA IMPLEMENTAÇÃO ATUALIZADA PARA A TELA DE QUALIDADE
+ * ===================================================================
+ */
+
+/**
+ * Interface para a Qualidade dos Dejetos, com TODOS os campos do formulário
+ */
+export interface QualidadeDejetosItem {
+  id: string;
+  dataColeta: string;
+  cooperado: string;
+  placa: string;
+  ph: number | string;
+  densidade: number | string;
+  entregaReferencia?: string; // Novo campo
+  // Campos das etapas de pesagem
+  pesagem1?: string;
+  pesagem1_dup?: string;
+  pesagem2?: string;
+  pesagem2_dup?: string;
+  pesagem3?: string;
+  pesagem3_dup?: string;
+  pesagem4?: string;
+  pesagem4_dup?: string;
+}
+
+/**
+ * Novos Dados Mocados para Qualidade
+ */
+let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
+  { id: 'DEJ-001', dataColeta: '13/10/2025', cooperado: 'Ademir Engelsing', placa: 'ABC-1D23', ph: 7.2, densidade: 1025, entregaReferencia: 'ENT-54321' },
+  { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
+];
+
+/**
+ * Funções Fetch para a Qualidade
+ */
+export const fetchQualidadeDejetosData = (): Promise<QualidadeDejetosItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockQualidadeDejetosData);
+    }, 500);
+  });
+};
+
+export const createAnaliseQualidade = (analise: Partial<QualidadeDejetosItem>): Promise<QualidadeDejetosItem> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const newItem: QualidadeDejetosItem = {
+                id: `DEJ-${Math.floor(Math.random() * 1000)}`,
+                dataColeta: analise.dataColeta || new Date().toLocaleDateString('pt-BR'),
+                cooperado: analise.cooperado || 'N/A',
+                placa: 'N/A',
+                ph: analise.ph || 'N/A',
+                densidade: analise.densidade || 'N/A',
+                ...analise
+            };
+            mockQualidadeDejetosData.unshift(newItem);
+            resolve(newItem);
+        }, 500);
+    });
+};
