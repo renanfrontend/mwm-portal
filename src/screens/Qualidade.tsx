@@ -1,7 +1,7 @@
 // src/screens/Qualidade.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdSave } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdSave, MdAddCircleOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { QualidadeDejetosListItem } from '../components/QualidadeDejetosListItem';
@@ -21,61 +21,76 @@ const Qualidade: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
-  const [formStep, setFormStep] = useState(0);
+  // --- CONTROLE DO FLUXO DO FORMULÁRIO CORRIGIDO ---
+  const [formStep, setFormStep] = useState(0); // 0: Básico, 1: P1/P2, 2: P3, 3: P4
   const [amostraOrigem, setAmostraOrigem] = useState<AmostraOrigem>();
   const [formData, setFormData] = useState<Partial<QualidadeDejetosItem>>({});
 
-  const loadListData = useCallback(async () => { /* ... */ }, [activeTab]);
+  const loadListData = useCallback(async () => {
+      if (activeTab === 'Qualidade dos Dejetos') {
+          setLoading(true);
+          try {
+              const data = await fetchQualidadeDejetosData();
+              setDejetosData(data || []);
+          } catch (err) { toast.error("Falha ao carregar dados."); }
+          finally { setLoading(false); }
+      }
+  }, [activeTab]);
+
   useEffect(() => { loadListData(); }, [loadListData]);
   
   useEffect(() => {
     const loadCooperados = async () => {
-      const data = await fetchCooperadosData();
-      setCooperados(data);
+      try {
+        const data = await fetchCooperadosData();
+        setCooperados(data || []);
+      } catch (error) {
+        toast.error("Falha ao carregar lista de cooperados.");
+      }
     };
     if (activeTab === 'Análise') { loadCooperados(); }
   }, [activeTab]);
 
   const filteredDejetosData = useMemo(() => (dejetosData || []).filter(item => item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()) || item.placa.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm, dejetosData]);
 
-  const handleSave = async () => { /* ... (lógica de salvar) ... */ };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+        await createAnaliseQualidade(formData);
+        toast.success("Amostra armazenada com sucesso!");
+        resetForm();
+        setActiveTab('Qualidade dos Dejetos');
+    } catch (error) { toast.error("Erro ao armazenar a amostra."); }
+    finally { setSaving(false); }
+  };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const resetForm = () => { /* ... (lógica de resetar form) ... */ };
+  const resetForm = () => {
+    setActiveTab('Análise');
+    setFormStep(0);
+    setFormData({});
+    setAmostraOrigem(undefined);
+  };
+
+  const handleOrigemSelect = (origem: AmostraOrigem) => {
+    setAmostraOrigem(origem);
+    setFormStep(0);
+    setFormData({}); 
+  };
 
   return (
     <>
       <nav className="level is-mobile mb-4">
-        <div className="level-left">
-          <div className="level-item">
-            <div className="buttons">
-              <button className="button is-white" onClick={() => navigate(-1)}>
-                <span className="icon"><MdArrowBack /></span>
-              </button>
-              <h1 className="title is-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Qualidade</h1>
-            </div>
-          </div>
-        </div>
-        <div className="level-right">
-          <div className="level-item">
-            <button className="button is-link">
-              <span className="icon"><MdAdd /></span>
-            </button>
-          </div>
-        </div>
+        {/* ... (cabeçalho da página) ... */}
       </nav>
 
       <section className="section py-0">
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
-          <ul>
-            <li className={activeTab === 'Análise' ? 'is-active' : ''}><a onClick={resetForm}><span>Análise</span></a></li>
-            <li className={activeTab === 'Qualidade dos Dejetos' ? 'is-active' : ''}><a onClick={() => setActiveTab('Qualidade dos Dejetos')}><span>Qualidade dos Dejetos</span></a></li>
-            <li className={activeTab === 'Qualidade das Amostras' ? 'is-active' : ''}><a onClick={() => setActiveTab('Qualidade das Amostras')}><span>Qualidade das Amostras</span></a></li>
-          </ul>
+          {/* ... (abas de navegação) ... */}
         </div>
       </section>
       
@@ -85,69 +100,113 @@ const Qualidade: React.FC = () => {
             <h2 className="title is-5">Entrada da amostra</h2>
             
             <div className="field">
-              <div className="control">
-                <label className="radio"><input type="radio" name="amostraOrigem" checked={amostraOrigem === 'cooperado'} onChange={() => setAmostraOrigem('cooperado')} /> Cooperado</label>
-                <label className="radio"><input type="radio" name="amostraOrigem" checked={amostraOrigem === 'pontoDeColeta'} onChange={() => setAmostraOrigem('pontoDeColeta')} /> Ponto de coleta</label>
+              <div className="buttons has-addons">
+                <button 
+                  className={`button ${amostraOrigem === 'cooperado' ? 'is-info is-selected' : ''}`}
+                  onClick={() => handleOrigemSelect('cooperado')}
+                >
+                  Cooperado
+                </button>
+                <button 
+                  className={`button ${amostraOrigem === 'pontoDeColeta' ? 'is-info is-selected' : ''}`}
+                  onClick={() => handleOrigemSelect('pontoDeColeta')}
+                >
+                  Ecoponto
+                </button>
               </div>
             </div>
 
-            {/* --- FLUXO PARA COOPERADO (COM SELECTS CORRIGIDOS) --- */}
-            {amostraOrigem === 'cooperado' && (
+            {/* Renderiza o restante do formulário APENAS se a origem foi selecionada */}
+            {amostraOrigem && (
               <>
-                <div className="columns">
-                  <div className="column"><div className="field"><label className="label">Nome do cooperado</label><div className="control"><div className="select is-fullwidth"><select name="cooperado" onChange={handleInputChange}><option>Selecionar</option>{cooperados.map(c => <option key={c.id} value={c.motorista}>{c.motorista}</option>)}</select></div></div></div></div>
-                  <div className="column"><div className="field"><label className="label">Data da análise</label><div className="control"><input className="input" type="date" name="dataColeta" onChange={handleInputChange} /></div></div></div>
-                </div>
-                <div className="columns">
-                    <div className="column">
-                        <div className="field">
-                            <label className="label">Entrega Referência</label>
-                            <div className="control"><div className="select is-fullwidth"><select name="entregaReferencia" onChange={handleInputChange}><option>Selecionar Referência</option></select></div></div>
-                        </div>
+                {/* --- ETAPA 0: DADOS BÁSICOS --- */}
+                {amostraOrigem === 'cooperado' && (
+                  <>
+                    <div className="columns">
+                      <div className="column"><div className="field"><label className="label">Nome do cooperado</label><div className="control"><div className="select is-fullwidth"><select name="cooperado" value={formData.cooperado || ''} onChange={handleInputChange}><option value="">Selecionar</option>{cooperados.map(c => <option key={c.id} value={c.motorista}>{c.motorista}</option>)}</select></div></div></div></div>
+                      <div className="column"><div className="field"><label className="label">Data da análise</label><div className="control"><input className="input" type="date" name="dataColeta" value={formData.dataColeta || ''} onChange={handleInputChange} /></div></div></div>
                     </div>
-                    <div className="column">
-                        <div className="field">
-                            <label className="label">PH</label>
-                            <div className="control"><div className="select is-fullwidth"><select name="ph" onChange={handleInputChange}><option>Selecionar PH</option></select></div></div>
-                        </div>
+                    <div className="columns">
+                        <div className="column"><div className="field"><label className="label">Entrega Referência</label><div className="control"><div className="select is-fullwidth"><select name="entregaReferencia" value={formData.entregaReferencia || ''} onChange={handleInputChange}><option value="">Selecionar Referência</option></select></div></div></div></div>
+                        <div className="column"><div className="field"><label className="label">PH</label><div className="control"><div className="select is-fullwidth"><select name="ph" value={formData.ph || ''} onChange={handleInputChange}><option value="">Selecionar PH</option></select></div></div></div></div>
+                        <div className="column"><div className="field"><label className="label">Densidade</label><div className="control"><div className="select is-fullwidth"><select name="densidade" value={formData.densidade || ''} onChange={handleInputChange}><option value="">Selecionar Densidade</option></select></div></div></div></div>
                     </div>
-                    <div className="column">
-                        <div className="field">
-                            <label className="label">Densidade</label>
-                            <div className="control"><div className="select is-fullwidth"><select name="densidade" onChange={handleInputChange}><option>Selecionar Densidade</option></select></div></div>
-                        </div>
+                  </>
+                )}
+                {amostraOrigem === 'pontoDeColeta' && (
+                  <div className="columns">
+                    <div className="column"><div className="field"><label className="label">Ecoponto</label><div className="control"><div className="select is-fullwidth"><select name="cooperado" value={formData.cooperado || ''} onChange={handleInputChange}><option value="">Selecionar Ponto</option></select></div></div></div></div>
+                    <div className="column"><div className="field"><label className="label">PH</label><div className="control"><div className="select is-fullwidth"><select name="ph" value={formData.ph || ''} onChange={handleInputChange}><option value="">Selecionar PH</option></select></div></div></div></div>
+                    <div className="column"><div className="field"><label className="label">Densidade</label><div className="control"><div className="select is-fullwidth"><select name="densidade" value={formData.densidade || ''} onChange={handleInputChange}><option value="">Selecionar Densidade</option></select></div></div></div></div>
+                  </div>
+                )}
+
+                {/* --- ETAPA 1: P1 E P2 (Fiel ao print) --- */}
+                {formStep >= 1 && (
+                  <>
+                    <hr />
+                    <div className="columns">
+                      <div className="column">
+                        <p className="label has-text-centered">AMOSTRA</p>
+                        <div className="field"><label className="label">ID Recipiente</label><div className="control"><input className="input" type="text" name="id_recipiente_amostra" value={formData.id_recipiente_amostra || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Peso do Recip.:</label><div className="control"><input className="input" type="text" name="peso_recip_amostra" value={formData.peso_recip_amostra || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Pesagem P2:</label><div className="control"><input className="input" type="text" name="pesagem_p2_amostra" value={formData.pesagem_p2_amostra || ''} onChange={handleInputChange}/></div></div>
+                      </div>
+                      <div className="column">
+                        <p className="label has-text-centered">DUPLICATA</p>
+                        <div className="field"><label className="label">ID Recipiente</label><div className="control"><input className="input" type="text" name="id_recipiente_duplicata" value={formData.id_recipiente_duplicata || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Peso do Recip.:</label><div className="control"><input className="input" type="text" name="peso_recip_duplicata" value={formData.peso_recip_duplicata || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Pesagem P2:</label><div className="control"><input className="input" type="text" name="pesagem_p2_duplicata" value={formData.pesagem_p2_duplicata || ''} onChange={handleInputChange}/></div></div>
+                      </div>
                     </div>
+                  </>
+                )}
+                {/* --- ETAPA 2: P3 (Fiel ao print) --- */}
+                {formStep >= 2 && (
+                   <>
+                    <hr />
+                    <div className="columns">
+                      <div className="column">
+                        <p className="label has-text-centered">AMOSTRA</p>
+                        <div className="field"><label className="label">Pesagem P3:</label><div className="control"><input className="input" type="text" name="pesagem_p3_amostra" value={formData.pesagem_p3_amostra || ''} onChange={handleInputChange}/></div></div>
+                      </div>
+                      <div className="column">
+                        <p className="label has-text-centered">DUPLICATA</p>
+                        <div className="field"><label className="label">Recip. + ST:</label><div className="control"><input className="input" type="text" name="recip_st_duplicata" value={formData.recip_st_duplicata || ''} onChange={handleInputChange}/></div></div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {/* --- ETAPA 3: P4 (Fiel ao print) --- */}
+                {formStep >= 3 && (
+                   <>
+                    <hr />
+                    <div className="columns">
+                      <div className="column">
+                        <p className="label has-text-centered">AMOSTRA</p>
+                        <div className="field"><label className="label">Pesagem P4:</label><div className="control"><input className="input" type="text" name="pesagem_p4_amostra" value={formData.pesagem_p4_amostra || ''} onChange={handleInputChange}/></div></div>
+                      </div>
+                      <div className="column">
+                        <p className="label has-text-centered">DUPLICATA</p>
+                        <div className="field"><label className="label">Recip. + SF:</label><div className="control"><input className="input" type="text" name="recip_sf_duplicata" value={formData.recip_sf_duplicata || ''} onChange={handleInputChange}/></div></div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {/* BOTÕES CONDICIONAIS CORRIGIDOS */}
+                <div className="field is-grouped is-justify-content-flex-end">
+                  {formStep === 0 && <p className="control"><button className="button is-light" onClick={() => setFormStep(1)}><span className="icon is-small"><MdAddCircleOutline /></span><span>Infos</span></button></p>}
+                  {formStep === 1 && <p className="control"><button className="button is-light" onClick={() => setFormStep(2)}>Próximo Passo</button></p>}
+                  {formStep === 2 && <p className="control"><button className="button is-light" onClick={() => setFormStep(3)}>Próximo Passo</button></p>}
+                  <p className="control">
+                    <button className={`button is-info ${saving ? 'is-loading' : ''}`} onClick={handleSave}>
+                      <span className="icon"><MdSave /></span>
+                      <span>Salvar</span>
+                    </button>
+                  </p>
                 </div>
               </>
-            )}
-            
-            {/* --- FLUXO PARA PONTO DE COLETA (JÁ ESTAVA CORRETO) --- */}
-            {amostraOrigem === 'pontoDeColeta' && (
-              <div className="columns">
-                <div className="column"><div className="field"><label className="label">Ponto de Coleta</label><div className="control"><div className="select is-fullwidth"><select name="pontoColeta" onChange={handleInputChange}><option>Selecionar Ponto</option></select></div></div></div></div>
-                <div className="column"><div className="field"><label className="label">PH</label><div className="control"><div className="select is-fullwidth"><select name="ph" onChange={handleInputChange}><option>Selecionar PH</option></select></div></div></div></div>
-                <div className="column"><div className="field"><label className="label">Densidade</label><div className="control"><div className="select is-fullwidth"><select name="densidade" onChange={handleInputChange}><option>Selecionar Densidade</option></select></div></div></div></div>
-              </div>
-            )}
-
-            {/* ETAPAS ADICIONAIS DE PESAGEM */}
-            {formStep >= 1 && (<><hr /><div className="columns"><div className="column"><div className="field"><label className="label">Pesagem 1 (P1)</label><div className="control"><input className="input" type="text" name="pesagem1" onChange={handleInputChange}/></div></div></div><div className="column"><div className="field"><label className="label">Pesagem 1 (duplicata)</label><div className="control"><input className="input" type="text" name="pesagem1_dup" onChange={handleInputChange}/></div></div></div></div><div className="columns"><div className="column"><div className="field"><label className="label">Pesagem 2 (P2)</label><div className="control"><input className="input" type="text" name="pesagem2" onChange={handleInputChange}/></div></div></div><div className="column"><div className="field"><label className="label">Pesagem 2 (duplicata)</label><div className="control"><input className="input" type="text" name="pesagem2_dup" onChange={handleInputChange}/></div></div></div></div></>)}
-            {formStep >= 2 && (<><hr /><div className="columns"><div className="column"><div className="field"><label className="label">Pesagem 3 (P3)</label><div className="control"><input className="input" type="text" name="pesagem3" onChange={handleInputChange}/></div></div></div><div className="column"><div className="field"><label className="label">Pesagem 3 (duplicata)</label><div className="control"><input className="input" type="text" name="pesagem3_dup" onChange={handleInputChange}/></div></div></div></div></>)}
-            {formStep >= 3 && (<><hr /><div className="columns"><div className="column"><div className="field"><label className="label">Pesagem 4 (P4)</label><div className="control"><input className="input" type="text" name="pesagem4" onChange={handleInputChange}/></div></div></div><div className="column"><div className="field"><label className="label">Pesagem 4 (duplicata)</label><div className="control"><input className="input" type="text" name="pesagem4_dup" onChange={handleInputChange}/></div></div></div></div></>)}
-            
-            {/* BOTÕES CONDICIONAIS */}
-            {amostraOrigem && (
-              <div className="field is-grouped is-justify-content-flex-end">
-                {formStep === 0 && <p className="control"><button className="button is-light" onClick={() => setFormStep(1)}>+ Informações</button></p>}
-                {formStep === 1 && <p className="control"><button className="button is-light" onClick={() => setFormStep(2)}>Próximo Passo</button></p>}
-                {formStep === 2 && <p className="control"><button className="button is-light" onClick={() => setFormStep(3)}>Próximo Passo</button></p>}
-                <p className="control">
-                  <button className={`button is-info ${saving ? 'is-loading' : ''}`} onClick={handleSave}>
-                    <span className="icon"><MdSave /></span>
-                    <span>Salvar</span>
-                  </button>
-                </p>
-              </div>
             )}
           </div>
         </section>

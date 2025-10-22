@@ -897,7 +897,7 @@ export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
 
 /**
  * ===================================================================
- * NOVA IMPLEMENTAÇÃO ATUALIZADA PARA A TELA DE QUALIDADE
+ * IMPLEMENTAÇÃO ATUALIZADA PARA A TELA DE QUALIDADE
  * ===================================================================
  */
 
@@ -907,20 +907,22 @@ export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
 export interface QualidadeDejetosItem {
   id: string;
   dataColeta: string;
-  cooperado: string;
-  placa: string;
+  cooperado: string; // Pode ser nome do cooperado ou nome do Ecoponto
+  placa: string; // Virá do cooperado/entrega selecionada
   ph: number | string;
   densidade: number | string;
-  entregaReferencia?: string; // Novo campo
-  // Campos das etapas de pesagem
-  pesagem1?: string;
-  pesagem1_dup?: string;
-  pesagem2?: string;
-  pesagem2_dup?: string;
-  pesagem3?: string;
-  pesagem3_dup?: string;
-  pesagem4?: string;
-  pesagem4_dup?: string;
+  entregaReferencia?: string;
+  // --- CAMPOS DE PESAGEM CORRIGIDOS PARA O NOVO LAYOUT ---
+  id_recipiente_amostra?: string;
+  id_recipiente_duplicata?: string;
+  peso_recip_amostra?: string;
+  peso_recip_duplicata?: string;
+  pesagem_p2_amostra?: string;
+  pesagem_p2_duplicata?: string;
+  pesagem_p3_amostra?: string;
+  recip_st_duplicata?: string;
+  pesagem_p4_amostra?: string;
+  recip_sf_duplicata?: string;
 }
 
 /**
@@ -932,16 +934,15 @@ let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
 ];
 
 /**
- * Funções Fetch para a Qualidade
+ * Função Fetch para a Qualidade dos Dejetos
  */
 export const fetchQualidadeDejetosData = (): Promise<QualidadeDejetosItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockQualidadeDejetosData);
-    }, 500);
-  });
+  return new Promise((resolve) => setTimeout(() => resolve(mockQualidadeDejetosData), 500));
 };
 
+/**
+ * Função para CRIAR uma Análise de Qualidade (simulação)
+ */
 export const createAnaliseQualidade = (analise: Partial<QualidadeDejetosItem>): Promise<QualidadeDejetosItem> => {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -952,7 +953,7 @@ export const createAnaliseQualidade = (analise: Partial<QualidadeDejetosItem>): 
                 placa: 'N/A',
                 ph: analise.ph || 'N/A',
                 densidade: analise.densidade || 'N/A',
-                ...analise
+                ...analise // Inclui todos os campos de pesagem que foram enviados
             };
             mockQualidadeDejetosData.unshift(newItem);
             resolve(newItem);
