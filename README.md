@@ -37,6 +37,26 @@ src/
 e2e/
 └── ...           # Testes de ponta a ponta (E2E) com Playwright.
 
+## 🏛️ Estratégia de Branches (Git Flow)
+
+O projeto utiliza uma estratégia de branches baseada no Git Flow para organizar o desenvolvimento, garantir a estabilidade do código e facilitar o trabalho paralelo.
+
+-   **`main`**: Contém o código de produção estável. Nenhum commit é feito diretamente aqui. As atualizações chegam apenas via merge de branches `develop` (para novas versões) ou `hotfix` (para correções urgentes).
+
+-   **`develop`**: É a branch principal de desenvolvimento. Integra todas as novas funcionalidades e correções que farão parte da próxima versão. É a base para criar novas branches.
+
+-   **`feature/<nome-da-funcionalidade>`**: Criada a partir da `develop` para desenvolver uma nova funcionalidade de forma isolada.
+    -   *Exemplo*: `feature/login-com-google`
+    -   Ao concluir, é mesclada de volta na `develop`.
+
+-   **`fix/<nome-da-correcao>`**: Criada a partir da `develop` para corrigir bugs que ainda não estão em produção.
+    -   *Exemplo*: `fix/ajuste-layout-sidebar`
+    -   Ao concluir, é mesclada de volta na `develop`.
+
+-   **`hotfix/<correcao-urgente>`**: Criada a partir da `main` para corrigir bugs críticos em produção.
+    -   *Exemplo*: `hotfix/falha-login-producao`
+    -   Ao concluir, é mesclada tanto na `main` quanto na `develop`.
+
 ## Funcionalidades Implementadas
 
 A aplicação conta com diversas telas e funcionalidades para análise de dados:
