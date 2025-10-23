@@ -84,3 +84,58 @@ body {
   animation: fadeInUp 0.5s ease-out forwards;
   opacity: 0;
 }
+/* =================================================== */
+/* Correção Final (Especificidade + !important)        */
+/* =================================================== */
+
+/* Layout (não precisa de !important) */
+.sidebar-menu {
+  background-color: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-menu .menu-footer {
+  margin-top: auto; /* Empurra o rodapé para baixo */
+  padding-top: 1rem;
+  border-top: 1px solid var(--sidebar-divider);
+}
+
+
+/* --- ESTILOS DO TEMA CLARO (Garantia) --- */
+/* Para garantir que não quebre o modo claro de novo */
+
+body.theme-light .sidebar-menu .menu-label {
+  color: var(--subtitle-color) !important;
+}
+body.theme-light .sidebar-menu .menu-list a.menu-item,
+body.theme-light .sidebar-menu .menu-list a.menu-item .icon,
+body.theme-light .sidebar-menu .user-info .has-text-weight-bold {
+  color: var(--sidebar-text) !important; /* Força o texto escuro no modo claro */
+}
+body.theme-light .sidebar-menu .user-info .is-size-7 {
+  color: var(--subtitle-color) !important;
+}
+body.theme-light .sidebar-menu .menu-list a.menu-item:hover,
+body.theme-light .sidebar-menu .menu-list a.menu-item.is-active {
+  background-color: var(--sidebar-hover);
+}
+
+
+/* --- ESTILOS DO TEMA ESCURO (O PROBLEMA) --- */
+/* Esta é a parte crucial */
+
+body.theme-dark .sidebar-menu .menu-label {
+  color: var(--subtitle-color) !important;
+}
+body.theme-dark .sidebar-menu .menu-list a.menu-item,
+body.theme-dark .sidebar-menu .menu-list a.menu-item .icon,
+body.theme-dark .sidebar-menu .user-info .has-text-weight-bold {
+  color: var(--sidebar-text) !important; /* Força o texto branco no modo escuro */
+}
+body.theme-dark .sidebar-menu .user-info .is-size-7 {
+  color: var(--subtitle-color) !important;
+}
+body.theme-dark .sidebar-menu .menu-list a.menu-item:hover,
+body.theme-dark .sidebar-menu .menu-list a.menu-item.is-active {
+  background-color: var(--sidebar-hover);
+}

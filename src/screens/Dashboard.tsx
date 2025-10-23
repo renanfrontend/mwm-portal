@@ -1,15 +1,17 @@
+// src/screens/Dashboard.tsx
+
 import React, { useEffect } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
-import AbastecimentoPieChart from '../components/AbastecimentoPieChart';
+// import AbastecimentoPieChart from '../components/AbastecimentoPieChart'; // Removido
 import { loadDashboardData } from '../features/dashboard/dashboardSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const iconMap = {
+const iconMap: { [key: string]: React.ReactNode } = {
   'density_medium': <MdAnalytics/>,
   'water_drop': <MdWaterDrop/>,
   'timer': <MdTimer/>,
@@ -19,7 +21,8 @@ const iconMap = {
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
-  const { data, abastecimentoSummary, loading, error } = useAppSelector((state) => state.dashboard);
+  // 'abastecimentoSummary' removido
+  const { data, loading, error } = useAppSelector((state) => state.dashboard);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -62,6 +65,7 @@ const Dashboard = () => {
                     value={`${metric.value}${metric.unit || ''}`}
                     icon={iconMap[metric.icon]}
                     trend={metric.trend}
+                    iconColor="" // Prop fantasma mantida para não quebrar (embora o componente não a use mais)
                   />
                 </div>
               ))}
@@ -74,11 +78,9 @@ const Dashboard = () => {
                 <CooperativeAnalysisChart chartData={data.cooperativeAnalysis} title="Análise de Cooperados" />
               </div>
             </div>
-            <div className="columns mt-4">
-              <div className="column is-8 is-offset-2">
-                <AbastecimentoPieChart chartData={abastecimentoSummary} title="Abastecimento em M³ por Veículo - Primato" />
-              </div>
-            </div>
+            
+            {/* Bloco do AbastecimentoPieChart removido */}
+
           </div>
         </section>
       )}

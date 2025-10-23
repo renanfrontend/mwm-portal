@@ -1,5 +1,7 @@
+// src/screens/Cooperados.tsx
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable';
@@ -12,15 +14,14 @@ const Cooperados: React.FC = () => {
 
   const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
-
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Estados para o filtro
+  
   const [showFilters, setShowFilters] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
   const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]);
@@ -36,9 +37,8 @@ const Cooperados: React.FC = () => {
         setCooperadosData(data || []);
       }
     } catch (err) {
-      const errorMessage = "Ocorreu um erro ao buscar os dados.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError("Ocorreu um erro ao buscar os dados.");
+      toast.error("Falha ao carregar os dados.");
     } finally {
       setLoading(false);
     }
@@ -48,109 +48,54 @@ const Cooperados: React.FC = () => {
     loadData();
     setSearchTerm(''); setSelectedItems([]); setIsDeleteMode(false);
   }, [activeTab, loadData]);
-
+  
   const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus.length === 0 || filterStatus.includes(item.status)) && (filterTransportadora.length === 0 || filterTransportadora.includes(item.transportadora))), [searchTerm, agendaData, filterStatus, filterTransportadora]);
-  const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) || item.filial.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm, cooperadosData]);
-
-  const handleSelectItem = (id: string | number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]);
-
+  const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase())) || (item.filial && item.filial.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
+  
+  const handleSelectItem = (id: string | number) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]) };
   const handleConfirmDelete = () => {
-    console.log("Deletando itens:", selectedItems);
-    toast.success(`${selectedItems.length} item(s) deletado(s) com sucesso!`);
-    setIsModalOpen(false);
-    loadData();
+    try {
+      if (activeTab === 'agenda') {
+        setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+      } else {
+        setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+      }
+      toast.success(`${selectedItems.length} item(ns) excluído(s) com sucesso!`);
+      setSelectedItems([]); setIsModalOpen(false); setIsDeleteMode(false);
+    } catch {
+      toast.error("Ocorreu um erro ao excluir os itens.");
+      setIsModalOpen(false);
+    }
   };
-
   const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); };
-  const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); setShowFilters(false); };
-
-  const transportadorasUnicas = useMemo(() => [...new Set(agendaData.map(item => item.transportadora))], [agendaData]);
-  const areFiltersActive = filterStatus.length > 0 || filterTransportadora.length > 0;
-
-  // Componente reutilizável para a barra de ferramentas
-  const Toolbar = () => (
-    <div className="my-4 p-2 has-background-white-ter">
-        <div className="is-flex is-align-items-center">
-            <div className="field has-addons" style={{ flexGrow: 1, minWidth: '150px' }}>
-                <div className="control is-expanded">
-                    <input
-                        className="input" type="text" placeholder="Digite para buscar..."
-                        value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <div className="control">
-                    <button className="button is-info"><span className="icon"><MdSearch /></span></button>
-                </div>
-            </div>
-            <div className="is-flex ml-2">
-                <button
-                    className={`button is-pill mr-1 ${isDeleteMode ? 'is-danger' : ''}`}
-                    onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }}
-                    title="Ativar modo de seleção">
-                    <span className="icon"><MdDelete /></span>
-                </button>
-                <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
-                    <div className="dropdown-trigger">
-                        <button 
-                            className={`button is-pill ${areFiltersActive ? 'is-info' : ''}`} 
-                            onClick={() => setShowFilters(!showFilters)} 
-                            aria-haspopup="true" 
-                            aria-controls="dropdown-menu-filter">
-                            <span className="icon"><MdFilterList /></span>
-                        </button>
-                    </div>
-                    <div className="dropdown-menu" id="dropdown-menu-filter" role="menu">
-                        <div className="dropdown-content">
-                            {activeTab === 'agenda' ? (
-                                <div className="p-4" style={{ minWidth: '300px' }}>
-                                    <p className="subtitle is-6">Status</p>
-                                    <div className="field">
-                                        <label className="checkbox mr-4">
-                                            <input type="checkbox" checked={filterStatus.includes('Realizado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Realizado')} /> Realizado
-                                        </label>
-                                        <label className="checkbox">
-                                            <input type="checkbox" checked={filterStatus.includes('Planejado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Planejado')} /> Planejado
-                                        </label>
-                                    </div>
-                                    <hr className="dropdown-divider" />
-                                    <p className="subtitle is-6">Transportadora</p>
-                                    {transportadorasUnicas.map(t => (
-                                      <div key={t} className="field">
-                                        <label className="checkbox">
-                                          <input type="checkbox" checked={filterTransportadora.includes(t)} onChange={() => handleCheckboxChange(setFilterTransportadora, t)}/> {t}
-                                        </label>
-                                      </div>
-                                    ))}
-                                    {areFiltersActive && (
-                                        <>
-                                            <hr className="dropdown-divider" />
-                                            <button className="button is-small is-danger is-light is-fullwidth" onClick={clearFilters}>Limpar Filtros</button>
-                                        </>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="dropdown-item">
-                                    <p>Filtros não disponíveis nesta aba.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  );
+  const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); };
 
   return (
     <>
-      <nav className="level is-mobile mb-4">
-        <div className="level-left">
-          <div className="level-item"><div className="buttons"><button className="button is-white" onClick={() => navigate(-1)}><span className="icon"><MdArrowBack /></span></button><h1 className="title is-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Cooperados</h1></div></div>
+      <nav className="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div className="navbar-brand">
+          <div className="navbar-item pl-0">
+            <div className="buttons">
+              <button className="button is-medium is-white" onClick={() => navigate(-1)}>
+                <span className="icon"><MdArrowBack /></span>
+              </button>
+              <span className="is-size-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Cooperados</span>
+            </div>
+          </div>
         </div>
-        <div className="level-right"><div className="level-item"><button className="button is-link"><span className="icon"><MdAdd /></span></button></div></div>
+        <div className="navbar-end">
+          <div className="navbar-item">
+            <div className="buttons">
+              <button className="button is-link">
+                <span className="icon"><MdPersonAdd /></span>
+              </button>
+            </div>
+          </div>
+        </div>
       </nav>
 
-      <section className="section has-background-white-bis py-4">
+      {/* --- SEÇÃO DAS ABAS COM FUNDO CORRETO --- */}
+      <section className="section has-background-white-bis" style={{ paddingTop: '6rem' }}>
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
           <ul>
             <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cadastro</span></a></li>
@@ -159,44 +104,58 @@ const Cooperados: React.FC = () => {
         </div>
       </section>
 
-      <section className="section pt-1 pb-6">
-        <Toolbar />
-        
-        {/* --- BARRA DE EXCLUSÃO CORRIGIDA --- */}
-        {isDeleteMode && selectedItems.length > 0 && (
-          <div className="level is-mobile mb-4">
-            <div className="level-left">
-              <p>{selectedItems.length} item(s) selecionado(s)</p>
-            </div>
-            <div className="level-right">
-              <button className="button is-danger" onClick={() => setIsModalOpen(true)}>
-                Excluir Selecionados
-              </button>
+      {/* --- SEÇÃO PRINCIPAL (FUNDO BRANCO PADRÃO) --- */}
+      {activeTab === 'cadastro' && (
+        <section className="section bioPartners pt-1 pb-6">
+          <div className="has-background-white-ter my-4 p-2">
+            <div className="field is-grouped">
+              <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome, empresa, veículo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
+              <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }} title="Ativar modo de seleção"><span className="icon"><MdDelete /></span></button></div>
+              <div className="control"><button className="button is-pill"><span className="icon"><MdFilterList /></span></button></div>
             </div>
           </div>
-        )}
+          {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button></div></div>}
+          {loading && <progress className="progress is-small is-info" max="100"></progress>}
+          {error && <div className="notification is-danger">{error}</div>}
+          {!loading && !error && filteredCooperadosData.map(item => <CooperadoListItem key={item.id} item={item} isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem} />)}
+        </section>
+      )}
 
-        {loading && <progress className="progress is-small is-info" max="100"></progress>}
-        {error && <div className="notification is-danger">{error}</div>}
-
-        {activeTab === 'cadastro' && !loading && !error && filteredCooperadosData.map(item => <CooperadoListItem key={item.id} item={item} isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem} />)}
-        
-        {activeTab === 'agenda' && !loading && !error && (
-            <>
-                <label className="label">Período: de 13/10/2025 à 17/10/2025</label>
-                <div className="box p-0">
-                    <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+      {activeTab === 'agenda' && (
+        <section className="section bioCalendars pt-1 pb-6">
+          <div className="has-background-white-ter my-4 p-2">
+            <div className="field is-grouped">
+                <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome do cooperado..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
+                <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }} title="Ativar modo de seleção"><span className="icon"><MdDelete /></span></button></div>
+                <div className="control">
+                    <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
+                        <div className="dropdown-trigger"><button className="button is-pill" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => setShowFilters(!showFilters)}><span className="icon"><MdFilterList /></span></button></div>
+                        <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}>
+                            <div className="dropdown-content">
+                                <div className="dropdown-item"><label className="label is-small">STATUS</label><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Planejado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Planejado')} /> Planejado</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Realizado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Realizado')} /> Realizado</label></div><hr className="dropdown-divider" />
+                                <div className="dropdown-item"><label className="label is-small">TRANSPORTADORA</label><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Primato')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Primato')} /> Primato</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Agrocampo')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Agrocampo')} /> Agrocampo</label></div><hr className="dropdown-divider" />
+                                <div className="dropdown-item field is-grouped is-justify-content-space-between"><p className="control"><button className="button is-small is-light" onClick={clearFilters}>Limpar</button></p><p className="control"><button className="button is-small is-info" onClick={() => setShowFilters(false)}>Aplicar</button></p></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </>
-        )}
-      </section>
+            </div>
+          </div>
+          <label className="label">Período: de 13/10/2025 à 17/10/2025</label>
+          <div className="box p-0">
+            {loading && <progress className="progress is-small is-info" max="100"></progress>}
+            {error && <div className="notification is-danger">{error}</div>}
+            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
+          </div>
+        </section>
+      )}
 
       <div className={`modal ${isModalOpen ? 'is-active' : ''}`}>
         <div className="modal-background" onClick={() => setIsModalOpen(false)}></div>
         <div className="modal-card">
           <header className="modal-card-head"><p className="modal-card-title">Confirmar Exclusão</p><button className="delete" aria-label="close" onClick={() => setIsModalOpen(false)}></button></header>
-          <section className="modal-card-body"><p>Você tem certeza que deseja excluir <strong>{selectedItems.length} item(s)</strong>? Esta ação não pode ser desfeita.</p></section>
-          <footer className="modal-card-foot"><button className="button is-danger" onClick={handleConfirmDelete}>Excluir</button><button className="button" onClick={() => setIsModalOpen(false)}>Cancelar</button></footer>
+          <section className="modal-card-body"><p>Você tem certeza que deseja excluir {selectedItems.length} item(ns) selecionado(s)? Esta ação não pode ser desfeita.</p></section>
+          <footer className="modal-card-foot is-justify-content-flex-end"><button className="button" onClick={() => setIsModalOpen(false)}>Cancelar</button><button className="button is-danger" onClick={handleConfirmDelete}>Excluir</button></footer>
         </div>
       </div>
     </>

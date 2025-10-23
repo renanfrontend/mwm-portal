@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             </div>
             {/* O item da navbar com o nome da unidade */}
             <div className="navbar-item is-hidden-touch">
-              <div className="button is-outlined">Toledo - PR</div>
+              <div className="button">Toledo - PR</div>
             </div>
           </div>
           <div className="navbar-end">

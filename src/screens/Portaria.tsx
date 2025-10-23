@@ -1,10 +1,10 @@
 // src/screens/Portaria.tsx
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdAdd, MdLockClock, MdDelete } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdAdd, MdCalendarViewMonth, MdDelete } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { PortariaTable } from '../components/PortariaTable';
+import { PortariaListItem } from '../components/PortariaListItem';
 import { fetchPortariaData, type PortariaItem } from '../services/api';
 
 type Tab = 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
@@ -14,8 +14,7 @@ const Portaria: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
-
-  // --- CORREÇÃO CRÍTICA: INICIALIZAR ESTADO COM ARRAY VAZIO ---
+  
   const [data, setData] = useState<PortariaItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +23,7 @@ const Portaria: React.FC = () => {
       setLoading(true);
       try {
         const result = await fetchPortariaData();
-        setData(result);
+        setData(result || []);
       } catch (error) {
         toast.error("Falha ao carregar os dados da portaria.");
       } finally {
@@ -35,18 +34,13 @@ const Portaria: React.FC = () => {
   }, []);
 
   const filteredData = useMemo(() => {
-    // A inicialização correta do estado já resolve, mas esta verificação é uma segurança extra.
-    if (!data) {
-      return [];
-    }
-    return data.filter(item =>
+    return (data || []).filter(item => 
       item.categoria === activeTab &&
       (item.motorista.toLowerCase().includes(searchTerm.toLowerCase()) ||
        item.empresa.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [data, activeTab, searchTerm]);
 
-  // Mensagens para o estado vazio, fiéis ao HTML
   const emptyStateMessages = {
     Entregas: { title: "Não há entregas agendadas", subtitle: "Verifique com a supervisão antes de adicionar uma nova entrega.", buttonClass: 'is-info' },
     Abastecimentos: { title: "Não há abastecimentos agendados", subtitle: "Caso o veículo esteja dentro da Bio Planta, você pode incluir manualmente a solicitação.", buttonClass: 'is-link' },
@@ -56,27 +50,29 @@ const Portaria: React.FC = () => {
 
   return (
     <>
-      <nav className="level is-mobile mb-4">
-        <div className="level-left">
-          <div className="level-item">
+      <nav className="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div className="navbar-brand">
+          <div className="navbar-item pl-0">
             <div className="buttons">
-              <button className="button is-white" onClick={() => navigate(-1)}>
+              <button className="button is-medium is-white" onClick={() => navigate(-1)}>
                 <span className="icon"><MdArrowBack /></span>
               </button>
-              <h1 className="title is-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Portaria</h1>
+              <span className="is-size-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Portaria</span>
             </div>
           </div>
         </div>
-        <div className="level-right">
-          <div className="level-item">
-            <button className="button is-link">
-              <span className="icon"><MdAdd /></span>
-            </button>
+        <div className="navbar-end">
+          <div className="navbar-item">
+            <div className="buttons">
+              <button className="button is-link">
+                <span className="icon"><MdAdd /></span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      <section className="section py-0">
+      <section className="section has-background-white-bis" style={{ paddingTop: '6rem' }}>
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
           <ul>
             <li className={activeTab === 'Entregas' ? 'is-active' : ''}><a onClick={() => setActiveTab('Entregas')}><span>Entregas</span></a></li>
@@ -87,35 +83,33 @@ const Portaria: React.FC = () => {
         </div>
       </section>
 
-      <section className="section pt-4 pb-6">
-        <div className="has-background-white-ter p-2 mb-5">
+      <section className="section pt-1 pb-6">
+        <div className="has-background-white-ter my-4 p-2">
           <div className="field is-grouped">
-            <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome, empresa, veículo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
+            <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome, empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
             <div className="control"><button className="button is-pill"><span className="icon"><MdDelete /></span></button></div>
             <div className="control">
               <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
                 <div className="dropdown-trigger"><button className="button is-pill" onClick={() => setShowFilters(!showFilters)}><span className="icon"><MdFilterList /></span></button></div>
-                <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}><div className="dropdown-content"></div></div>
+                <div className="dropdown-menu" role="menu" style={{width: '280px'}}><div className="dropdown-content"></div></div>
               </div>
             </div>
           </div>
         </div>
 
-        <label className="label">Período: de 13/10/2025 à 17/10/2025</label>
+        <label className="label">Período: de 15/10/2025 à 17/10/2025</label>
         
         {loading ? (
           <div className="box p-4"><progress className="progress is-small is-info" max="100"></progress></div>
         ) : filteredData.length > 0 ? (
-          <div className="box p-0">
-            {/* Renderiza a tabela de portaria */}
-            <PortariaTable data={filteredData} />
-          </div>
+          // Renderiza a lista de itens
+          filteredData.map(item => <PortariaListItem key={item.id} item={item} />)
         ) : (
           // Renderiza o estado de "vazio"
           <div className="columns is-centered">
             <div className="column is-half has-text-centered mt-6">
               <span className="icon is-large has-text-grey-light">
-                <MdLockClock size="3em"/>
+                <MdCalendarViewMonth size="3em"/>
               </span>
               <p className="subtitle has-text-weight-medium">{emptyStateMessages[activeTab].title}</p>
               <p>{emptyStateMessages[activeTab].subtitle}</p>

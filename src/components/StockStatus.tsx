@@ -1,25 +1,43 @@
 import React from 'react';
-import type { StockItem as StockItemType } from '../services/api';
+// Função para determinar a cor da barra com base na porcentagem
+const getStockColorClass = (value: number, capacity: number): string => {
+  const percentage = (value / capacity) * 100;
 
-// Mover o sub-componente para fora do componente principal evita que ele seja recriado em cada renderização.
-const StockItem: React.FC<Omit<StockItemType, 'id'>> = ({ label, value, capacity, unit, color }) => (
-  <div className="mb-4">
-    <h3 className="is-size-6 has-text-weight-bold">{label}</h3>
-    <div className="is-flex is-justify-content-space-between is-size-7 has-text-grey">
-      <span>{value.toLocaleString('pt-BR')} / {capacity.toLocaleString('pt-BR')} {unit}</span>
-      <span>{((value / capacity) * 100).toFixed(1)}%</span>
+  if (percentage < 25) {
+    return 'is-danger'; // Vermelho (muito baixo)
+  }
+  if (percentage < 30) {
+    return 'is-warning'; // Amarelo (baixando)
+  }
+  // No seu print, o "Digestato Bruto" está acima de 50% e azul
+  return 'is-info'; // Azul (normal, como no print)
+};
+
+// A prop 'color' foi removida da interface do sub-componente
+const StockItem: React.FC<Omit<StockItemType, 'id' | 'color'>> = ({ label, value, capacity, unit }) => {
+  // Chama a função para obter a cor dinâmica
+  const colorClass = getStockColorClass(value, capacity);
+  const percentage = (value / capacity) * 100;
+
+  return (
+    <div className="mb-4">
+      <h3 className="is-size-6 has-text-weight-bold">{label}</h3>
+      <div className="is-flex is-justify-content-space-between is-size-7 has-text-grey">
+        <span>{value.toLocaleString('pt-BR')} / {capacity.toLocaleString('pt-BR')} {unit}</span>
+        <span>{percentage.toFixed(1)}%</span>
+      </div>
+      <progress
+        // --- CORREÇÃO AQUI: Usa a classe de cor dinâmica ---
+        className={`progress is-small ${colorClass}`}
+        value={value}
+        max={capacity}
+      >
+        {percentage.toFixed(1)}%
+      </progress>
     </div>
-    <progress
-      className={`progress is-small ${color}`}
-      value={value}
-      max={capacity}
-    >
-      {((value / capacity) * 100).toFixed(1)}%
-    </progress>
-  </div>
-);
+  );
+};
 
-// Props que o componente principal recebe
 interface Props {
   stockItems: StockItemType[];
 }
@@ -38,7 +56,6 @@ const StockStatus = ({ stockItems }: Props) => {
             value={item.value}
             capacity={item.capacity}
             unit={item.unit}
-            color={item.color}
           />
         ))}
       </div>
