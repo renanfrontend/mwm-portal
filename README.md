@@ -33,6 +33,7 @@ src/
 ├── hooks/        # Hooks customizados (ex: useTheme, useAuth).
 ├── screens/      # Componentes de página (telas principais da aplicação).
 ├── services/     # Lógica de acesso a dados (API mockada).
+│   └── mock/     # Implementações mockadas dos serviços de API.
 └── styles/       # Arquivos de estilização globais e temas.
 e2e/
 └── ...           # Testes de ponta a ponta (E2E) com Playwright.
@@ -115,11 +116,31 @@ O módulo foi refatorado para ter um novo layout de tabela na aba "Agenda".
 
 ## 🔌 Integração com Backend (Próximos Passos)
 
-Atualmente, a aplicação utiliza uma camada de serviço mockada (`src/services/api.ts` e `src/services/auth.ts`) que simula o comportamento de uma API real.
+Atualmente, a aplicação utiliza uma camada de serviço mockada (`src/services/api.ts`, `src/services/auth.ts`, `src/services/mock/api.mock.ts` e `src/services/mock/auth.mock.ts`) que simula o comportamento de uma API real.
 
 O próximo passo crucial do projeto é a integração com o backend definitivo, que será desenvolvido em **Java com Spring Boot** e utilizará um banco de dados **SQL Server**. A camada de serviço existente será refatorada para substituir as funções mockadas por chamadas HTTP (utilizando `fetch` ou `axios`) aos endpoints da API real. A estrutura de tipos (interfaces TypeScript) já definida será mantida para garantir a consistência e a segurança dos dados trafegados entre o frontend e o backend.
 
 ## Como Executar o Projeto
+
+### Configuração de Variáveis de Ambiente
+
+O projeto utiliza um arquivo `.env` na raiz para configurar seu comportamento.
+
+```bash
+# .env
+
+# Defina como 'true' para usar os dados mockados e desenvolver o frontend sem o backend.
+# Defina como 'false' (ou remova a linha) para conectar-se à API real.
+VITE_USE_MOCK_API=true
+
+# URL base da sua API real (usada quando VITE_USE_MOCK_API é 'false').
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+- **Para desenvolver o frontend sem o backend**: Mantenha `VITE_USE_MOCK_API=true`. A aplicação usará dados simulados e funcionará de forma independente.
+- **Para conectar ao backend real**: Altere para `VITE_USE_MOCK_API=false` e certifique-se de que seu servidor backend esteja rodando no endereço definido em `VITE_API_BASE_URL`.
+
+### Como Executar o Projeto
 
 1.  **Instalar as dependências**:
     ```bash

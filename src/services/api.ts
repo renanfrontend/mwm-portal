@@ -1,146 +1,47 @@
 // src/services/api.ts
+import axios from 'axios';
+import {
+  type Metric,
+  type StockItem,
+  type CooperativeAnalysisItem,
+  type AbastecimentoItem,
+  type DashboardData,
+  type AbastecimentoSummaryItem,
+  type FaturamentoItem,
+  type AbastecimentoVolumeItem,
+  type AbastecimentoReportItem,
+  type AbastecimentoVolumePorDiaItem,
+  type ColetaItem,
+  type CooperadoItem,
+  type CalendarEvent,
+  type AgendaItem,
+  type AgendaData,
+  type PortariaItem,
+  type QualidadeDejetosItem,
+  mockFetchCooperadosData,
+  mockFetchColetaData,
+  mockUpdateColetaItem,
+  mockCreateColetaItem,
+  mockFetchAbastecimentoReportData,
+  mockFetchAbastecimentoVolumePorDiaData,
+  mockAddAbastecimentoReportItem,
+  mockFetchAbastecimentoAggregatedVolumeData,
+  mockFetchFaturamentoData,
+  mockFetchAbastecimentoVolumeData,
+  mockFetchDashboardData,
+  mockFetchAbastecimentoSummaryData, mockFetchPortariaData, mockFetchNewAgendaData, mockFetchQualidadeDejetosData, mockCreateAnaliseQualidade
+} from './mock/api.mock';
 
-/**
- * Tipos de Dados
- */
-
-// Tipo para os cards de métricas no topo do dashboard
-export interface Metric {
-  id: number;
-  icon: string;
-  label: string;
-  value: string | number;
-  trend: "up" | "down" | "neutral";
-  unit?: string;
-}
-
-// Tipo para cada item na lista de estoque
-export interface StockItem {
-  id: number;
-  label: string;
-  value: number;
-  capacity: number;
-  unit: string;
-  color:
-    | "is-primary"
-    | "is-link"
-    | "is-info"
-    | "is-success"
-    | "is-warning"
-    | "is-danger";
-}
-
-// Tipo para os dados do gráfico de Análise de Cooperados
-export interface CooperativeAnalysisItem {
-  name: string;
-  value: number;
-  color: string;
-}
-
-// Tipo para os dados do gráfico de Abastecimento por Veículo
-export interface AbastecimentoItem {
-  veiculo: string;
-  m3: number;
-}
-
-// Estrutura completa dos dados do dashboard
-export interface DashboardData {
-  metrics: Metric[];
-  stock: StockItem[];
-  cooperativeAnalysis: CooperativeAnalysisItem[];
-  abastecimentos?: AbastecimentoItem[];
-}
-
-// Tipo para o sumário de abastecimento
-export interface AbastecimentoSummaryItem {
-  veiculo: string;
-  placa: string;
-  volumeTotal: number;
-}
-
-// Tipos e dados mockados para Faturamentos
-export interface FaturamentoItem {
-  name: string;
-  faturamento: number;
-  label: string;
-}
-
-// Tipos e dados mockados para Abastecimentos
-export interface AbastecimentoVolumeItem {
-  name: string;
-  volume: number;
-}
-
-export interface AbastecimentoReportItem {
-  status: string;
-  cliente: string;
-  veiculo: string;
-  placa: string;
-  data: string;
-  horaInicio: string;
-  horaTermino: string;
-  volume: number;
-  odometro: number;
-  usuario: string;
-  produto: string;
-}
-
-// Tipo para o volume de abastecimento por dia
-export interface AbastecimentoVolumePorDiaItem {
-  data: string;
-  volumeTotal: number;
-}
-
-// Interface para um item da lista de coleta
-export interface ColetaItem {
-  id: string; // Usar UUID para ID único
-  cooperado: string;
-  motorista: string;
-  tipoVeiculo: string;
-  placa: string;
-  odometro: number;
-  dataPrevisao: string;
-  horaPrevisao: string;
-  status: "Pendente" | "Entregue" | "Atrasado";
-}
-
-// Interface para um item de Cooperado
-export interface CooperadoItem {
-  id: string;
-  matricula: number;
-  filial: string;
-  motorista: string;
-  tipoVeiculo: string;
-  placa: string;
-  certificado: "Ativo" | "Inativo";
-  doamDejetos: "Sim" | "Não";
-  fase: string;
-}
-
-// Novo tipo para os eventos do calendário
-export interface CalendarEvent {
-  id: string | number;
-  title: string;
-  start: Date;
-  end: Date;
-  allDay?: boolean;
-  resource?: any;
-}
-
-// Novo tipo para os dados da agenda customizada
-export interface AgendaItem {
-  id: number;
-  cooperado: string;
-  filial: "Primato" | "Agrocampo";
-  coletas: { date: string; value: number | null; fullDate: string }[];
-  somaColetas: number;
-  km: number;
-}
+// Cria uma instância do axios para a API
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+});
 
 /**
  * Dados Mockados
  */
-let abastecimentoReportMockData: AbastecimentoReportItem[] = [
+/* Os dados mockados são mantidos para referência ou para testes, mas não são mais usados pelas funções da API.
+let abastecimentoReportMockData: AbastecimentoReportItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   {
     status: "Concluído",
     cliente: "Primato Cooperativa Agroindustrial",
@@ -271,9 +172,9 @@ let abastecimentoReportMockData: AbastecimentoReportItem[] = [
     odometro: 389858,
     usuario: "vanessa",
   },
-];
+];*/
 
-const faturamentoMockData: FaturamentoItem[] = [
+/*const faturamentoMockData: FaturamentoItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   { name: "Janeiro", faturamento: 2774.38, label: "3.50" },
   { name: "Fevereiro", faturamento: 2637.99, label: "3.72" },
   { name: "Março", faturamento: 5027.0, label: "3.70" },
@@ -286,17 +187,17 @@ const faturamentoMockData: FaturamentoItem[] = [
   { name: "Outubro", faturamento: 0, label: "0.0" },
   { name: "Novembro", faturamento: 0, label: "0.0" },
   { name: "Dezembro", faturamento: 0, label: "0.0" },
-];
+];*/
 
-const abastecimentoMockData: AbastecimentoItem[] = [
+/*const abastecimentoMockData: AbastecimentoItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   { veiculo: "Veículo 1", m3: 2500 },
   { veiculo: "Veículo 2", m3: 1500 },
   { veiculo: "Veículo 3", m3: 800 },
   { veiculo: "Veículo 4", m3: 4200 },
   { veiculo: "Veículo 5", m3: 1000 },
-];
+];*/
 
-const mockData: DashboardData = {
+/*const mockData: DashboardData = { // REMOVIDO: Movido para mock/api.mock.ts
   metrics: [
     {
       id: 1,
@@ -388,9 +289,9 @@ const mockData: DashboardData = {
     { name: "Renato I.", value: 1.5, color: "#334bff" },
   ],
   abastecimentos: [],
-};
+};*/
 
-let mockColetaData: ColetaItem[] = [
+/*let mockColetaData: ColetaItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   {
     id: "1",
     cooperado: "Primato",
@@ -424,9 +325,9 @@ let mockColetaData: ColetaItem[] = [
     horaPrevisao: "11:30",
     status: "Atrasado",
   },
-];
+];*/
 
-let mockCooperadosData: CooperadoItem[] = [
+/*let mockCooperadosData: CooperadoItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   {
     id: "1",
     matricula: 102646,
@@ -471,20 +372,14 @@ let mockCooperadosData: CooperadoItem[] = [
     doamDejetos: "Sim",
     fase: "UPD",
   },
-];
+];*/
 
 export const fetchCooperadosData = (): Promise<CooperadoItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockCooperadosData);
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchCooperadosData();
+  return api.get('/cooperados').then(response => response.data);
 };
 
-/**
- * Novos Dados Mocados para a Agenda
- */
-const newMockAgendaData: AgendaData[] = [
+/*const newMockAgendaData: AgendaData[] = [ // REMOVIDO: Movido para mock/api.mock.ts
   {
     id: 1,
     cooperado: "Ademir Engelsing",
@@ -576,115 +471,121 @@ const newMockAgendaData: AgendaData[] = [
     km: 300,
     status: "Planejado",
   },
-];
+];*/
 
 export const fetchColetaData = (): Promise<ColetaItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Retorna uma cópia para evitar mutação direta do array mockado
-      resolve([...mockColetaData]);
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchColetaData();
+  return api.get('/coletas').then(response => response.data);
 };
 
 export const updateColetaItem = (item: ColetaItem): Promise<ColetaItem> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const index = mockColetaData.findIndex((i) => i.id === item.id);
-      if (index !== -1) {
-        mockColetaData[index] = item;
-        resolve(item);
-      } else {
-        reject(new Error("Item de coleta não encontrado."));
-      }
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockUpdateColetaItem(item);
+  return api.put(`/coletas/${item.id}`, item).then(response => response.data);
 };
 
 export const createColetaItem = (
   item: Omit<ColetaItem, "id">
 ): Promise<ColetaItem> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newItem: ColetaItem = {
-        ...item,
-        id: new Date().getTime().toString(), // Gera um ID único
-      };
-      // Adiciona o novo item no início da lista
-      mockColetaData.unshift(newItem);
-      resolve(newItem);
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockCreateColetaItem(item);
+  return api.post('/coletas', item).then(response => response.data);
 };
 
 export const fetchAbastecimentoReportData = (
   startDate?: string,
   endDate?: string
 ): Promise<AbastecimentoReportItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let data = abastecimentoReportMockData;
-      if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        data = data.filter((item) => {
-          const itemDate = new Date(item.data);
-          return itemDate >= start && itemDate <= end;
-        });
-      }
-      resolve(data);
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoReportData(startDate, endDate);
+  return api.get('/abastecimentos/report', { params: { startDate, endDate } }).then(response => response.data);
+};
+
+export const fetchFaturamentoData = (): Promise<FaturamentoItem[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchFaturamentoData();
+  return api.get('/faturamentos').then(response => response.data);
+};
+
+export const fetchAbastecimentoVolumeData = (): Promise<
+  AbastecimentoVolumeItem[]
+> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoVolumeData();
+  return api.get('/abastecimentos/volume-por-mes').then(response => response.data);
 };
 
 export const fetchAbastecimentoVolumePorDiaData = (
   startDate?: string,
   endDate?: string
 ): Promise<AbastecimentoVolumePorDiaItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let data = abastecimentoReportMockData;
-      if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        data = data.filter((item) => {
-          const itemDate = new Date(item.data);
-          return itemDate >= start && itemDate <= end;
-        });
-      }
-
-      const volumePorDia = data.reduce((acc, item) => {
-        if (!acc[item.data]) {
-          acc[item.data] = { data: item.data, volumeTotal: 0 };
-        }
-        acc[item.data].volumeTotal += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoVolumePorDiaItem>);
-
-      resolve(
-        Object.values(volumePorDia).sort(
-          (a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
-        )
-      );
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoVolumePorDiaData(startDate, endDate);
+  return api.get('/abastecimentos/volume-por-dia', { params: { startDate, endDate } }).then(response => response.data);
 };
 
 export const addAbastecimentoReportItem = (
   item: Omit<AbastecimentoReportItem, "status" | "cliente" | "horaTermino">
 ): Promise<AbastecimentoReportItem> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newItem: AbastecimentoReportItem = {
-        ...item,
-        status: "Concluído",
-        cliente: "Primato Cooperativa Agroindustrial",
-        horaTermino: new Date().toLocaleTimeString("pt-BR", { hour12: false }),
-      };
-      abastecimentoReportMockData.unshift(newItem);
-      resolve(newItem);
-    }, 500);
-  });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockAddAbastecimentoReportItem(item);
+  return api.post('/abastecimentos/report', item).then(response => response.data);
+};
+
+export const fetchDashboardData = (): Promise<DashboardData> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchDashboardData();
+  return api.get('/dashboard').then(response => response.data);
+};
+
+export const fetchAbastecimentoSummaryData = (
+  startDate?: string,
+  endDate?: string
+): Promise<AbastecimentoSummaryItem[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoSummaryData(startDate, endDate);
+  return api.get('/abastecimentos/summary', { params: { startDate, endDate } }).then(response => response.data);
+};
+
+
+/**
+ * Novos Dados Mockados para a Portaria
+ */
+/*const mockPortariaData: PortariaItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
+  { id: 'ENT-001', categoria: 'Entregas', data: '01/01/2026', horario: '10:00H', empresa: 'Primato', motorista: 'Ademir Engelsing', tipoVeiculo: 'Caminhão de dejetos', placa: 'ABC-1D23', atividade: 'Entrega de dejetos', status: 'Concluído' },
+  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Mosaic', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
+  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Transportadora XYZ', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
+];*/
+
+/**
+ * Nova Função Fetch para a Portaria
+ */
+export const fetchPortariaData = (): Promise<PortariaItem[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API !== 'false') return mockFetchPortariaData();
+  return api.get('/portaria').then(response => response.data);
+};
+
+/**
+ * Nova Função Fetch (que estava faltando)
+ */
+export const fetchNewAgendaData = (): Promise<AgendaData[]> => { // Renomeado de fetchAgendaData para fetchNewAgendaData
+  if (import.meta.env.VITE_USE_MOCK_API !== 'false') return mockFetchNewAgendaData();
+  return api.get('/agenda').then(response => response.data);
+};
+
+/**
+ * Novos Dados Mockados para Qualidade
+ */
+/*let mockQualidadeDejetosData: QualidadeDejetosItem[] = [ // REMOVIDO: Movido para mock/api.mock.ts
+  { id: 'DEJ-001', dataColeta: '13/10/2025', cooperado: 'Ademir Engelsing', placa: 'ABC-1D23', ph: 7.2, densidade: 1025, entregaReferencia: 'ENT-54321' },
+  { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
+];*/
+
+/**
+ * Função Fetch para a Qualidade dos Dejetos
+ */
+export const fetchQualidadeDejetosData = (): Promise<QualidadeDejetosItem[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchQualidadeDejetosData();
+  return api.get('/qualidade-dejetos').then(response => response.data);
+};
+
+/**
+ * Função para CRIAR uma Análise de Qualidade (simulação)
+ */
+export const createAnaliseQualidade = (analise: Partial<QualidadeDejetosItem>): Promise<QualidadeDejetosItem> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockCreateAnaliseQualidade(analise);
+  return api.post('/qualidade-dejetos', analise).then(response => response.data);
 };
 
 type Period = "day" | "week" | "month";
@@ -692,271 +593,6 @@ type Period = "day" | "week" | "month";
 export const fetchAbastecimentoAggregatedVolumeData = (
   period: Period
 ): Promise<AbastecimentoVolumeItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const aggregatedData = abastecimentoReportMockData.reduce((acc, item) => {
-        const date = new Date(item.data);
-        let key: string;
-
-        switch (period) {
-          case "day":
-            key = item.data;
-            break;
-          case "month":
-            key = date.toLocaleString("pt-BR", { month: "long" });
-            key = key.charAt(0).toUpperCase() + key.slice(1);
-            break;
-          case "week": {
-            const startOfYear = new Date(date.getFullYear(), 0, 1);
-            const pastDaysOfYear =
-              (date.getTime() - startOfYear.getTime()) / 86400000;
-            const weekNumber = Math.ceil(
-              (pastDaysOfYear + startOfYear.getDay() + 1) / 7
-            );
-            key = `Semana ${weekNumber}`;
-            break;
-          }
-          default:
-            key = item.data;
-            break;
-        }
-
-        if (!acc[key]) {
-          acc[key] = {
-            name: key,
-            volume: 0,
-          };
-        }
-        acc[key].volume += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoVolumeItem>);
-
-      const sortedData = Object.values(aggregatedData).sort((a, b) => {
-        if (period === "day")
-          return new Date(a.name).getTime() - new Date(b.name).getTime();
-        return 0;
-      });
-
-      resolve(sortedData);
-    }, 500);
-  });
-};
-
-export const fetchFaturamentoData = (): Promise<FaturamentoItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(faturamentoMockData);
-    }, 500);
-  });
-};
-
-export const fetchAbastecimentoVolumeData = (): Promise<
-  AbastecimentoVolumeItem[]
-> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const volumePorMes = abastecimentoReportMockData.reduce((acc, item) => {
-        const month = new Date(item.data).toLocaleString("pt-BR", {
-          month: "long",
-        });
-        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
-
-        if (!acc[capitalizedMonth]) {
-          acc[capitalizedMonth] = {
-            name: capitalizedMonth,
-            volume: 0,
-          };
-        }
-        acc[capitalizedMonth].volume += item.volume;
-        return acc;
-      }, {} as Record<string, AbastecimentoVolumeItem>);
-
-      const finalData = faturamentoMockData.map((fatura) => {
-        return volumePorMes[fatura.name] || { name: fatura.name, volume: 0 };
-      });
-
-      resolve(finalData);
-    }, 500);
-  });
-};
-
-export const fetchDashboardData = (): Promise<DashboardData> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const dashboardDataWithAbastecimentos = { ...mockData };
-      if (
-        !dashboardDataWithAbastecimentos.abastecimentos ||
-        dashboardDataWithAbastecimentos.abastecimentos.length === 0
-      ) {
-        dashboardDataWithAbastecimentos.abastecimentos = abastecimentoMockData;
-      }
-      resolve(dashboardDataWithAbastecimentos);
-    }, 500);
-  });
-};
-
-export const fetchAbastecimentoSummaryData = (
-  startDate?: string,
-  endDate?: string
-): Promise<AbastecimentoSummaryItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let data = abastecimentoReportMockData;
-      if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        data = data.filter((item) => {
-          const itemDate = new Date(item.data);
-          return itemDate >= start && itemDate <= end;
-        });
-      }
-      const summary = data.reduce((acc, item) => {
-        const key = `${item.veiculo}-${item.placa}`;
-        if (!acc[key]) {
-          acc[key] = {
-            veiculo: item.veiculo,
-            placa: item.placa,
-            volumeTotal: 0,
-          };
-        }
-        if (item.produto) {
-          acc[key].volumeTotal += item.volume;
-        }
-        return acc;
-      }, {} as Record<string, AbastecimentoSummaryItem>);
-
-      resolve(Object.values(summary));
-    }, 500);
-  });
-};
-
-export interface PortariaItem {
-  id: string;
-  categoria: 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
-  data: string;
-  horario: string;
-  empresa: string;
-  motorista: string;
-  tipoVeiculo: string;
-  placa: string;
-  atividade: string;
-  status: 'Concluído' | 'Pendente';
-}
-
-/**
- * Nova Interface para a Agenda Refatorada
- * Esta interface corresponde à estrutura de dados que a nova tabela espera.
- */
-export interface AgendaData {
-  id: number;
-  cooperado: string;
-  seg: number;
-  ter: number;
-  qua: number;
-  qui: number;
-  sex: number;
-  qtd: number;
-  km: number;
-  transportadora: "Primato" | "Agrocampo";
-  status: "Realizado" | "Planejado";
-}
-
-
-
-
-/**
- * Novos Dados Mocados para a Portaria
- */
-const mockPortariaData: PortariaItem[] = [
-  { id: 'ENT-001', categoria: 'Entregas', data: '01/01/2026', horario: '10:00H', empresa: 'Primato', motorista: 'Ademir Engelsing', tipoVeiculo: 'Caminhão de dejetos', placa: 'ABC-1D23', atividade: 'Entrega de dejetos', status: 'Concluído' },
-  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Mosaic', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
-  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Transportadora XYZ', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
-];
-
-/**
- * Nova Função Fetch para a Portaria
- */
-export const fetchPortariaData = (): Promise<PortariaItem[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockPortariaData);
-    }, 500);
-  });
-};
-
-/**
- * Nova Função Fetch (que estava faltando)
- */
-export const fetchNewAgendaData = (): Promise<AgendaData[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(newMockAgendaData);
-    }, 500); // Simula um delay de rede
-  });
-};
-
-/**
- * ===================================================================
- * IMPLEMENTAÇÃO ATUALIZADA PARA A TELA DE QUALIDADE
- * ===================================================================
- */
-
-/**
- * Interface para a Qualidade dos Dejetos, com TODOS os campos do formulário
- */
-export interface QualidadeDejetosItem {
-  id: string;
-  dataColeta: string;
-  cooperado: string; // Pode ser nome do cooperado ou nome do Ecoponto
-  placa: string; // Virá do cooperado/entrega selecionada
-  ph: number | string;
-  densidade: number | string;
-  entregaReferencia?: string;
-  // --- CAMPOS DE PESAGEM CORRIGIDOS PARA O NOVO LAYOUT ---
-  id_recipiente_amostra?: string;
-  id_recipiente_duplicata?: string;
-  peso_recip_amostra?: string;
-  peso_recip_duplicata?: string;
-  pesagem_p2_amostra?: string;
-  pesagem_p2_duplicata?: string;
-  pesagem_p3_amostra?: string;
-  recip_st_duplicata?: string;
-  pesagem_p4_amostra?: string;
-  recip_sf_duplicata?: string;
-}
-
-/**
- * Novos Dados Mocados para Qualidade
- */
-let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
-  { id: 'DEJ-001', dataColeta: '13/10/2025', cooperado: 'Ademir Engelsing', placa: 'ABC-1D23', ph: 7.2, densidade: 1025, entregaReferencia: 'ENT-54321' },
-  { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
-];
-
-/**
- * Função Fetch para a Qualidade dos Dejetos
- */
-export const fetchQualidadeDejetosData = (): Promise<QualidadeDejetosItem[]> => {
-  return new Promise((resolve) => setTimeout(() => resolve(mockQualidadeDejetosData), 500));
-};
-
-/**
- * Função para CRIAR uma Análise de Qualidade (simulação)
- */
-export const createAnaliseQualidade = (analise: Partial<QualidadeDejetosItem>): Promise<QualidadeDejetosItem> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const newItem: QualidadeDejetosItem = {
-                id: `DEJ-${Math.floor(Math.random() * 1000)}`,
-                dataColeta: analise.dataColeta || new Date().toLocaleDateString('pt-BR'),
-                cooperado: analise.cooperado || 'N/A',
-                placa: 'N/A',
-                ph: analise.ph || 'N/A',
-                densidade: analise.densidade || 'N/A',
-                ...analise // Inclui todos os campos de pesagem que foram enviados
-            };
-            mockQualidadeDejetosData.unshift(newItem);
-            resolve(newItem);
-        }, 500);
-    });
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoAggregatedVolumeData(period);
+  return api.get('/abastecimentos/aggregated-volume', { params: { period } }).then(response => response.data);
 };

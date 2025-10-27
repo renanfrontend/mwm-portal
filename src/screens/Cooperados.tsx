@@ -4,9 +4,10 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AgendaTable } from '../components/AgendaTable';
+import { AgendaTable } from '../components/AgendaTable'; // Component still from components
+import { fetchNewAgendaData, fetchCooperadosData } from '../services/api'; // Functions still from api.ts
 import { CooperadoListItem } from '../components/CooperadoListItem';
-import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
+import { type AgendaData, type CooperadoItem } from '../types/models'; // Types from models.ts
 
 const Cooperados: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
@@ -145,7 +146,7 @@ const Cooperados: React.FC = () => {
           <div className="box p-0">
             {loading && <progress className="progress is-small is-info" max="100"></progress>}
             {error && <div className="notification is-danger">{error}</div>}
-            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
+            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} />}
           </div>
         </section>
       )}

@@ -3,11 +3,13 @@ import {
   fetchAbastecimentoReportData,
   fetchAbastecimentoSummaryData,
   fetchAbastecimentoVolumePorDiaData,
-  addAbastecimentoReportItem,
+} from '../../services/api';
+import { addAbastecimentoReportItem } from '../../services/api'; // Function from api.ts
+import {
   type AbastecimentoReportItem,
   type AbastecimentoSummaryItem,
   type AbastecimentoVolumePorDiaItem
-} from '../../services/api';
+} from '../../types/models'; // Types from models.ts
 
 const getDefaultEndDate = () => new Date().toISOString().split('T')[0];
 const getDefaultStartDate = () => {
@@ -65,11 +67,10 @@ export const loadAbastecimentoData = createAsyncThunk(
 export const addAbastecimento = createAsyncThunk(
   'abastecimento/addAbastecimento',
   async (formData: Omit<AbastecimentoReportItem, 'status' | 'cliente' | 'horaTermino'>, { dispatch, getState }) => {
-    const newItem = await addAbastecimentoReportItem(formData);
-    // Recarrega os dados para atualizar os gráficos de sumário
-    const { abastecimento } = getState() as { abastecimento: { reportData: AbastecimentoReportItem[] } };
-    const dates = abastecimento.reportData.map(item => new Date(item.data));
-    dispatch(loadAbastecimentoData({ startDate: new Date(Math.min(...dates.map(d => d.getTime()))).toISOString().split('T')[0], endDate: new Date(Math.max(...dates.map(d => d.getTime()))).toISOString().split('T')[0] }));
+    const newItem = await addAbastecimentoReportItem(formData); // A API real deve retornar o item criado
+    // Recarrega todos os dados da tela com base nos filtros de data atuais
+    const { abastecimento } = getState() as { abastecimento: AbastecimentoState };
+    dispatch(loadAbastecimentoData({ startDate: abastecimento.startDate, endDate: abastecimento.endDate }));
     return newItem;
   }
 );

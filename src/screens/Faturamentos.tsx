@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MonthlyBarChart from '../components/MonthlyBarChart';
-import { fetchFaturamentoData, fetchAbastecimentoVolumeData, type FaturamentoItem, type AbastecimentoVolumeItem } from '../services/api';
+import { fetchFaturamentoData, fetchAbastecimentoVolumeData } from '../services/api'; // Functions still from api.ts
+import { type FaturamentoItem, type AbastecimentoVolumeItem } from '../types/models'; // Types from models.ts
 
 const Faturamentos = () => {
   const [faturamentoData, setFaturamentoData] = useState<FaturamentoItem[]>([]);
