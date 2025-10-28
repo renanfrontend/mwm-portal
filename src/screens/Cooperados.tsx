@@ -1,7 +1,7 @@
 // src/screens/Cooperados.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable'; // Component still from components
@@ -73,30 +73,20 @@ const Cooperados: React.FC = () => {
 
   return (
     <>
-      <nav className="navbar is-fixed-top" role="navigation" aria-label="main navigation">
-        <div className="navbar-brand">
-          <div className="navbar-item pl-0">
-            <div className="buttons">
-              <button className="button is-medium is-white" onClick={() => navigate(-1)}>
-                <span className="icon"><MdArrowBack /></span>
-              </button>
-              <span className="is-size-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Cooperados</span>
-            </div>
+      {/* O Header agora é gerenciado pelo PageLayout */}
+      <div className="level is-mobile mb-4">
+          <div className="level-left">
+              <div className="level-item">
+                  <h1 className="title is-4">Cooperados</h1>
+              </div>
           </div>
-        </div>
-        <div className="navbar-end">
-          <div className="navbar-item">
-            <div className="buttons">
-              <button className="button is-link">
-                <span className="icon"><MdPersonAdd /></span>
-              </button>
-            </div>
+          <div className="level-right">
+              {/* Botão para adicionar novo cooperado, se necessário */}
           </div>
-        </div>
-      </nav>
+      </div>
 
       {/* --- SEÇÃO DAS ABAS COM FUNDO CORRETO --- */}
-      <section className="section has-background-white-bis" style={{ paddingTop: '6rem' }}>
+      <section className="section py-0 pt-2">
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
           <ul>
             <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cadastro</span></a></li>

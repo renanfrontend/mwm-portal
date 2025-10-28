@@ -4,10 +4,9 @@ import React, { useEffect } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
-// import AbastecimentoPieChart from '../components/AbastecimentoPieChart'; // Removido
 import { loadDashboardData } from '../features/dashboard/dashboardSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
-import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md';
+import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater, MdFilterList } from 'react-icons/md'; 
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +20,6 @@ const iconMap: { [key: string]: React.ReactNode } = {
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
-  // 'abastecimentoSummary' removido
   const { data, loading, error } = useAppSelector((state) => state.dashboard);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -34,6 +32,10 @@ const Dashboard = () => {
 
     dispatch(loadDashboardData());
   }, [isAuthenticated, navigate, dispatch]);
+  
+  const handleFilterClick = () => {
+      console.log('Botão de Filtros clicado! Implemente a lógica de abertura de modal/dropdown aqui.');
+  };
 
   return (
     <div>
@@ -54,9 +56,33 @@ const Dashboard = () => {
         </section>
       )}
       {data && (
-        <section className="section">
+        <section className="section" style={{ paddingTop: '1.5rem' }}> 
           <div className="container">
-            <h1 className="title is-4">Dashboard</h1>
+            
+            {/* SEGUNDO HEADER (ESPECÍFICO DO DASHBOARD) */}
+            <div className="level is-mobile mb-4">
+                
+                {/* Lado Esquerdo: Nome da Unidade */}
+                <div className="level-left">
+                    <div className="level-item">
+                        <p className="is-size-5 has-text-weight-semibold">Toledo - PR</p> 
+                    </div>
+                </div>
+                
+                {/* Lado Direito: Botão de Filtros */}
+                <div className="level-right">
+                    <div className="level-item">
+                        <button className="button is-info is-rounded" onClick={handleFilterClick}> 
+                            <span className="icon">
+                                <MdFilterList size={24} />
+                            </span>
+                            <span>Filtros</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            {/* O restante do conteúdo do Dashboard */}
             <div className="columns is-multiline">
               {data.metrics.map((metric) => (
                 <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
@@ -65,7 +91,7 @@ const Dashboard = () => {
                     value={`${metric.value}${metric.unit || ''}`}
                     icon={iconMap[metric.icon]}
                     trend={metric.trend}
-                    iconColor="" // Prop fantasma mantida para não quebrar (embora o componente não a use mais)
+                    iconColor=""
                   />
                 </div>
               ))}
@@ -78,9 +104,6 @@ const Dashboard = () => {
                 <CooperativeAnalysisChart chartData={data.cooperativeAnalysis} title="Análise de Cooperados" />
               </div>
             </div>
-            
-            {/* Bloco do AbastecimentoPieChart removido */}
-
           </div>
         </section>
       )}
