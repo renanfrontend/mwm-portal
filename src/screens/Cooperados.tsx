@@ -1,13 +1,12 @@
 // src/screens/Cooperados.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AgendaTable } from '../components/AgendaTable'; // Component still from components
-import { fetchNewAgendaData, fetchCooperadosData } from '../services/api'; // Functions still from api.ts
+import { AgendaTable } from '../components/AgendaTable';
 import { CooperadoListItem } from '../components/CooperadoListItem';
-import { type AgendaData, type CooperadoItem } from '../types/models'; // Types from models.ts
+import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
 
 const Cooperados: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
@@ -73,20 +72,30 @@ const Cooperados: React.FC = () => {
 
   return (
     <>
-      {/* O Header agora é gerenciado pelo PageLayout */}
-      <div className="level is-mobile mb-4">
-          <div className="level-left">
-              <div className="level-item">
-                  <h1 className="title is-4">Cooperados</h1>
-              </div>
+      <nav className="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div className="navbar-brand">
+          <div className="navbar-item pl-0">
+            <div className="buttons">
+              <button className="button is-medium is-white" onClick={() => navigate(-1)}>
+                <span className="icon"><MdArrowBack /></span>
+              </button>
+              <span className="is-size-4" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Cooperados</span>
+            </div>
           </div>
-          <div className="level-right">
-              {/* Botão para adicionar novo cooperado, se necessário */}
+        </div>
+        <div className="navbar-end">
+          <div className="navbar-item">
+            <div className="buttons">
+              <button className="button is-link">
+                <span className="icon"><MdPersonAdd /></span>
+              </button>
+            </div>
           </div>
-      </div>
+        </div>
+      </nav>
 
       {/* --- SEÇÃO DAS ABAS COM FUNDO CORRETO --- */}
-      <section className="section py-0 pt-2">
+      <section className="section has-background-white-bis" style={{ paddingTop: '6rem' }}>
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
           <ul>
             <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cadastro</span></a></li>
@@ -132,11 +141,14 @@ const Cooperados: React.FC = () => {
                 </div>
             </div>
           </div>
+          {/* INÍCIO DO AJUSTE: Adicionando a linha para mostrar o botão de exclusão na aba 'agenda' */}
+          {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button></div></div>}
+          {/* FIM DO AJUSTE */}
           <label className="label">Período: de 13/10/2025 à 17/10/2025</label>
           <div className="box p-0">
             {loading && <progress className="progress is-small is-info" max="100"></progress>}
             {error && <div className="notification is-danger">{error}</div>}
-            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} />}
+            {!loading && !error && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
           </div>
         </section>
       )}
