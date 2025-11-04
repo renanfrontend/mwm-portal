@@ -150,13 +150,13 @@ const Qualidade: React.FC = () => {
                         <p className="label has-text-centered">AMOSTRA</p>
                         <div className="field"><label className="label">ID Recipiente</label><div className="control"><input className="input" type="text" name="id_recipiente_amostra" value={formData.id_recipiente_amostra || ''} onChange={handleInputChange}/></div></div>
                         <div className="field"><label className="label">Peso do Recip.:</label><div className="control"><input className="input" type="text" name="peso_recip_amostra" value={formData.peso_recip_amostra || ''} onChange={handleInputChange}/></div></div>
-                        <div className="field"><label className="label">Pesagem P2:</label><div className="control"><input className="input" type="text" name="pesagem_p2_amostra" value={formData.pesagem_p2_amostra || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Recip. + Amostra:</label><div className="control"><input className="input" type="text" name="pesagem_p2_amostra" value={formData.pesagem_p2_amostra || ''} onChange={handleInputChange}/></div></div>
                       </div>
                       <div className="column">
                         <p className="label has-text-centered">DUPLICATA</p>
                         <div className="field"><label className="label">ID Recipiente</label><div className="control"><input className="input" type="text" name="id_recipiente_duplicata" value={formData.id_recipiente_duplicata || ''} onChange={handleInputChange}/></div></div>
                         <div className="field"><label className="label">Peso do Recip.:</label><div className="control"><input className="input" type="text" name="peso_recip_duplicata" value={formData.peso_recip_duplicata || ''} onChange={handleInputChange}/></div></div>
-                        <div className="field"><label className="label">Pesagem P2:</label><div className="control"><input className="input" type="text" name="pesagem_p2_duplicata" value={formData.pesagem_p2_duplicata || ''} onChange={handleInputChange}/></div></div>
+                        <div className="field"><label className="label">Recip. + Amostra</label><div className="control"><input className="input" type="text" name="pesagem_p2_duplicata" value={formData.pesagem_p2_duplicata || ''} onChange={handleInputChange}/></div></div>
                       </div>
                     </div>
                   </>
