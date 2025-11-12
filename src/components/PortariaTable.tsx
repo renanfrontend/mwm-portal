@@ -3,19 +3,29 @@
 import React from 'react';
 import type { PortariaItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { MdEdit, MdVisibility } from 'react-icons/md';
+import { MdEdit, MdWhereToVote } from 'react-icons/md';
 
 interface Props {
   data: PortariaItem[];
+  onCheckInClick: (item: PortariaItem) => void;
+  onEditClick: (item: PortariaItem) => void;
 }
 
-export const PortariaTable: React.FC<Props> = ({ data }) => {
+export const PortariaTable: React.FC<Props> = ({ data, onCheckInClick, onEditClick }) => {
   const { theme } = useTheme();
 
-  const getStatusTagClass = (status: 'Concluído' | 'Pendente') => {
-    if (status === 'Concluído') return 'is-success';
-    if (status === 'Pendente') return 'is-warning';
-    return 'is-light';
+  const getStatusTagClass = (status: PortariaItem['status']) => {
+    switch (status) {
+      case 'Concluído':
+        return 'is-success';
+      case 'Pesagem':
+        return 'is-info';
+      case 'Em processo':
+        return 'is-warning';
+      case 'Pendente':
+      default:
+        return 'is-light';
+    }
   };
 
   return (
@@ -48,9 +58,13 @@ export const PortariaTable: React.FC<Props> = ({ data }) => {
                 <span className={`tag ${getStatusTagClass(item.status)}`}>{item.status}</span>
               </td>
               <td className="has-text-centered is-vcentered">
-                <div className="buttons are-small is-centered">
-                  <button className="button is-light is-rounded"><span className="icon"><MdVisibility /></span></button>
-                  <button className="button is-light is-rounded"><span className="icon"><MdEdit /></span></button>
+                <div className="buttons are-small is-centered" style={{flexWrap: 'nowrap'}}>
+                  <button className="button is-light is-rounded" onClick={() => onCheckInClick(item)} disabled={item.status === 'Concluído'}>
+                    <span className="icon"><MdWhereToVote /></span>
+                  </button>
+                  <button className="button is-light is-rounded" onClick={() => onEditClick(item)} disabled={item.status !== 'Pendente'}>
+                    <span className="icon"><MdEdit /></span>
+                  </button>
                 </div>
               </td>
             </tr>

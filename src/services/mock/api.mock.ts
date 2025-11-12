@@ -240,8 +240,8 @@ const newMockAgendaData: AgendaData[] = [
 
 const mockPortariaData: PortariaItem[] = [
   { id: 'ENT-001', categoria: 'Entregas', data: '01/01/2026', horario: '10:00H', empresa: 'Primato', motorista: 'Ademir Engelsing', tipoVeiculo: 'Caminhão de dejetos', placa: 'ABC-1D23', atividade: 'Entrega de dejetos', status: 'Concluído' },
-  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Transportadora XYZ', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
-  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Mosaic', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
+  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Agrocampo', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
+  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Primato', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
 ];
 
 let mockQualidadeDejetosData: QualidadeDejetosItem[] = [

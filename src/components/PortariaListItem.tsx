@@ -6,10 +6,31 @@ import { MdEdit, MdWhereToVote } from 'react-icons/md';
 
 interface Props {
   item: PortariaItem;
+  onCheckInClick: () => void;
+  onEditClick: () => void;
 }
 
-export const PortariaListItem: React.FC<Props> = ({ item }) => {
-  const isConcluida = item.status === 'Concluído';
+export const PortariaListItem: React.FC<Props> = ({ item, onCheckInClick, onEditClick }) => {
+  
+  // Lógica para definir a cor da tag de status
+  const getStatusColor = () => {
+    switch (item.status) {
+      case 'Concluído':
+        return 'is-success'; // Verde
+      case 'Pesagem':
+        return 'is-info'; // Azul
+      case 'Em processo':
+        return 'is-warning'; // Amarelo
+      case 'Pendente':
+      default:
+        return 'is-light'; // Cinza
+    }
+  };
+
+  // O botão de Check-in (prancheta) só desabilita se estiver Concluído
+  const isCheckInDisabled = item.status === 'Concluído';
+  // O botão de Editar (lápis) só habilita se estiver Pendente
+  const isEditDisabled = item.status !== 'Pendente';
 
   return (
     <div className="mb-4">
@@ -44,19 +65,30 @@ export const PortariaListItem: React.FC<Props> = ({ item }) => {
         </div>
         <div className="column">
           <span className="help">Status</span>
-          <div className={`tag ${isConcluida ? 'is-success' : 'is-light'}`}>
+          
+          {/* Tag de Status com a cor dinâmica */}
+          <div className={`tag ${getStatusColor()}`}>
             <span className="has-text-weight-bold">{item.status}</span>
           </div>
+
         </div>
         <div className="column">
           <div className="field is-grouped is-grouped-centered">
             <div className="control">
-              <button className="button is-small is-success is-light" disabled={isConcluida}>
+              <button 
+                className="button is-small is-success is-light" 
+                disabled={isCheckInDisabled}
+                onClick={onCheckInClick}
+              >
                 <span className="icon"><MdWhereToVote /></span>
               </button>
             </div>
             <div className="control">
-              <button className="button is-small is-info is-light" disabled={isConcluida}>
+              <button 
+                className="button is-small is-info is-light" 
+                disabled={isEditDisabled}
+                onClick={onEditClick}
+              >
                 <span className="icon"><MdEdit /></span>
               </button>
             </div>

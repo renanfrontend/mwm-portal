@@ -157,6 +157,7 @@ export interface AgendaData {
   status: "Realizado" | "Planejado";
 }
 
+// Interface da Portaria Atualizada
 export interface PortariaItem {
   id: string;
   categoria: 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
@@ -167,18 +168,25 @@ export interface PortariaItem {
   tipoVeiculo: string;
   placa: string;
   atividade: string;
-  status: 'Concluído' | 'Pendente';
+  
+  // Status atualizado para incluir os passos
+  status: 'Concluído' | 'Pendente' | 'Em processo' | 'Pesagem';
+  
+  // Campos novos (opcionais) que adicionamos
+  cpf_cnpj?: string;
+  balancaEntrada?: string;
+  balancaSaida?: string;
 }
+
 
 export interface QualidadeDejetosItem {
   id: string;
   dataColeta: string;
-  cooperado: string; // Pode ser nome do cooperado ou nome do Ecoponto
-  placa: string; // Virá do cooperado/entrega selecionada
+  cooperado: string; 
+  placa: string; 
   ph: number | string;
   densidade: number | string;
   entregaReferencia?: string;
-  // --- CAMPOS DE PESAGEM CORRIGIDOS PARA O NOVO LAYOUT ---
   id_recipiente_amostra?: string;
   id_recipiente_duplicata?: string;
   peso_recip_amostra?: string;

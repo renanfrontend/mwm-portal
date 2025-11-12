@@ -5,7 +5,10 @@ import { MdSearch, MdFilterList, MdArrowBack, MdAdd, MdCalendarViewMonth, MdDele
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { PortariaListItem } from '../components/PortariaListItem';
-import { fetchPortariaData, type PortariaItem } from '../services/api';
+import { fetchPortariaData, type PortariaItem } from '../services/api'; 
+
+import PortariaCheckInModal from '../components/PortariaCheckInModal';
+import PortariaEditModal from '../components/PortariaEditModal';
 
 type Tab = 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
 
@@ -17,6 +20,11 @@ const Portaria: React.FC = () => {
   
   const [data, setData] = useState<PortariaItem[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [selectedItem, setSelectedItem] = useState<PortariaItem | null>(null);
+  const [modalCheckInOpen, setModalCheckInOpen] = useState(false);
+  const [modalEditOpen, setModalEditOpen] = useState(false);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,6 +49,100 @@ const Portaria: React.FC = () => {
     );
   }, [data, activeTab, searchTerm]);
 
+  
+  // --- FUNÇÕES DOS MODAIS ---
+
+  // Check-in (Abertura e Fechamento)
+  const handleOpenCheckIn = (item: PortariaItem) => {
+    setSelectedItem(item);
+    setModalCheckInOpen(true);
+  };
+  const handleCloseCheckIn = () => {
+    setSelectedItem(null);
+    setModalCheckInOpen(false);
+  };
+
+  // Esta função SÓ ATUALIZA O STATUS e NÃO FECHA o modal
+  const handleModalStepChange = (
+    newStatus: 'Em processo' | 'Pesagem', 
+    stepData: { horarioCheckIn?: string, balancaEntrada?: string }
+  ) => {
+    if (!selectedItem) return;
+
+    // TODO: Chamar a API aqui para salvar o passo (PATCH)
+    console.log(`Status mudando para: ${newStatus}`, selectedItem.id, stepData);
+    toast.info(`Status de ${selectedItem.motorista} atualizado para: ${newStatus}`);
+
+    // Atualiza a lista local para refletir a mudança
+    setData(currentData =>
+      currentData.map(item =>
+        item.id === selectedItem.id
+          ? { 
+              ...item, 
+              status: newStatus,
+              ...(stepData.horarioCheckIn && { horario: stepData.horarioCheckIn }),
+              ...(stepData.balancaEntrada && { balancaEntrada: stepData.balancaEntrada })
+            }
+          : item
+      )
+    );
+  };
+
+
+  // Esta função FINALIZA TUDO e FECHA o modal
+  const handleConfirmCheckIn = (checkInData: { 
+    horarioCheckIn: string;
+    balancaEntrada: string;
+    balancaSaida: string;
+  }) => {
+    if (!selectedItem) return;
+
+    // TODO: Chamar a API para salvar TUDO (PUT/PATCH final)...
+    console.log("Check-in FINALIZADO:", selectedItem.id, checkInData); 
+    
+    // O toast com o nome do motorista
+    toast.success(`Check-in de ${selectedItem.motorista} finalizado com sucesso!`);
+
+    // Atualiza a lista local
+    setData(currentData =>
+      currentData.map(item =>
+        item.id === selectedItem.id
+          ? { 
+              ...item, 
+              status: 'Concluído', 
+              horario: checkInData.horarioCheckIn,
+              balancaEntrada: checkInData.balancaEntrada,
+              balancaSaida: checkInData.balancaSaida
+            }
+          : item
+      )
+    );
+    handleCloseCheckIn(); // Fecha o modal
+  };
+
+  // Edição (Abertura e Fechamento)
+  const handleOpenEdit = (item: PortariaItem) => {
+    setSelectedItem(item);
+    setModalEditOpen(true);
+  };
+  const handleCloseEdit = () => {
+    setSelectedItem(null);
+    setModalEditOpen(false);
+  };
+  const handleSaveEdit = (editedItem: PortariaItem) => {
+    if (!selectedItem) return;
+    // TODO: Chamar a API para salvar as edições...
+    console.log("Item editado:", editedItem);
+    toast.success(`Agendamento de ${editedItem.motorista} atualizado!`);
+    setData(currentData =>
+      currentData.map(item =>
+        item.id === selectedItem.id ? editedItem : item
+      )
+    );
+    handleCloseEdit();
+  };
+
+  
   const emptyStateMessages = {
     Entregas: { title: "Não há entregas agendadas", subtitle: "Verifique com a supervisão antes de adicionar uma nova entrega.", buttonClass: 'is-info' },
     Abastecimentos: { title: "Não há abastecimentos agendados", subtitle: "Caso o veículo esteja dentro da Bio Planta, você pode incluir manualmente a solicitação.", buttonClass: 'is-link' },
@@ -102,10 +204,15 @@ const Portaria: React.FC = () => {
         {loading ? (
           <div className="box p-4"><progress className="progress is-small is-info" max="100"></progress></div>
         ) : filteredData.length > 0 ? (
-          // Renderiza a lista de itens
-          filteredData.map(item => <PortariaListItem key={item.id} item={item} />)
+          filteredData.map(item => 
+            <PortariaListItem 
+              key={item.id} 
+              item={item} 
+              onCheckInClick={() => handleOpenCheckIn(item)}
+              onEditClick={() => handleOpenEdit(item)}
+            />
+          )
         ) : (
-          // Renderiza o estado de "vazio"
           <div className="columns is-centered">
             <div className="column is-half has-text-centered mt-6">
               <span className="icon is-large has-text-grey-light">
@@ -122,6 +229,23 @@ const Portaria: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Renderização do Modal de Check-in */}
+      <PortariaCheckInModal
+        isActive={modalCheckInOpen}
+        onClose={handleCloseCheckIn}
+        onConfirm={handleConfirmCheckIn}
+        onStepChange={handleModalStepChange}
+        data={selectedItem}
+      />
+      
+      {/* Renderização do Modal de Edição (NOSSA MUDANÇA!) */}
+      <PortariaEditModal
+        isActive={modalEditOpen}
+        onClose={handleCloseEdit}
+        onSave={handleSaveEdit}
+        data={selectedItem}
+      />
     </>
   );
 };
