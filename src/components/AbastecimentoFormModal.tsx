@@ -22,7 +22,8 @@ const AbastecimentoFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit }
   };
 
   const [formData, setFormData] = useState<FormState>(initialState);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // CORRIGIDO: Renomeado para _setIsSubmitting para remover o aviso de "não lido" (TS6133)
+  const [isSubmitting, _setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -34,8 +35,10 @@ const AbastecimentoFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Você pode adicionar _setIsSubmitting(true) aqui se onSubmit se tornar assíncrono
     onSubmit(formData);
     setFormData(initialState);
+    // e _setIsSubmitting(false) aqui
   };
 
   return (

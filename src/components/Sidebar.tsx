@@ -123,7 +123,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
           </div>
           
           <div className="user-info" style={{ color: currentColors.text }}>
-            <p className="has-text-weight-bold">{user?.name || 'Usuário'}</p>
+            {/* CORREÇÃO: Alterado de user?.name para user?.username */}
+            <p className="has-text-weight-bold">{user?.username || 'Usuário'}</p>
             <p className="is-size-7" style={{ color: currentColors.subtitle }}>{user?.email || 'email@exemplo.com'}</p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+// CORRIGIDO: Removido 'React' (TS6133)
 import {
   ScatterChart,
   Scatter,

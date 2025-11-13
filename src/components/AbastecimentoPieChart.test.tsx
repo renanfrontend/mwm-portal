@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -34,21 +35,25 @@ const mockChartData: AbastecimentoSummaryItem[] = [
 describe('AbastecimentoPieChart', () => {
   it('deve renderizar o título fornecido', () => {
     render(<AbastecimentoPieChart chartData={[]} title="Teste de Título" />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
     expect(screen.getByText('Teste de Título')).toBeInTheDocument();
   });
 
   it('deve usar o título padrão se nenhum for fornecido', () => {
     render(<AbastecimentoPieChart chartData={[]} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
     expect(screen.getByText('Abastecimento')).toBeInTheDocument();
   });
 
   it('deve renderizar a label central "Volume por Veículo" mesmo com dados vazios', () => {
     render(<AbastecimentoPieChart chartData={[]} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
     expect(screen.getByText('Volume por Veículo')).toBeInTheDocument();
   });
 
   it('deve renderizar os componentes do gráfico quando houver dados', () => {
     render(<AbastecimentoPieChart chartData={mockChartData} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
     expect(screen.getByTestId('pie-chart-mock')).toBeInTheDocument();
     expect(screen.getByTestId('legend-mock')).toBeInTheDocument();
   });

@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AbastecimentoReportItem, AbastecimentoSummaryItem, AbastecimentoVolumePorDiaItem } from '../../services/api';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit'; // CORRIGIDO: 'type' separado
+// CORRIGIDO: 'import type' para os tipos da API
+import type { AbastecimentoReportItem, AbastecimentoSummaryItem, AbastecimentoVolumePorDiaItem } from '../../services/api';
 
 interface AbastecimentoState {
   reportData: AbastecimentoReportItem[];

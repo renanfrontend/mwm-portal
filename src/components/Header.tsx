@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+// CORRIGIDO: Removido 'useContext' (TS6133)
+import React, { useState } from 'react';
 // Importações necessárias para ícones
 import { MdNotifications, MdMenu, MdAccountCircle } from 'react-icons/md'; 
 // Use a importação REAL do seu contexto de autenticação:
@@ -6,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  children?: React.ReactNode; // ADICIONADO: Necessário pelo App.tsx
 }
 
 const NotificationButton: React.FC = () => {
@@ -101,7 +103,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                                 <div className="dropdown-content">
                                     {/* Informações do Usuário no topo do dropdown */}
                                     <div className="dropdown-item has-text-weight-semibold">
-                                        {user?.name || 'Usuário'}
+                                        {/* CORRIGIDO: user.name para user.username (TS2339) */}
+                                        {user?.username || 'Usuário'}
                                         <p className="is-size-7 has-text-grey">{user?.email}</p>
                                     </div>
                                     <hr className="dropdown-divider" />

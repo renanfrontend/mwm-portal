@@ -1,4 +1,7 @@
 import React from 'react';
+// CORREÇÃO: Importar o tipo 'StockItem' da API
+import type { StockItem as StockItemType } from '../services/api';
+
 // Função para determinar a cor da barra com base na porcentagem
 const getStockColorClass = (value: number, capacity: number): string => {
   const percentage = (value / capacity) * 100;
@@ -14,6 +17,7 @@ const getStockColorClass = (value: number, capacity: number): string => {
 };
 
 // A prop 'color' foi removida da interface do sub-componente
+// CORREÇÃO: 'StockItemType' agora é 'StockItem'
 const StockItem: React.FC<Omit<StockItemType, 'id' | 'color'>> = ({ label, value, capacity, unit }) => {
   // Chama a função para obter a cor dinâmica
   const colorClass = getStockColorClass(value, capacity);
@@ -39,6 +43,7 @@ const StockItem: React.FC<Omit<StockItemType, 'id' | 'color'>> = ({ label, value
 };
 
 interface Props {
+  // CORREÇÃO: 'StockItemType' agora é 'StockItem'
   stockItems: StockItemType[];
 }
 

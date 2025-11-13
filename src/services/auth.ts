@@ -1,5 +1,5 @@
 // src/services/auth.ts
-import { v4 as uuidv4 } from 'uuid';
+// CORREÇÃO: Removido 'uuidv4' não utilizado
 import axios from 'axios';
 import { type MockUser } from '../types/models'; // Import MockUser from models.ts
 import { login as mockLogin, forgotPassword as mockForgotPassword, createNewPassword as mockCreateNewPassword } from './mock/auth.mock';

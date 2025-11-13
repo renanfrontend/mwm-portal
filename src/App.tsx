@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useState } from 'react';
+import React, { useState } from 'react'; // Importado React para React.ReactElement
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,13 +31,15 @@ const AppContent = () => {
   const { isAuthenticated, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  // CORRIGIDO: Trocado JSX.Element por React.ReactElement
+  const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
     if (!isAuthenticated) return <Navigate to="/login" />;
     // Esta linha agora funciona, pois PageLayout retorna JSX
     return <PageLayout>{children}</PageLayout>;
   };
 
-  const AuthRoute = ({ children }: { children: JSX.Element }) => {
+  // CORRIGIDO: Trocado JSX.Element por React.ReactElement
+  const AuthRoute = ({ children }: { children: React.ReactElement }) => {
     return isAuthenticated ? <Navigate to="/" /> : children;
   };
 
@@ -46,6 +48,7 @@ const AppContent = () => {
       {isAuthenticated && (
         <>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={logout} />
+          {/* Este Header agora aceita 'children' (o botão) graças à correção em Header.tsx */}
           <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             <button className="button is-light" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
               <span className="icon"><MdMenu /></span>

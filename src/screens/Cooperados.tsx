@@ -1,7 +1,8 @@
 // src/screens/Cooperados.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdPersonAdd } from 'react-icons/md';
+// CORREÇÃO: Removido 'MdAdd' (TS6133)
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable';

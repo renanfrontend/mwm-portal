@@ -9,7 +9,8 @@ import {
   setCurrentPage,
   setItemsPerPage,
 } from '../features/abastecimento/abastecimentoSlice';
-import { type AbastecimentoReportItem } from '../services/api';
+// CORRIGIDO: import type e adicionado AbastecimentoSummaryItem
+import { type AbastecimentoReportItem, type AbastecimentoSummaryItem } from '../services/api'; 
 import MonthlyBarChart from '../components/MonthlyBarChart';
 import DetailedSupplyChart from '../components/DetailedSupplyChart';
 import AbastecimentoFormModal from '../components/AbastecimentoFormModal';
@@ -19,7 +20,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 const AbastecimentoReport = () => {
   const dispatch = useAppDispatch();
-  const { reportData, summaryData, volumePorDiaData, loading, error, startDate, endDate, isModalOpen, currentPage, itemsPerPage } = useAppSelector((state) => state.abastecimento);
+  // CORRIGIDO: Removido 'error' (TS6133)
+  const { reportData, summaryData, volumePorDiaData, loading, startDate, endDate, isModalOpen, currentPage, itemsPerPage } = useAppSelector((state) => state.abastecimento);
 
   useEffect(() => {
     dispatch(loadAbastecimentoData({ startDate, endDate }));
@@ -41,7 +43,8 @@ const AbastecimentoReport = () => {
       "Hora Início", "Hora Término", "Volume (m³)", "Odômetro", "Usuário"
     ];
 
-    const csvRows = reportData.map(item => [
+    // CORRIGIDO: Adicionado tipo 'item: AbastecimentoReportItem' (TS7006)
+    const csvRows = reportData.map((item: AbastecimentoReportItem) => [
       item.status,
       `"${item.cliente}"`,
       item.veiculo,
@@ -79,7 +82,8 @@ const AbastecimentoReport = () => {
           </tr>
         </thead>
         <tbody>
-          {summaryData.map((item, index) => (
+          {/* CORRIGIDO: Adicionado tipo 'item' (TS7006) e removido 'index' (TS6133) */}
+          {summaryData.map((item: AbastecimentoSummaryItem) => (
             <tr key={`${item.veiculo}-${item.placa}`}>
               <td>{item.veiculo}</td>
               <td>{item.placa}</td>
@@ -94,7 +98,8 @@ const AbastecimentoReport = () => {
   const renderSummaryChart = () => (
     <div className="chart-container">
       <MonthlyBarChart
-        chartData={summaryData.map(item => ({
+        // CORRIGIDO: Adicionado tipo 'item: AbastecimentoSummaryItem' (TS7006)
+        chartData={summaryData.map((item: AbastecimentoSummaryItem) => ({
           name: item.placa,
           value: item.volumeTotal,
         }))}
@@ -127,7 +132,11 @@ const AbastecimentoReport = () => {
   );
 
   const renderVolumePorProdutoChart = () => {
-    const dataByProduct = reportData.reduce((acc, item) => {
+    // CORRIGIDO: Tipos adicionados para 'acc' (TS7006) e 'item' (TS7006)
+    const dataByProduct = reportData.reduce((
+      acc: Record<string, { name: string, value: number }>, 
+      item: AbastecimentoReportItem
+    ) => {
       const { produto, volume } = item;
       if (!acc[produto]) {
         acc[produto] = { name: produto, value: 0 };
@@ -145,7 +154,8 @@ const AbastecimentoReport = () => {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
-                {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                {/* CORRIGIDO: 'entry' não utilizado trocado por '_' (TS6133) */}
+                {chartData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={(value: number) => `${value.toFixed(2)} m³`} />
               <Legend />
@@ -157,7 +167,11 @@ const AbastecimentoReport = () => {
   };
 
   const renderAbastecimentosPorUsuarioChart = () => {
-    const dataByUser = reportData.reduce((acc, item) => {
+    // CORRIGIDO: Tipos adicionados para 'acc' (TS7006) e 'item' (TS7006)
+    const dataByUser = reportData.reduce((
+      acc: Record<string, { name: string, value: number }>, 
+      item: AbastecimentoReportItem
+    ) => {
       const { usuario } = item;
       if (!acc[usuario]) {
         acc[usuario] = { name: usuario, value: 0 };
@@ -166,7 +180,8 @@ const AbastecimentoReport = () => {
       return acc;
     }, {} as Record<string, { name: string, value: number }>);
 
-    const chartData = Object.values(dataByUser);
+    // CORRIGIDO: Tipo explícito para 'chartData' (TS2322)
+    const chartData: { name: string; value: number; }[] = Object.values(dataByUser);
 
     return (
       <MonthlyBarChart
@@ -203,7 +218,8 @@ const AbastecimentoReport = () => {
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((item) => (
+          {/* CORRIGIDO: Adicionado tipo 'item: AbastecimentoReportItem' (TS7006) */}
+          {currentItems.map((item: AbastecimentoReportItem) => (
             <tr key={`${item.placa}-${item.data}-${item.horaInicio}`}>
               <td>{item.status}</td>
               <td>{item.cliente}</td>
@@ -233,7 +249,7 @@ const AbastecimentoReport = () => {
       dispatch(setCurrentPage(pageNumber));
     };
 
-    const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+    // CORRIGIDO: 'pageNumbers' removido (TS6133)
 
     return (
       <div className="level mt-4">
@@ -258,20 +274,22 @@ const AbastecimentoReport = () => {
         </div>
         <div className="level-right">
           <nav className="pagination is-centered" role="navigation" aria-label="pagination">
-            <a
+            {/* CORRIGIDO: Trocado <a> por <button> para usar 'disabled' (TS2322) */}
+            <button
               className="pagination-previous"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
               Anterior
-            </a>
-            <a
+            </button>
+            {/* CORRIGIDO: Trocado <a> por <button> para usar 'disabled' (TS2322) */}
+            <button
               className="pagination-next"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
               Próxima
-            </a>
+            </button>
             <ul className="pagination-list">
             </ul>
           </nav>

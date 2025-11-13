@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // CORREÇÃO: Removido 'React'
 import { MdSearch, MdFilterList, MdArrowForwardIos, MdArrowBack, MdLocationOn, MdModeEdit } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +18,7 @@ const Coleta = () => {
   const [selectedItem, setSelectedItem] = useState<ColetaItem | null>(null);
   const navigate = useNavigate();
 
-  const canEdit = user?.role === 'editor' || user?.role === 'administrador';
+  // CORREÇÃO: Removida variável 'canEdit' (TS6133)
   const canAdd = user?.role === 'editor' || user?.role === 'administrador';
 
   useEffect(() => {

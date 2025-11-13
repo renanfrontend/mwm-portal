@@ -25,7 +25,8 @@ interface Props {
   yAxisLabel?: string;
 }
 
-const MonthlyBarChart: React.FC<Props> = ({ chartData, title, dataKey, barColor, yAxisLabel, }) => {
+// CORRIGIDO: Removido 'dataKey' da desestruturação (TS6133)
+const MonthlyBarChart: React.FC<Props> = ({ chartData, title, barColor, yAxisLabel, }) => {
   const { theme } = useTheme();
   const axisColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
   const textColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';

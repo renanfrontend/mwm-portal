@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { AgendaData } from '../services/api';
+import type { AgendaData } from '../services/api'; // CORRIGIDO: import type
 import useTheme from '../hooks/useTheme';
 import { FaCheckCircle, FaRegCircle } from 'react-icons/fa';
 
@@ -8,7 +8,7 @@ interface Props {
   isDeleteMode: boolean;
   selectedItems: (string | number)[];
   onSelectItem: (id: string | number) => void;
-  // A prop 'onConfirmDelete' não é mais necessária aqui
+  onConfirmDelete?: () => void; // ADICIONADO: Prop opcional faltando (TS2322 em Cooperados.tsx)
 }
 
 const REALIZADO_ID_COLOR = '#d4edda';
@@ -19,7 +19,8 @@ export const AgendaTable: React.FC<Props> = ({ data, isDeleteMode, selectedItems
 
   // Ordena os dados: 'Realizado' primeiro, depois por Qtd
   const sortedData = useMemo(() => {
-    const statusPriority = { 'Realizado': 1, 'Planejado': 2 };
+    // CORRIGIDO: Tipo explícito para statusPriority (TS7053)
+    const statusPriority: Record<string, number> = { 'Realizado': 1, 'Planejado': 2 };
     return [...data].sort((a, b) => {
       const statusComparison = statusPriority[a.status] - statusPriority[b.status];
       if (statusComparison !== 0) return statusComparison;

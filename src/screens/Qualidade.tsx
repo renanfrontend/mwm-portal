@@ -1,10 +1,12 @@
 // src/screens/Qualidade.tsx
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdSave, MdAddCircleOutline } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
+// CORREÇÃO: Removido 'useMemo' (TS6133)
+import React, { useState, useEffect, useCallback } from 'react';
+// CORREÇÃO: Removidos ícones não utilizados (TS6133)
+import { MdSave, MdAddCircleOutline } from 'react-icons/md';
+// CORREÇÃO: Removido 'useNavigate' (TS6133)
 import { toast } from 'react-toastify';
-import { QualidadeDejetosListItem } from '../components/QualidadeDejetosListItem';
+// CORREÇÃO: Removido 'QualidadeDejetosListItem' (TS6133)
 import { fetchQualidadeDejetosData, createAnaliseQualidade, fetchCooperadosData, type QualidadeDejetosItem, type CooperadoItem } from '../services/api';
 
 type Tab = 'Análise' | 'Qualidade dos Dejetos' | 'Qualidade das Amostras';
@@ -12,13 +14,16 @@ type AmostraOrigem = 'cooperado' | 'pontoDeColeta';
 
 const Qualidade: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('Análise');
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  // CORREÇÃO: Removido 'navigate' (TS6133)
+  // CORREÇÃO: Removido 'searchTerm' e 'setSearchTerm' (TS6133)
 
-  const [dejetosData, setDejetosData] = useState<QualidadeDejetosItem[]>([]);
+  // CORREÇÃO: 'dejetosData' não é lido, então foi removido (TS6133)
+  const [, setDejetosData] = useState<QualidadeDejetosItem[]>([]);
   const [cooperados, setCooperados] = useState<CooperadoItem[]>([]);
   
-  const [loading, setLoading] = useState(false);
+  // CORREÇÃO: 'loading' não é lido, então foi removido (TS6133)
+  // E 'setLoading' agora é corretamente pego do 'useState' (Corrige TS2349)
+  const [, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
   // --- CONTROLE DO FLUXO DO FORMULÁRIO CORRIGIDO ---
@@ -28,14 +33,16 @@ const Qualidade: React.FC = () => {
 
   const loadListData = useCallback(async () => {
       if (activeTab === 'Qualidade dos Dejetos') {
+          // CORREÇÃO: Chamada correta para setLoading (TS2349)
           setLoading(true);
           try {
               const data = await fetchQualidadeDejetosData();
               setDejetosData(data || []);
           } catch (err) { toast.error("Falha ao carregar dados."); }
+          // CORREÇÃO: Chamada correta para setLoading (TS2349)
           finally { setLoading(false); }
       }
-  }, [activeTab]);
+  }, [activeTab, setDejetosData, setLoading]); // Adicionado setLoading e setDejetosData às dependências
 
   useEffect(() => { loadListData(); }, [loadListData]);
   
@@ -51,7 +58,7 @@ const Qualidade: React.FC = () => {
     if (activeTab === 'Análise') { loadCooperados(); }
   }, [activeTab]);
 
-  const filteredDejetosData = useMemo(() => (dejetosData || []).filter(item => item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()) || item.placa.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm, dejetosData]);
+  // CORREÇÃO: Removido 'filteredDejetosData' (TS6133)
 
   const handleSave = async () => {
     setSaving(true);

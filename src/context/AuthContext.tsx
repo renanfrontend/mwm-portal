@@ -1,6 +1,8 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { decodeJwt, type MockUser } from '../services/auth';
+// CORRIGIDO: Importações divididas
+import { decodeJwt } from '../services/auth';
+import type { MockUser } from '../types/models'; // Corrigido o caminho de importação do TIPO
 
 interface AuthContextType {
   isAuthenticated: boolean;

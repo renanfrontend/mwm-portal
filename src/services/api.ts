@@ -1,23 +1,28 @@
 // src/services/api.ts
 import axios from 'axios';
+// ADICIONADO 'export' AQUI para expor os tipos para a aplicação
+export type {
+  Metric,
+  StockItem,
+  CooperativeAnalysisItem,
+  AbastecimentoItem,
+  DashboardData,
+  AbastecimentoSummaryItem,
+  FaturamentoItem,
+  AbastecimentoVolumeItem,
+  AbastecimentoReportItem,
+  AbastecimentoVolumePorDiaItem,
+  ColetaItem,
+  CooperadoItem,
+  CalendarEvent,
+  AgendaItem,
+  AgendaData,
+  PortariaItem,
+  QualidadeDejetosItem,
+} from './mock/api.mock';
+
+// Importação das funções mock
 import {
-  type Metric,
-  type StockItem,
-  type CooperativeAnalysisItem,
-  type AbastecimentoItem,
-  type DashboardData,
-  type AbastecimentoSummaryItem,
-  type FaturamentoItem,
-  type AbastecimentoVolumeItem,
-  type AbastecimentoReportItem,
-  type AbastecimentoVolumePorDiaItem,
-  type ColetaItem,
-  type CooperadoItem,
-  type CalendarEvent,
-  type AgendaItem,
-  type AgendaData,
-  type PortariaItem,
-  type QualidadeDejetosItem,
   mockFetchCooperadosData,
   mockFetchColetaData,
   mockUpdateColetaItem,
@@ -29,8 +34,28 @@ import {
   mockFetchFaturamentoData,
   mockFetchAbastecimentoVolumeData,
   mockFetchDashboardData,
-  mockFetchAbastecimentoSummaryData, mockFetchPortariaData, mockFetchNewAgendaData, mockFetchQualidadeDejetosData, mockCreateAnaliseQualidade
+  mockFetchAbastecimentoSummaryData, 
+  mockFetchPortariaData, 
+  mockFetchNewAgendaData, 
+  mockFetchQualidadeDejetosData, 
+  mockCreateAnaliseQualidade
 } from './mock/api.mock';
+
+// Importação dos tipos necessários para as assinaturas de função
+import type {
+  AbastecimentoReportItem,
+  AbastecimentoSummaryItem,
+  AbastecimentoVolumeItem,
+  AbastecimentoVolumePorDiaItem,
+  AgendaData,
+  ColetaItem,
+  CooperadoItem,
+  DashboardData,
+  FaturamentoItem,
+  PortariaItem,
+  QualidadeDejetosItem
+} from './mock/api.mock';
+
 
 // Cria uma instância do axios para a API
 const api = axios.create({

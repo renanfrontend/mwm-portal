@@ -1,11 +1,12 @@
 // src/screens/Dashboard.tsx
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react'; // CORRIGIDO: Removido 'React' (TS6133)
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import { loadDashboardData } from '../features/dashboard/dashboardSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
+import type { Metric } from '../services/api'; // ADICIONADO: Importação do tipo Metric
 import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater, MdFilterList } from 'react-icons/md'; 
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -84,14 +85,15 @@ const Dashboard = () => {
             
             {/* O restante do conteúdo do Dashboard */}
             <div className="columns is-multiline">
-              {data.metrics.map((metric) => (
+              {/* CORRIGIDO: Adicionado tipo 'metric: Metric' (TS7006) */}
+              {data.metrics.map((metric: Metric) => (
                 <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
                   <MetricCard
                     title={metric.label}
                     value={`${metric.value}${metric.unit || ''}`}
                     icon={iconMap[metric.icon]}
                     trend={metric.trend}
-                    iconColor=""
+                    // CORRIGIDO: Removida prop 'iconColor' (TS2322)
                   />
                 </div>
               ))}

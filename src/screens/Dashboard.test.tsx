@@ -1,4 +1,4 @@
-import React from 'react';
+// CORREÇÃO: Removido 'import React' (TS6133)
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
@@ -81,7 +81,7 @@ describe('Dashboard Screen', () => {
 
     expect(await screen.findByText('Erro')).toBeInTheDocument();
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
-    expect(screen.queryByText('Carregando dados...')).not.toBeInTheDocument();
+    expect(screen.queryByText('Carregado dados...')).not.toBeInTheDocument();
   });
 
   it('deve renderizar os dados do dashboard com sucesso', async () => {

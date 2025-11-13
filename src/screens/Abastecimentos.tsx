@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // CORREÇÃO: Removido 'React'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchAbastecimentoAggregatedVolumeData, type AbastecimentoVolumeItem } from '../services/api';
 

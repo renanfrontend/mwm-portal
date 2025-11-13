@@ -9,7 +9,8 @@ interface Props {
 }
 
 const ColetaFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit, initialData }) => {
-  const initialState = {
+  // CORRIGIDO: Adicionado tipo explícito ': ColetaItem' (TS2345)
+  const initialState: ColetaItem = {
     id: '', // será gerado pela API
     cooperado: '',
     motorista: '',
@@ -18,7 +19,7 @@ const ColetaFormModal: React.FC<Props> = ({ isActive, onClose, onSubmit, initial
     odometro: 0,
     dataPrevisao: new Date().toISOString().split('T')[0],
     horaPrevisao: new Date().toTimeString().split(' ')[0].substring(0, 5),
-    status: 'Pendente',
+    status: 'Pendente', // Este agora é validado como "Pendente" | "Entregue" | "Atrasado"
   };
 
   const [formData, setFormData] = useState<ColetaItem>(initialState);

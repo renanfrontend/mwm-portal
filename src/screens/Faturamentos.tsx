@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // CORREÇÃO: Removido 'React'
 import MonthlyBarChart from '../components/MonthlyBarChart';
 import { fetchFaturamentoData, fetchAbastecimentoVolumeData } from '../services/api'; // Functions still from api.ts
 import { type FaturamentoItem, type AbastecimentoVolumeItem } from '../types/models'; // Types from models.ts

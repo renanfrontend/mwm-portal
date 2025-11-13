@@ -1,4 +1,4 @@
-import React from 'react';
+// CORRIGIDO: Removido 'React' (TS6133)
 import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend, Label } from 'recharts';
 import { type AbastecimentoSummaryItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
@@ -43,7 +43,8 @@ const AbastecimentoPieChart = ({ chartData, title = 'Abastecimento' }: Props) =>
               paddingAngle={5}
               labelLine={false}
             >
-              {chartData.map((entry, index) => (
+              {/* CORRIGIDO: 'entry' renomeado para '_' (TS6133) */}
+              {chartData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
               <Label value="Volume por Veículo" position="center" fill={textColor} fontSize="16px" />

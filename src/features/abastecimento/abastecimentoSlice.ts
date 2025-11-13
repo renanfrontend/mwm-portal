@@ -111,7 +111,8 @@ const abastecimentoSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(addAbastecimento.pending, (state) => {
+      // CORREÇÃO: Removido 'state' não utilizado (TS6133)
+      .addCase(addAbastecimento.pending, () => {
         // Opcional: pode-se definir um estado de loading específico para adição
         // state.loading = true; 
       })

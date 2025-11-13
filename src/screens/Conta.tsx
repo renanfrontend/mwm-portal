@@ -1,4 +1,4 @@
-import React from 'react';
+// CORREÇÃO: Removido 'import React' (TS6133)
 
 const Conta = () => {
   return (
