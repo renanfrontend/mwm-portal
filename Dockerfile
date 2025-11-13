@@ -1,35 +1,37 @@
 # Estágio 1: Build da Aplicação React com Vite
-# Use uma imagem Node.js leve (baseada em Alpine Linux) para o build
+# (Esta etapa permanece a mesma, apenas limpei um 'cd')
 FROM node:20-alpine AS builder
 
-# Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# Copia os arquivos de definição de dependências
-COPY package.json package-lock.json /app/
-
-# Instala as dependências do projeto
-RUN cd /app && npm install
-# Copia todo o código-fonte da aplicação para o contêiner
+COPY package.json package-lock.json ./
+RUN npm install
 COPY . .
 
-# Executa o script de build para gerar os arquivos estáticos de produção
 RUN npm run build
 
-# Estágio 2: Servir a Aplicação com Nginx
-# Use uma imagem Nginx oficial e leve
-FROM nginx:stable-alpine
+# -----------------------------------------------------------------
 
-# Copie os arquivos estáticos gerados no estágio de build para o diretório padrão do Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Estágio 2: Servir a Aplicação com http-serve
+# (Esta etapa substitui todo o bloco Nginx)
+FROM node:20-alpine
 
-# Copia o arquivo de tipos MIME para o Nginx
-COPY mime.types /etc/nginx/mime.types
+# Define o diretório de trabalho
+WORKDIR /app/dist
 
-# Copia o arquivo de configuração customizado do Nginx (essencial para SPAs)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Instala o 'http-serve' globalmente dentro da imagem
+RUN npm install -g http-serve
 
-# Exponha a porta 80, que é a porta padrão do Nginx
-EXPOSE 80
+# Copia SOMENTE os arquivos estáticos gerados no estágio 'builder'
+# O destino é '.', que é o WORKDIR (/app)
+COPY --from=builder /app/dist .
+RUN cd /app/dist
 
-# O comando padrão da imagem Nginx já inicia o servidor.
+# Expõe a porta 8080 (a porta que o http-serve usará)
+EXPOSE 8080
+
+# Comando para iniciar o servidor
+# -s : Habilita o modo "Single Page Application" (SPA)
+#      (Isto redireciona todos os 404s para o index.html, corrigindo seu erro)
+# -p 8080: Diz ao servidor para rodar na porta 8080
+CMD ["http-serve", ".", "-s", "-p", "8080"]
