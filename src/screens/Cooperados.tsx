@@ -4,9 +4,8 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AgendaTable } from '../components/AgendaTable';
 import { CooperadoListItem } from '../components/CooperadoListItem';
-import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
+import { fetchNewAgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
 
 // --- IMPORT DO NOVO MODAL ---
 import CooperadoContactModal from '../components/CooperadoContactModal';
@@ -15,7 +14,7 @@ const Cooperados: React.FC = () => {
   // --- Seus estados originais ---
   const [activeTab, setActiveTab] = useState('cadastro');
   const navigate = useNavigate();
-  const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
+  // const [agendaData, setAgendaData] = useState<AgendaData[]>([]); // Removido - Não utilizado
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,9 +22,9 @@ const Cooperados: React.FC = () => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal de Delete
-  const [showFilters, setShowFilters] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string[]>([]);
-  const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]);
+  // const [showFilters, setShowFilters] = useState(false); // Removido - Não utilizado
+  // const [filterStatus, setFilterStatus] = useState<string[]>([]); // Removido - Não utilizado
+  // const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]); // Removido - Não utilizado
 
   // --- ESTADO PARA O NOVO MODAL ---
   const [isContactModalActive, setIsContactModalActive] = useState(false);
@@ -37,8 +36,8 @@ const Cooperados: React.FC = () => {
     setLoading(true); setError(null);
     try {
       if (activeTab === 'agenda') {
-        const data = await fetchNewAgendaData();
-        setAgendaData(data || []);
+        await fetchNewAgendaData();
+        // setAgendaData(data || []); // Removido - Não utilizado
       } else {
         const data = await fetchCooperadosData();
         setCooperadosData(data || []);
@@ -56,7 +55,7 @@ const Cooperados: React.FC = () => {
     setSearchTerm(''); setSelectedItems([]); setIsDeleteMode(false);
   }, [activeTab, loadData]);
   
-  const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus.length === 0 || filterStatus.includes(item.status)) && (filterTransportadora.length === 0 || filterTransportadora.includes(item.transportadora))), [searchTerm, agendaData, filterStatus, filterTransportadora]);
+  // const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus.length === 0 || filterStatus.includes(item.status)) && (filterTransportadora.length === 0 || filterTransportadora.includes(item.transportadora))), [searchTerm, agendaData, filterStatus, filterTransportadora]); // Removido - Não utilizado
   const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase())) || (item.filial && item.filial.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
   
   const handleSelectItem = (id: string | number) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]) };
@@ -64,7 +63,7 @@ const Cooperados: React.FC = () => {
     // ... (sua função de delete)
     try {
       if (activeTab === 'agenda') {
-        setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+        // setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id))); // Removido - Não utilizado
       } else {
         setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
       }
@@ -75,8 +74,8 @@ const Cooperados: React.FC = () => {
       setIsModalOpen(false);
     }
   };
-  const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); };
-  const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); };
+  // const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); }; // Removido - Não utilizado
+  // const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); }; // Removido - Não utilizado
 
   
   // --- HANDLERS PARA TODOS OS BOTÕES ---
