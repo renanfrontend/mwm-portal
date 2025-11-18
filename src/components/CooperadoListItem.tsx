@@ -11,8 +11,9 @@ interface Props {
   onSelectItem: (id: string | number) => void;
 
   // --- ADIÇÃO DAS PROPS DOS BOTÕES ---
+  // (Vou adicionar todas para os outros botões não quebrarem no futuro)
   onContactItem: (item: CooperadoItem) => void;
-  onLocationItem: (item: CooperadoItem) => void;
+  onLocationItem: (item: CooperadoItem) => void; // A que vamos usar
   onViewItem: (item: CooperadoItem) => void;
   onEditItem: (item: CooperadoItem) => void;
   onCalendarItem: (item: CooperadoItem) => void;
@@ -33,14 +34,14 @@ export const CooperadoListItem: React.FC<Props> = ({
   const certificadoClass = item.certificado === 'Ativo' ? 'has-text-success' : 'has-text-grey';
   const doamDejetosClass = item.doamDejetos === 'Sim' ? 'has-text-success' : 'has-text-grey';
 
-  // --- Handlers para parar a propagação ---
+  // --- Handlers para parar a propagação e chamar as props ---
   const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onContactItem(item);
   };
   const handleLocationClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onLocationItem(item);
+    onLocationItem(item); // <--- A MÁGICA ACONTECE AQUI
   };
   const handleViewClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -107,7 +108,7 @@ export const CooperadoListItem: React.FC<Props> = ({
           <span className="subtitle is-6">{item.fase}</span>
         </div>
         
-        {/* --- CORREÇÃO APLICADA NOS ONCLICKS --- */}
+        {/* --- LIGANDO OS ONCLICKS NOS SEUS BOTÕES --- */}
         <div className="column is-narrow">
             <div className="is-flex is-justify-content-flex-end">
                 <button className="button is-small is-light is-rounded" onClick={handleContactClick}>
