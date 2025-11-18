@@ -246,7 +246,7 @@ let mockColetaData: ColetaItem[] = [
 let mockCooperadosData: CooperadoItem[] = [
   { id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa" },
   { id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC" },
-  { id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crecjário" },
+  { id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário" },
   { id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD" },
 ];
 
