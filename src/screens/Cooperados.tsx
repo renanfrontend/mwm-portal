@@ -11,8 +11,7 @@ import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type Cooperad
 // --- IMPORTS DOS NOVOS MODAIS ---
 import CooperadoContactModal from '../components/CooperadoContactModal';
 import CooperadoLocationModal from '../components/CooperadoLocationModal';
-
-type Tab = 'cadastro' | 'agenda';
+import CooperadoInfoModal from '../components/CooperadoInfoModal';
 
 
 const Cooperados: React.FC = () => {
@@ -37,6 +36,7 @@ const Cooperados: React.FC = () => {
   const [selectedCooperado, setSelectedCooperado] = useState<CooperadoItem | null>(null);
   const [isContactModalActive, setIsContactModalActive] = useState(false);
   const [isLocationModalActive, setIsLocationModalActive] = useState(false);
+  const [isInfoModalActive, setIsInfoModalActive] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -84,28 +84,34 @@ const Cooperados: React.FC = () => {
   const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); };
   const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); };
 
-  // --- HANDLERS DOS MODAIS ---
+  // --- 5. FUNÇÕES PARA ABRIR E FECHAR OS MODAIS ---
+  const closeAllModals = () => {
+    setIsContactModalActive(false);
+    setIsLocationModalActive(false);
+    setIsInfoModalActive(false);
+    setTimeout(() => setSelectedCooperado(null), 200);
+  };
 
   const handleOpenContactModal = (item: CooperadoItem) => {
     setSelectedCooperado(item);
     setIsContactModalActive(true);
-  };
-  const handleCloseContactModal = () => {
-    setIsContactModalActive(false);
-    setTimeout(() => setSelectedCooperado(null), 200);
   };
 
   const handleOpenLocationModal = (item: CooperadoItem) => {
     setSelectedCooperado(item);
     setIsLocationModalActive(true);
   };
-  const handleCloseLocationModal = () => {
-    setIsLocationModalActive(false);
-    setTimeout(() => setSelectedCooperado(null), 200);
+
+  const handleOpenViewModal = (item: CooperadoItem) => {
+    setSelectedCooperado(item);
+    setIsInfoModalActive(true);
   };
 
-  // Placeholders para os outros botões (para não dar erro no CooperadoListItem)
-  const handleOpenViewModal = (item: CooperadoItem) => toast.info(`Modal VISUALIZAR para: ${item.motorista} (Não implementado)`);
+  const handleOpenMapFromInfo = (item: CooperadoItem) => {
+    setIsInfoModalActive(false);
+    setTimeout(() => handleOpenLocationModal(item), 100);
+  };
+
   const handleOpenEditModal = (item: CooperadoItem) => toast.info(`Modal EDITAR para: ${item.motorista} (Não implementado)`);
   const handleOpenCalendarModal = (item: CooperadoItem) => toast.info(`Modal AGENDA para: ${item.motorista} (Não implementado)`);
 
@@ -222,14 +228,21 @@ const Cooperados: React.FC = () => {
       {/* --- RENDERIZAÇÃO DOS MODAIS NOVO --- */}
       <CooperadoContactModal
         isActive={isContactModalActive}
-        onClose={handleCloseContactModal}
+        onClose={closeAllModals}
         data={selectedCooperado}
       />
       
       <CooperadoLocationModal
         isActive={isLocationModalActive}
-        onClose={handleCloseLocationModal}
+        onClose={closeAllModals}
         data={selectedCooperado}
+      />
+
+      <CooperadoInfoModal
+        isActive={isInfoModalActive}
+        onClose={closeAllModals}
+        data={selectedCooperado}
+        onOpenMap={handleOpenMapFromInfo}
       />
     </>
   );
