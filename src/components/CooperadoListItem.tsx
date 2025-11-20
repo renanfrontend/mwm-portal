@@ -58,7 +58,9 @@ export const CooperadoListItem: React.FC<Props> = ({
         <div className="column"><span className="help">Filiada</span><span className="subtitle is-6">{item.filial}</span></div>
         <div className="column is-2-desktop is-4-mobile"><span className="help">Motorista</span><span className="subtitle is-6">{item.motorista}</span></div>
         <div className="column is-2-desktop is-hidden-mobile"><span className="help">Tipo de veículo</span><span className="subtitle is-6">{item.tipoVeiculo}</span></div>
-        <div className="column is-hidden-mobile"><span className="help">Placa</span><span className="subtitle is-6">{item.placa}</span></div>
+        
+        {/* REMOVIDA A COLUNA DE PLACA AQUI */}
+
         <div className="column"><span className="help">Certificado</span><div className={`icon-text has-text-weight-bold ${certificadoClass}`}><span className="icon"><MdVerified /></span><span>{item.certificado}</span></div></div>
         <div className="column"><span className="help">Doam Dejetos</span><div className={`icon-text has-text-weight-bold ${doamDejetosClass}`}><span className="icon"><MdCheck /></span><span>{item.doamDejetos}</span></div></div>
         <div className="column is-hidden-mobile"><span className="help">Fase do dejeto</span><span className="subtitle is-6">{item.fase}</span></div>
