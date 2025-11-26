@@ -10,7 +10,7 @@ import {
 } from '../services/api';
 
 // Definição das abas
-type Tab = 'Abastecimento' | 'Análise' | 'Qualidade dos Dejetos' | 'Qualidade das Amostras';
+type Tab = 'Entrega de dejetos' | 'Análise' | 'Qualidade dos Dejetos' | 'Qualidade das Amostras';
 type AmostraOrigem = 'cooperado' | 'pontoDeColeta';
 
 const Qualidade: React.FC = () => {
@@ -30,8 +30,8 @@ const Qualidade: React.FC = () => {
   const [amostraOrigem, setAmostraOrigem] = useState<AmostraOrigem>();
   const [formData, setFormData] = useState<Partial<QualidadeDejetosItem>>({});
 
-  // --- FORMULÁRIO ABASTECIMENTO ---
-  const [abastecimentoForm, setAbastecimentoForm] = useState({
+  // --- FORMULÁRIO ENTREGA DE DEJETOS ---
+  const [entregaDejetosForm, setEntregaDejetosForm] = useState({
     cooperado: '',
     data: '',
     medicaoInicial: '',
@@ -46,18 +46,18 @@ const Qualidade: React.FC = () => {
 
   // Cálculo automático do Total Recebido
   useEffect(() => {
-    const inicial = parseFloat(abastecimentoForm.medicaoInicial);
-    const final = parseFloat(abastecimentoForm.medicaoFinal);
+    const inicial = parseFloat(entregaDejetosForm.medicaoInicial);
+    const final = parseFloat(entregaDejetosForm.medicaoFinal);
     
     if (!isNaN(inicial) && !isNaN(final)) {
         // Calcula a diferença absoluta
         const total = Math.abs(inicial - final);
-        setAbastecimentoForm(prev => ({
+        setEntregaDejetosForm(prev => ({
             ...prev,
             totalRecebido: total.toFixed(2)
         }));
     }
-  }, [abastecimentoForm.medicaoInicial, abastecimentoForm.medicaoFinal]);
+  }, [entregaDejetosForm.medicaoInicial, entregaDejetosForm.medicaoFinal]);
 
   // Loaders
   const loadListData = useCallback(async () => {
@@ -85,7 +85,7 @@ const Qualidade: React.FC = () => {
         toast.error("Falha ao carregar lista de cooperados.");
       }
     };
-    if (activeTab === 'Análise' || activeTab === 'Abastecimento') { 
+    if (activeTab === 'Análise' || activeTab === 'Entrega de dejetos') { 
         loadCooperados(); 
     }
   }, [activeTab]);
@@ -96,9 +96,9 @@ const Qualidade: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAbastecimentoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleEntregaDejetosChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setAbastecimentoForm(prev => ({ ...prev, [name]: value }));
+    setEntregaDejetosForm(prev => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
@@ -127,18 +127,18 @@ const Qualidade: React.FC = () => {
     }
   };
 
-  const handleSaveAbastecimento = async () => {
+  const handleSaveEntregaDejetos = async () => {
       setSaving(true);
       try {
-          console.log(abastecimentoForm);
+          console.log(entregaDejetosForm);
           await new Promise(resolve => setTimeout(resolve, 500));
-          toast.success("Abastecimento salvo com sucesso!");
-          setAbastecimentoForm({
+          toast.success("Entrega de dejetos salva com sucesso!");
+          setEntregaDejetosForm({
             cooperado: '', data: '', medicaoInicial: '', medicaoFinal: '', totalRecebido: '0.00',
             densidade: '', ms: '', nitrogenio: '', fosfato: '', oxidoPotassio: ''
           });
       } catch(e) {
-          toast.error("Erro ao salvar abastecimento");
+          toast.error("Erro ao salvar entrega de dejetos");
       } finally {
           setSaving(false);
       }
@@ -161,9 +161,9 @@ const Qualidade: React.FC = () => {
         {/* ABAS */}
         <div className="tabs is-toggle is-medium is-centered is-fullwidth">
           <ul>
-            <li className={activeTab === 'Abastecimento' ? 'is-active' : ''}>
-              <a onClick={() => setActiveTab('Abastecimento')}>
-                <span>Abastecimento</span>
+            <li className={activeTab === 'Entrega de dejetos' ? 'is-active' : ''}>
+              <a onClick={() => setActiveTab('Entrega de dejetos')}>
+                <span>Entrega de dejetos</span>
               </a>
             </li>
             <li className={activeTab === 'Análise' ? 'is-active' : ''}>
@@ -185,8 +185,8 @@ const Qualidade: React.FC = () => {
         </div>
       </section>
       
-      {/* --- ABA: ABASTECIMENTO (Formulário) --- */}
-      {activeTab === 'Abastecimento' && (
+      {/* --- ABA: ENTREGA DE DEJETOS (Formulário) --- */}
+      {activeTab === 'Entrega de dejetos' && (
         <section className="section pt-4 pb-6">
             <div className="box">
                 <div className="animate-fade-in">
@@ -204,8 +204,8 @@ const Qualidade: React.FC = () => {
                                     <div className="select is-fullwidth">
                                         <select 
                                             name="cooperado" 
-                                            value={abastecimentoForm.cooperado} 
-                                            onChange={handleAbastecimentoChange}
+                                            value={entregaDejetosForm.cooperado} 
+                                            onChange={handleEntregaDejetosChange}
                                         >
                                             <option value="">Selecionar</option>
                                             {cooperados.map(c => (
@@ -225,8 +225,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="date" 
                                         name="data" 
-                                        value={abastecimentoForm.data} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.data} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -240,8 +240,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="number" 
                                         name="medicaoInicial" 
-                                        value={abastecimentoForm.medicaoInicial} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.medicaoInicial} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -255,14 +255,14 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="number" 
                                         name="medicaoFinal" 
-                                        value={abastecimentoForm.medicaoFinal} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.medicaoFinal} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* --- TOTAL RECEBIDO (Ajustado: Título Maior e Alinhamento) --- */}
+                        {/* --- TOTAL RECEBIDO --- */}
                         <div className="column is-12">
                             <div className="field">
                                 <div className="control">
@@ -271,7 +271,7 @@ const Qualidade: React.FC = () => {
                                             Total recebido (Kg):
                                         </p>
                                         <p className="is-size-4 has-text-weight-bold has-text-white has-text-left">
-                                            {abastecimentoForm.totalRecebido}
+                                            {entregaDejetosForm.totalRecebido}
                                         </p>
                                     </div>
                                 </div>
@@ -292,8 +292,8 @@ const Qualidade: React.FC = () => {
                                     <div className="select is-fullwidth">
                                         <select 
                                             name="densidade" 
-                                            value={abastecimentoForm.densidade} 
-                                            onChange={handleAbastecimentoChange}
+                                            value={entregaDejetosForm.densidade} 
+                                            onChange={handleEntregaDejetosChange}
                                         >
                                             <option value="">Selecionar</option>
                                             {densidadeOptions.map(val => (
@@ -313,8 +313,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="text" 
                                         name="ms" 
-                                        value={abastecimentoForm.ms} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.ms} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -328,8 +328,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="text" 
                                         name="nitrogenio" 
-                                        value={abastecimentoForm.nitrogenio} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.nitrogenio} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -343,8 +343,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="text" 
                                         name="fosfato" 
-                                        value={abastecimentoForm.fosfato} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.fosfato} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -358,8 +358,8 @@ const Qualidade: React.FC = () => {
                                         className="input" 
                                         type="text" 
                                         name="oxidoPotassio" 
-                                        value={abastecimentoForm.oxidoPotassio} 
-                                        onChange={handleAbastecimentoChange} 
+                                        value={entregaDejetosForm.oxidoPotassio} 
+                                        onChange={handleEntregaDejetosChange} 
                                     />
                                 </div>
                             </div>
@@ -370,7 +370,7 @@ const Qualidade: React.FC = () => {
                         <p className="control">
                             <button 
                                 className={`button is-info ${saving ? 'is-loading' : ''}`} 
-                                onClick={handleSaveAbastecimento}
+                                onClick={handleSaveEntregaDejetos}
                             >
                                 <span className="icon"><MdSave /></span>
                                 <span>Salvar</span>
