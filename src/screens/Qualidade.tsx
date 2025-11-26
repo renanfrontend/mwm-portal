@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdSave, MdAddCircleOutline } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import { 
-  fetchQualidadeDejetosData, 
   createAnaliseQualidade, 
   fetchCooperadosData, 
   type QualidadeDejetosItem, 
@@ -18,11 +17,9 @@ const Qualidade: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('Análise');
 
   // Dados Gerais
-  const [dejetosData, setDejetosData] = useState<QualidadeDejetosItem[]>([]);
   const [cooperados, setCooperados] = useState<CooperadoItem[]>([]);
   
   // Estados de Controle
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
   // --- FORMULÁRIO ANÁLISE (Existente) ---
@@ -44,13 +41,68 @@ const Qualidade: React.FC = () => {
     oxidoPotassio: ''
   });
 
+  // Dados Mockados para visualização das tabelas
+  const mockDejetosList = [
+    {
+        data: '2025-02-20',
+        cooperado: 'Ademir Engelsing',
+        status: 'Concluído',
+        pesoInicial: '1500',
+        pesoFinal: '1000',
+        totalRecebido: '500',
+        densidade: '1015',
+        ms: '5.2',
+        n: '250',
+        p: '120',
+        k: '180',
+        st: '5000',
+        sv: '4200'
+    },
+    {
+        data: '2025-02-21',
+        cooperado: 'João da Silva',
+        status: 'Em Análise',
+        pesoInicial: '2000',
+        pesoFinal: '1200',
+        totalRecebido: '800',
+        densidade: '1012',
+        ms: '4.8',
+        n: '-',
+        p: '-',
+        k: '-',
+        st: '-',
+        sv: '-'
+    }
+  ];
+
+  const mockAmostrasList = [
+    {
+        data: '2025-02-22',
+        ecoponto: 'Ecoponto Central',
+        status: 'Concluído',
+        referencia: 'REF-2024/01',
+        recipiente: 'A-01',
+        st_perc: '12.5',
+        sv_st_perc: '85.0',
+        st_mg: '450',
+        st_var: '0.5',
+        sv_var: '0.2',
+        mv_mf: '92.0',
+        var_perc: '1.1',
+        data_analise: '2025-02-23',
+        p1: '10.5',
+        p2: '20.1',
+        p3: '15.2',
+        p4: '12.0'
+    }
+  ];
+
   // Cálculo automático do Total Recebido
   useEffect(() => {
     const inicial = parseFloat(entregaDejetosForm.medicaoInicial);
     const final = parseFloat(entregaDejetosForm.medicaoFinal);
     
     if (!isNaN(inicial) && !isNaN(final)) {
-        // Calcula a diferença absoluta
         const total = Math.abs(inicial - final);
         setEntregaDejetosForm(prev => ({
             ...prev,
@@ -60,22 +112,6 @@ const Qualidade: React.FC = () => {
   }, [entregaDejetosForm.medicaoInicial, entregaDejetosForm.medicaoFinal]);
 
   // Loaders
-  const loadListData = useCallback(async () => {
-      if (activeTab === 'Qualidade dos Dejetos') {
-          setLoading(true);
-          try {
-              const data = await fetchQualidadeDejetosData();
-              setDejetosData(data || []);
-          } catch (err) { 
-              toast.error("Falha ao carregar dados."); 
-          } finally { 
-              setLoading(false); 
-          }
-      }
-  }, [activeTab]);
-
-  useEffect(() => { loadListData(); }, [loadListData]);
-  
   useEffect(() => {
     const loadCooperados = async () => {
       try {
@@ -266,13 +302,29 @@ const Qualidade: React.FC = () => {
                         <div className="column is-12">
                             <div className="field">
                                 <div className="control">
-                                    <div className="notification is-success p-4" style={{ borderRadius: '4px' }}>
-                                        <p className="is-size-5 has-text-white mb-1 has-text-weight-bold">
+                                    <div style={{ 
+                                        backgroundColor: '#1a3b5d',
+                                        borderRadius: '6px',
+                                        padding: '1rem 1.5rem',
+                                        color: 'white',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start'
+                                    }}>
+                                        <span style={{ 
+                                            fontSize: '0.9rem', 
+                                            fontWeight: 'bold', 
+                                            marginBottom: '0.25rem',
+                                            opacity: 0.9
+                                        }}>
                                             Total recebido (Kg):
-                                        </p>
-                                        <p className="is-size-4 has-text-weight-bold has-text-white has-text-left">
+                                        </span>
+                                        <span style={{ 
+                                            fontSize: '1.8rem', 
+                                            fontWeight: 'bold' 
+                                        }}>
                                             {entregaDejetosForm.totalRecebido}
-                                        </p>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -525,58 +577,116 @@ const Qualidade: React.FC = () => {
         </section>
       )}
 
-      {/* --- ABA: LISTA --- */}
+      {/* --- ABA: LISTA DE DEJETOS (ATUALIZADA) --- */}
       {activeTab === 'Qualidade dos Dejetos' && (
         <section className="section pt-4 pb-6">
           <div className="box">
-            <h2 className="title is-5 mb-4">Registros de Qualidade</h2>
-            {loading ? (
-                <div className="has-text-centered py-6">
-                    <button className="button is-loading is-white is-large">Carregando</button>
-                </div>
-            ) : (
-                dejetosData.length > 0 ? (
-                    <div className="table-container">
-                        <table className="table is-fullwidth is-striped is-hoverable">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Cooperado/Ponto</th>
-                                    <th>PH</th>
-                                    <th>Densidade</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dejetosData.map((item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.dataColeta ? new Date(item.dataColeta).toLocaleDateString() : '-'}</td>
-                                        <td>{item.cooperado}</td>
-                                        <td>{item.ph}</td>
-                                        <td>{item.densidade}</td>
-                                        <td><span className="tag is-success is-light">Concluído</span></td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="notification is-light has-text-centered">
-                        Nenhum registro encontrado.
-                    </div>
-                )
-            )}
+            <h2 className="title is-5 mb-4">Qualidade dos dejetos por cooperado</h2>
+            <div className="table-container">
+                <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
+                    <thead>
+                        <tr className="has-background-light">
+                            <th>Data</th>
+                            <th>Cooperado</th>
+                            <th>Status</th>
+                            <th>Peso Inicial</th>
+                            <th>Peso Final</th>
+                            <th>Total Recebido</th>
+                            <th>Densidade</th>
+                            <th>MS (%)</th>
+                            <th>N (mg/L)</th>
+                            <th>P2O5 (mg/L)</th>
+                            <th>K2O (mg/L)</th>
+                            <th>ST (mg/L)</th>
+                            <th>SV (mg/L)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {mockDejetosList.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.data}</td>
+                                <td>{item.cooperado}</td>
+                                <td>
+                                    <span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>
+                                        {item.status}
+                                    </span>
+                                </td>
+                                <td>{item.pesoInicial}</td>
+                                <td>{item.pesoFinal}</td>
+                                <td>{item.totalRecebido}</td>
+                                <td>{item.densidade}</td>
+                                <td>{item.ms}</td>
+                                <td>{item.n}</td>
+                                <td>{item.p}</td>
+                                <td>{item.k}</td>
+                                <td>{item.st}</td>
+                                <td>{item.sv}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
           </div>
         </section>
       )}
 
-      {/* --- ABA: AMOSTRAS --- */}
+      {/* --- ABA: AMOSTRAS (ATUALIZADA) --- */}
       {activeTab === 'Qualidade das Amostras' && (
         <section className="section pt-4 pb-6">
-            <div className="box has-text-centered py-6 has-text-grey-light border-dashed">
-                <span className="icon is-large mb-3"><MdAddCircleOutline size={48} /></span>
-                <p className="is-size-5">Template de Amostras em Desenvolvimento</p>
-                <p className="is-size-7">Esta aba será implementada na próxima etapa.</p>
+            <div className="box">
+                <h2 className="title is-5 mb-4">Qualidade das amostras por ponto de coleta</h2>
+                <div className="table-container">
+                    <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
+                        <thead>
+                            <tr className="has-background-light">
+                                <th>Data</th>
+                                <th>Ecoponto</th>
+                                <th>Status</th>
+                                <th>Referência</th>
+                                <th>Recepiente</th>
+                                <th>ST (%)</th>
+                                <th>SV/ST (%)</th>
+                                <th>ST (mg/L)</th>
+                                <th>ST Var. (%)</th>
+                                <th>SV Var. (%)</th>
+                                <th>MV/MF (%)</th>
+                                <th>Var. (%)</th>
+                                <th>Data Análise</th>
+                                <th>P1 (g)</th>
+                                <th>P2 (g)</th>
+                                <th>P3 (g)</th>
+                                <th>P4 (g)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {mockAmostrasList.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.data}</td>
+                                    <td>{item.ecoponto}</td>
+                                    <td>
+                                        <span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td>{item.referencia}</td>
+                                    <td>{item.recipiente}</td>
+                                    <td>{item.st_perc}</td>
+                                    <td>{item.sv_st_perc}</td>
+                                    <td>{item.st_mg}</td>
+                                    <td>{item.st_var}</td>
+                                    <td>{item.sv_var}</td>
+                                    <td>{item.mv_mf}</td>
+                                    <td>{item.var_perc}</td>
+                                    <td>{item.data_analise}</td>
+                                    <td>{item.p1}</td>
+                                    <td>{item.p2}</td>
+                                    <td>{item.p3}</td>
+                                    <td>{item.p4}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
       )}
