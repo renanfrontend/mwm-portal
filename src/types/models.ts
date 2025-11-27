@@ -198,3 +198,26 @@ export interface QualidadeDejetosItem {
   pesagem_p4_amostra?: string;
   recip_sf_duplicata?: string;
 }
+
+export interface CooperadoItem {
+  id: string;
+  matricula: number;
+  filial: string; // Isso será usado como "Transportadora"
+  motorista: string;
+  tipoVeiculo: string;
+  placa: string;
+  certificado: "Ativo" | "Inativo";
+  doamDejetos: "Sim" | "Não";
+  fase: string;
+  
+  // --- NOVOS CAMPOS PARA O FORMULÁRIO COMPLETO ---
+  cpfCnpj?: string;
+  cabecasAlojadas?: string | number;
+  tecnico?: string;
+  telefone?: string;
+  numPropriedade?: string;
+  numEstabelecimento?: string;
+  municipio?: string;
+  latitude?: string;
+  longitude?: string;
+}
