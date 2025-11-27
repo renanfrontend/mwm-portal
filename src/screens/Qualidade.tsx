@@ -303,10 +303,10 @@ const Qualidade: React.FC = () => {
                             <div className="field">
                                 <div className="control">
                                     <div style={{ 
-                                        backgroundColor: '#1a3b5d',
+                                        backgroundColor: '#e4f7ee',
                                         borderRadius: '6px',
                                         padding: '1rem 1.5rem',
-                                        color: 'white',
+                                        color: 'black',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'flex-start'
