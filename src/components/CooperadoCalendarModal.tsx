@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import type { CooperadoItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { MdChevronLeft, MdChevronRight, MdCalendarToday, MdCheck } from 'react-icons/md';
+import { MdChevronLeft, MdChevronRight, MdCheck } from 'react-icons/md';
 
 interface Props {
   isActive: boolean;
@@ -56,7 +56,7 @@ const CooperadoCalendarModal: React.FC<Props> = ({ isActive, onClose, onSave, da
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
   // Formatar data selecionada para exibição no input
-  const formattedDateText = selectedDate 
+  selectedDate 
     ? `${selectedDate} de ${monthNames[month]} de ${year}`
     : '';
 
