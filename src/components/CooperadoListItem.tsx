@@ -29,7 +29,7 @@ export const CooperadoListItem: React.FC<Props> = ({
         {isDeleteMode && <div className="column is-narrow"><label className="checkbox"><input type="checkbox" checked={isSelected} onChange={() => onSelectItem(item.id)} /></label></div>}
         <div className="column"><span className="help">Matrícula</span><span className="subtitle is-6">{item.matricula}</span></div>
         <div className="column"><span className="help">Filiada</span><span className="subtitle is-6">{item.filial}</span></div>
-        <div className="column is-2-desktop is-4-mobile"><span className="help">Cooperado</span><span className="subtitle is-6">{item.motorista}</span></div>
+        <div className="column is-2-desktop is-4-mobile"><span className="help">Motorista</span><span className="subtitle is-6">{item.motorista}</span></div>
         <div className="column is-2-desktop is-hidden-mobile"><span className="help">Tipo de veículo</span><span className="subtitle is-6">{item.tipoVeiculo}</span></div>
         <div className="column is-hidden-mobile"><span className="help">Placa</span><span className="subtitle is-6">{item.placa}</span></div>
         <div className="column"><span className="help">Certificado</span><div className={`icon-text has-text-weight-bold ${certificadoClass}`}><span className="icon"><MdVerified /></span><span>{item.certificado}</span></div></div>

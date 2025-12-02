@@ -1,74 +1,101 @@
 // src/components/PortariaTable.tsx
 
 import React from 'react';
-import type { PortariaItem } from '../services/api';
+import { type PortariaItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { MdEdit, MdWhereToVote } from 'react-icons/md';
+import { MdEdit, MdLogin, MdQrCodeScanner } from 'react-icons/md';
 
 interface Props {
   data: PortariaItem[];
-  onCheckInClick: (item: PortariaItem) => void;
-  onEditClick: (item: PortariaItem) => void;
+  onCheckIn: (item: PortariaItem) => void;
+  onEdit: (item: PortariaItem) => void;
 }
 
-export const PortariaTable: React.FC<Props> = ({ data, onCheckInClick, onEditClick }) => {
+export const PortariaTable: React.FC<Props> = ({ data, onCheckIn, onEdit }) => {
   const { theme } = useTheme();
+  const textColor = theme === 'dark' ? '#a0aec0' : '#363636';
 
-  const getStatusTagClass = (status: PortariaItem['status']) => {
+  // Função para definir a cor da tag de status
+  const getStatusTag = (status: string) => {
     switch (status) {
-      case 'Concluído':
-        return 'is-success';
-      case 'Pesagem':
-        return 'is-info';
-      case 'Em processo':
-        return 'is-warning';
-      case 'Pendente':
-      default:
-        return 'is-light';
+      case 'Concluído': return 'is-success';
+      case 'Pendente': return 'is-warning';
+      case 'Em processo': return 'is-info';
+      case 'Pesagem': return 'is-link';
+      default: return 'is-light';
     }
   };
 
   return (
     <div className="table-container">
-      <table className={`table is-hoverable is-fullwidth is-narrow ${theme === 'dark' ? 'is-dark' : ''}`}>
+      <table className="table is-fullwidth is-hoverable is-striped">
         <thead>
-          <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
-            <th>Data</th>
-            <th>Horário</th>
-            <th>Empresa</th>
-            <th>Motorista</th>
-            <th>Tipo de veículo</th>
-            <th>Placa</th>
-            <th>Atividade</th>
-            <th className="has-text-centered">Status</th>
-            <th className="has-text-centered">Ações</th>
+          <tr>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Data/Hora</th>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Motorista</th>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Empresa</th>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Veículo</th>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Atividade</th>
+            <th style={{ color: textColor, padding: '12px 15px' }}>Status</th>
+            <th style={{ color: textColor, padding: '12px 15px', textAlign: 'right' }}>Ações</th>
           </tr>
         </thead>
         <tbody>
-          {data.map(item => (
+          {data.map((item) => (
             <tr key={item.id}>
-              <td>{item.data}</td>
-              <td>{item.horario}</td>
-              <td>{item.empresa}</td>
-              <td>{item.motorista}</td>
-              <td>{item.tipoVeiculo}</td>
-              <td>{item.placa}</td>
-              <td>{item.atividade}</td>
-              <td className="has-text-centered is-vcentered">
-                <span className={`tag ${getStatusTagClass(item.status)}`}>{item.status}</span>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                <div>
+                    <p className="has-text-weight-semibold">{item.data}</p>
+                    <p className="is-size-7 has-text-grey">{item.horario}</p>
+                </div>
               </td>
-              <td className="has-text-centered is-vcentered">
-                <div className="buttons are-small is-centered" style={{flexWrap: 'nowrap'}}>
-                  <button className="button is-light is-rounded" onClick={() => onCheckInClick(item)} disabled={item.status === 'Concluído'}>
-                    <span className="icon"><MdWhereToVote /></span>
-                  </button>
-                  <button className="button is-light is-rounded" onClick={() => onEditClick(item)} disabled={item.status !== 'Pendente'}>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                <span className="has-text-weight-medium">{item.motorista}</span>
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                {item.empresa}
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                <p>{item.tipoVeiculo}</p>
+                <span className="tag is-light is-rounded is-small mt-1">{item.placa}</span>
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                {item.atividade}
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
+                <span className={`tag ${getStatusTag(item.status)} is-light`}>
+                  {item.status}
+                </span>
+              </td>
+              <td style={{ verticalAlign: 'middle', padding: '12px 15px', textAlign: 'right' }}>
+                <div className="buttons is-right are-small">
+                  {item.status !== 'Concluído' && (
+                    <button 
+                        className="button is-link is-light" 
+                        title="Check-in / Avançar"
+                        onClick={() => onCheckIn(item)}
+                    >
+                        <span className="icon"><MdQrCodeScanner /></span>
+                    </button>
+                  )}
+                  <button 
+                    className="button is-white" 
+                    title="Editar"
+                    onClick={() => onEdit(item)}
+                  >
                     <span className="icon"><MdEdit /></span>
                   </button>
                 </div>
               </td>
             </tr>
           ))}
+          {data.length === 0 && (
+            <tr>
+              <td colSpan={7} className="has-text-centered py-6 has-text-grey">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

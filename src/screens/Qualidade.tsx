@@ -1,6 +1,9 @@
+// src/screens/Qualidade.tsx
+
 import React, { useState, useEffect } from 'react';
-import { MdSave, MdAddCircleOutline } from 'react-icons/md';
+import { MdSave, MdAddCircleOutline, MdArrowBack } from 'react-icons/md'; // Adicionado MdArrowBack
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom'; // Adicionado useNavigate
 import { 
   createAnaliseQualidade, 
   fetchCooperadosData, 
@@ -13,6 +16,8 @@ type Tab = 'Entrega de dejetos' | 'Análise' | 'Qualidade dos Dejetos' | 'Qualid
 type AmostraOrigem = 'cooperado' | 'pontoDeColeta';
 
 const Qualidade: React.FC = () => {
+  const navigate = useNavigate(); // Hook de navegação
+
   // Controle de Abas
   const [activeTab, setActiveTab] = useState<Tab>('Análise');
 
@@ -185,10 +190,19 @@ const Qualidade: React.FC = () => {
 
   return (
     <>
+      {/* --- ALTERAÇÃO: BOTÃO VOLTAR ADICIONADO AQUI --- */}
       <nav className="level is-mobile mb-4">
         <div className="level-left">
           <div className="level-item">
-            <h1 className="title is-4">Controle de Qualidade</h1>
+             {/* Botão Voltar */}
+             <button 
+                className="button is-white mr-2" 
+                onClick={() => navigate(-1)} 
+                title="Voltar"
+             >
+                <span className="icon"><MdArrowBack size={24} /></span>
+             </button>
+             <h1 className="title is-4">Controle de Qualidade</h1>
           </div>
         </div>
       </nav>
@@ -303,10 +317,10 @@ const Qualidade: React.FC = () => {
                             <div className="field">
                                 <div className="control">
                                     <div style={{ 
-                                        backgroundColor: '#e4f7ee',
+                                        backgroundColor: '#1a3b5d',
                                         borderRadius: '6px',
                                         padding: '1rem 1.5rem',
-                                        color: 'black',
+                                        color: 'white',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'flex-start'
