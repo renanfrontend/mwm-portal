@@ -71,8 +71,8 @@ const CooperadoCalendarModal: React.FC<Props> = ({ isActive, onClose, onSave, da
       <div className="modal-card" style={{ maxWidth: '480px', width: '100%', borderRadius: '8px' }}>
         <header className="modal-card-head" style={{ borderBottom: '1px solid #ededed', padding: '1.25rem', backgroundColor: '#fff' }}>
           <div style={{ flex: 1 }}>
-            <p className="title is-6 has-text-weight-bold mb-1" style={{ color: textColor }}>Agendar Coleta</p>
-            <p className="subtitle is-7 has-text-grey">Cooperado: <strong>{data.motorista}</strong></p>
+            <p className="modal-card-title has-text-weight-bold mb-1" style={{ color: textColor }}>Agendar Coleta</p>
+            <p className="is-size-7 has-text-grey">Produtor: <strong>{data.motorista}</strong></p>
           </div>
           <button className="delete" aria-label="close" onClick={onClose}></button>
         </header>

@@ -93,7 +93,7 @@ export interface ColetaItem {
   status: "Pendente" | "Entregue" | "Atrasado";
 }
 
-// --- COOPERADO (COMPLETO) ---
+// --- COOPERADO ATUALIZADO ---
 export interface CooperadoItem {
   id: string;
   matricula: number;
@@ -104,9 +104,10 @@ export interface CooperadoItem {
   certificado: "Ativo" | "Inativo";
   doamDejetos: "Sim" | "Não";
   fase: string;
-  // Campos opcionais
+  
+  // Campos novos para layout e modal
   cpfCnpj?: string;
-  cabecasAlojadas?: string | number;
+  cabecasAlojadas?: string | number; // Campo da lista
   tecnico?: string;
   telefone?: string;
   numPropriedade?: string;
@@ -114,9 +115,14 @@ export interface CooperadoItem {
   municipio?: string;
   latitude?: string;
   longitude?: string;
+  modalidade?: string;
+  distancia?: string; // Campo da lista
+  responsavel?: string;
+  emailResponsavel?: string;
+  telefoneTecnico?: string;
+  emailTecnico?: string;
 }
 
-// --- TRANSPORTADORA (ESSENCIAL) ---
 export interface TransportadoraItem {
   id: string;
   nomeFantasia: string;

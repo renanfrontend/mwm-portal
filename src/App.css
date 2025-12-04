@@ -4,8 +4,8 @@ html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
-  padding: 0 !important; /* Remove padding padrão do Bulma se houver */
-  overflow: hidden; /* Impede scroll na janela do navegador */
+  padding: 0 !important; /* Remove padding padrão */
+  overflow: hidden; /* IMPORTANTE: Remove scroll da janela principal */
   background-color: #f5f7fa;
 }
 
@@ -16,33 +16,34 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* --- PADRÃO DE TELAS (Global) --- */
+/* --- PADRÃO DE TELAS --- */
 
-/* Container da Tela: Ocupa 100% da altura disponível */
+/* Ocupa toda a altura disponível */
 .screen-container {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  overflow: hidden; /* O container não rola */
+  overflow: hidden; /* Não rola o container externo */
+  position: relative;
 }
 
-/* Área de Conteúdo: Rola apenas aqui dentro */
+/* Onde o scroll acontece */
 .screen-content {
   flex: 1;
-  overflow-y: auto; /* Scroll vertical */
+  overflow-y: auto; /* Scroll vertical automático */
   padding: 1.5rem;
-  padding-bottom: 3rem; /* Espaço extra no final */
-  
-  /* Scrollbar mais bonita */
-  scrollbar-width: thin;
-  scrollbar-color: #dbdbdb transparent;
+  padding-bottom: 4rem; /* Espaço extra no final */
 }
 
+/* Estilização da barra de rolagem */
 .screen-content::-webkit-scrollbar {
   width: 8px;
 }
+.screen-content::-webkit-scrollbar-track {
+  background: transparent;
+}
 .screen-content::-webkit-scrollbar-thumb {
-  background-color: #dbdbdb;
+  background-color: #ccc;
   border-radius: 4px;
 }

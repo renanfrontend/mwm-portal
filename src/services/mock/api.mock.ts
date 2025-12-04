@@ -1,5 +1,7 @@
 // src/services/mock/api.mock.ts
 
+import { v4 as uuidv4 } from 'uuid';
+
 // EXPORT all types for the app
 export type {
   AbastecimentoItem,
@@ -18,10 +20,11 @@ export type {
   QualidadeDejetosItem,
   StockItem,
   CalendarEvent,
-  AgendaItem
-} from "../../types/models"; // Import types from the new models file
+  AgendaItem,
+  TransportadoraItem
+} from "../../types/models"; 
 
-// Import types *also* for local use
+// Import types locally
 import {
   type AbastecimentoItem,
   type AbastecimentoReportItem,
@@ -30,123 +33,30 @@ import {
   type AbastecimentoVolumePorDiaItem,
   type AgendaData,
   type ColetaItem,
-  // CORREÇÃO: Removido CooperativeAnalysisItem (usado apenas dentro de DashboardData)
   type CooperadoItem,
   type DashboardData,
   type FaturamentoItem,
-  // CORREÇÃO: Removido Metric (usado apenas dentro de DashboardData)
   type PortariaItem,
   type QualidadeDejetosItem,
-  // CORREÇÃO: Removido StockItem (usado apenas dentro de DashboardData)
-} from "../../types/models"; // Import types from the new models file
+  type Metric,
+  type StockItem,
+  type CooperativeAnalysisItem,
+  type TransportadoraItem
+} from "../../types/models";
 
+// --- DADOS DE RELATÓRIO (MANTIDOS) ---
 let abastecimentoReportMockData: AbastecimentoReportItem[] = [
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:09:21",
-    horaTermino: "17:09:21",
-    volume: 134.56,
-    odometro: 391396,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:08:56",
-    horaTermino: "17:08:56",
-    volume: 157.66,
-    odometro: 370306,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:05:53",
-    horaTermino: "17:05:53",
-    volume: 166.03,
-    odometro: 381134,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:05:32",
-    horaTermino: "17:05:33",
-    volume: 206.63,
-    odometro: 384328,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:04:57",
-    horaTermino: "17:04:58",
-    volume: 136.78,
-    odometro: 390768,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:04:10",
-    horaTermino: "17:04:10",
-    volume: 94.72,
-    odometro: 370055,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:03:29",
-    horaTermino: "17:03:30",
-    volume: 171.27,
-    odometro: 534723,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:03:01",
-    horaTermino: "17:03:01",
-    volume: 107.41,
-    odometro: 399801,
-    usuario: "vanessa",
-  },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:09:21", horaTermino: "17:09:21", volume: 134.56, odometro: 391396, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:08:56", horaTermino: "17:08:56", volume: 157.66, odometro: 370306, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:05:53", horaTermino: "17:05:53", volume: 166.03, odometro: 381134, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:05:32", horaTermino: "17:05:33", volume: 206.63, odometro: 384328, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:04:57", horaTermino: "17:04:58", volume: 136.78, odometro: 390768, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:04:10", horaTermino: "17:04:10", volume: 94.72, odometro: 370055, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:03:29", horaTermino: "17:03:30", volume: 171.27, odometro: 534723, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:03:01", horaTermino: "17:03:01", volume: 107.41, odometro: 399801, usuario: "vanessa" },
 ];
 
+// --- DADOS DE FATURAMENTO (MANTIDOS) ---
 const faturamentoMockData: FaturamentoItem[] = [
   { name: "Janeiro", faturamento: 2774.38, label: "3.50" },
   { name: "Fevereiro", faturamento: 2637.99, label: "3.72" },
@@ -162,6 +72,7 @@ const faturamentoMockData: FaturamentoItem[] = [
   { name: "Dezembro", faturamento: 0, label: "0.0" },
 ];
 
+// --- DADOS DE ABASTECIMENTO (MANTIDOS) ---
 const abastecimentoMockData: AbastecimentoItem[] = [
   { veiculo: "Veículo 1", m3: 2500 },
   { veiculo: "Veículo 2", m3: 1500 },
@@ -170,36 +81,18 @@ const abastecimentoMockData: AbastecimentoItem[] = [
   { veiculo: "Veículo 5", m3: 1000 },
 ];
 
+// --- DADOS DO DASHBOARD (AQUI ESTAVA O ERRO ANTERIOR - RESTAURADO) ---
 const mockData: DashboardData = {
   metrics: [
-    { id: 1, icon: "density_medium", label: "Densidade dos dejetos", value: 1014, trend: "up" },
+    { id: 1, icon: "density_medium", label: "Densidade dos dejetos", value: 1014, trend: "up", unit: " g/cm³" },
     { id: 2, icon: "water_drop", label: "Volume recebido", value: "34.6M", trend: "up", unit: "M³" },
-    {
-      id: 3,
-      icon: "timer",
-      label: "TMO diário",
-      value: "16:00:00",
-      trend: "up",
-    },
-    {
-      id: 4,
-      icon: "power_settings_new",
-      label: "Status operacional",
-      value: "Operando",
-      trend: "up",
-    },
+    { id: 3, icon: "timer", label: "TMO diário", value: "16:00:00", trend: "up" },
+    { id: 4, icon: "power_settings_new", label: "Status operacional", value: "Operando", trend: "up" },
   ],
   stock: [
     { id: 1, label: "Fertilizantes", value: 74480, capacity: 78400, unit: "t", color: "is-link" },
     { id: 2, label: "Bio Metano", value: 65000, capacity: 100000, unit: "M³", color: "is-success" },
-    {
-      id: 3,
-      label: "CO₂",
-      value: 38000,
-      capacity: 100000,
-      unit: "M³",
-      color: "is-warning",
-    },
+    { id: 3, label: "CO₂", value: 38000, capacity: 100000, unit: "M³", color: "is-warning" },
   ],
   cooperativeAnalysis: [
     { name: "Ademir E.", value: 2.5, color: "#334bff" },
@@ -237,17 +130,51 @@ const mockData: DashboardData = {
   abastecimentos: [],
 };
 
+// --- DADOS DE COLETA ---
 let mockColetaData: ColetaItem[] = [
   { id: "1", cooperado: "Primato", motorista: "Luiz Carlos", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", odometro: 123456, dataPrevisao: "2025-01-01", horaPrevisao: "15:00", status: "Pendente" },
   { id: "2", cooperado: "Primato", motorista: "Marcos Paulo", tipoVeiculo: "Caminhão de ração", placa: "XYZ-4567", odometro: 234567, dataPrevisao: "2025-01-02", horaPrevisao: "10:00", status: "Entregue" },
   { id: "3", cooperado: "Primato", motorista: "Ana Cássia", tipoVeiculo: "Caminhão de dejetos", placa: "GHI-7890", odometro: 345678, dataPrevisao: "2025-01-03", horaPrevisao: "11:30", status: "Atrasado" },
 ];
 
+// --- DADOS DE COOPERADOS (ATUALIZADOS) ---
+// ADICIONEI: cabecasAlojadas, latitude, longitude
 let mockCooperadosData: CooperadoItem[] = [
-  { id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa" },
-  { id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC" },
-  { id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário" },
-  { id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD" },
+  { 
+    id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan Kunzler", 
+    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", 
+    doamDejetos: "Não", fase: "Fase Term. Firmesa",
+    // Novos campos
+    cabecasAlojadas: 123456,
+    latitude: '-24.7229319', 
+    longitude: '-53.8641137', 
+    distancia: '', // Deixe vazio para testar o cálculo automático
+    tecnico: 'Daniel', telefone: '(45) 3376-1170'
+  },
+  { 
+    id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", 
+    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
+    doamDejetos: "Sim", fase: "GRSC",
+    cabecasAlojadas: 5000,
+    latitude: '-24.950000', 
+    longitude: '-53.450000',
+    tecnico: 'Roberto'
+  },
+  { 
+    id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", 
+    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
+    doamDejetos: "Sim", fase: "Fase Crechário",
+    cabecasAlojadas: 3000,
+    latitude: '-24.819445', 
+    longitude: '-53.483921'
+  },
+  { 
+    id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", 
+    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
+    doamDejetos: "Sim", fase: "UPD",
+    cabecasAlojadas: 8500
+    // Sem coordenadas
+  },
 ];
 
 const newMockAgendaData: AgendaData[] = [
@@ -271,7 +198,7 @@ let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
   { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
 ];
 
-// --- Funções Mock ---
+// --- FUNÇÕES MOCK (GARANTIA DE FUNCIONAMENTO) ---
 
 export const mockFetchCooperadosData = (): Promise<CooperadoItem[]> => {
   return new Promise((resolve) => {
@@ -467,10 +394,12 @@ export const mockFetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeI
       });
 };
 
+// --- CORREÇÃO AQUI: Retornando os dados reais do mockData ---
 export const mockFetchDashboardData = (): Promise<DashboardData> => {
     return new Promise((resolve) => {
         setTimeout(() => {
           const dashboardDataWithAbastecimentos = { ...mockData };
+          // Garante que abastecimentos tenha valor se estiver vazio
           if (
             !dashboardDataWithAbastecimentos.abastecimentos ||
             dashboardDataWithAbastecimentos.abastecimentos.length === 0

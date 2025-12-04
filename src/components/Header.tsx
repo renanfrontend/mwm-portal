@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, children }) => {
   const { user, logout } = useAuth();
 
   return (
-    // CORREÇÃO: Removido 'is-fixed-top'. Usamos style para borda e z-index.
+    // CORRIGIDO: position: relative (NÃO usar is-fixed-top)
     <nav 
       className="navbar" 
       role="navigation" 
@@ -43,7 +43,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, children }) => {
     >
       <div className="navbar-brand">
         <div className="navbar-item">
-          {/* Botão do Menu (Mobile/Tablet) */}
           {children}
         </div>
       </div>

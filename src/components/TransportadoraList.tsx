@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { MdSearch, MdAdd, MdEdit, MdDelete } from 'react-icons/md';
-import { type TransportadoraItem } from '../types/models';
+// Importando a interface do arquivo models.ts
+import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
 
 const mockTransportadoras: TransportadoraItem[] = [
@@ -38,7 +39,6 @@ export const TransportadoraList: React.FC = () => {
               />
               <span className="icon is-small is-left"><MdSearch /></span>
             </div>
-            <div className="control"><button className="button is-light">Buscar</button></div>
           </div>
         </div>
         <div className="level-right">

@@ -1,4 +1,4 @@
-// src/screens/Transportadora.tsx
+// src/screens/Logistica.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
@@ -17,7 +17,7 @@ import CooperadoEditModal from '../components/CooperadoEditModal';
 import CooperadoCalendarModal from '../components/CooperadoCalendarModal';
 import CooperadoCreateModal from '../components/CooperadoCreateModal';
 
-const Transportadora: React.FC = () => {
+const Logistica: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
   const navigate = useNavigate();
 
@@ -54,7 +54,6 @@ const Transportadora: React.FC = () => {
         const data = await fetchCooperadosData();
         setCooperadosData(data || []);
       }
-      // Transportadora usa mock local
     } catch (err) {
       setError("Erro ao buscar dados.");
       toast.error("Falha ao carregar dados.");
@@ -115,7 +114,7 @@ const Transportadora: React.FC = () => {
   };
 
   return (
-    <div className="screen-container p-2">
+    <div className="screen-container">
       
       {/* CABEÇALHO (TOOLBAR) */}
       <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem' }}>
@@ -125,13 +124,10 @@ const Transportadora: React.FC = () => {
               <button className="button is-white mr-2" onClick={() => navigate(-1)}>
                 <span className="icon"><MdArrowBack size={24} /></span>
               </button>
-              {/* TÍTULO CORRETO */}
-              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Transportadora</span>
+              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Logística</span>
             </div>
           </div>
-          <div className="level-right">
-            {/* SEM BOTÕES NO HEADER GLOBAL */}
-          </div>
+          <div className="level-right"></div>
         </div>
       </div>
 
@@ -234,4 +230,4 @@ const Transportadora: React.FC = () => {
   );
 };
 
-export default Transportadora;
+export default Logistica;
