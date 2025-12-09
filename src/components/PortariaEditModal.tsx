@@ -116,7 +116,7 @@ const PortariaEditModal: React.FC<Props> = ({ isActive, onClose, onSave, data })
               className="button is-success"
               onClick={handleSave}
             >
-              Salvar Alterações
+              Salvar
             </button>
           </div>
         </footer>

@@ -1,6 +1,5 @@
 // src/types/models.ts
 
-// Interface para um item de usuário mockado
 export interface MockUser {
   id: string;
   username: string;
@@ -10,7 +9,6 @@ export interface MockUser {
   filiais?: string[];
 }
 
-// Tipo para os cards de métricas no topo do dashboard
 export interface Metric {
   id: number;
   icon: string;
@@ -20,36 +18,26 @@ export interface Metric {
   unit?: string;
 }
 
-// Tipo para cada item na lista de estoque
 export interface StockItem {
   id: number;
   label: string;
   value: number;
   capacity: number;
   unit: string;
-  color:
-    | "is-primary"
-    | "is-link"
-    | "is-info"
-    | "is-success"
-    | "is-warning"
-    | "is-danger";
+  color: "is-primary" | "is-link" | "is-info" | "is-success" | "is-warning" | "is-danger";
 }
 
-// Tipo para os dados do gráfico de Análise de Cooperados
 export interface CooperativeAnalysisItem {
   name: string;
   value: number;
   color: string;
 }
 
-// Tipo para os dados do gráfico de Abastecimento por Veículo
 export interface AbastecimentoItem {
   veiculo: string;
   m3: number;
 }
 
-// Estrutura completa dos dados do dashboard
 export interface DashboardData {
   metrics: Metric[];
   stock: StockItem[];
@@ -57,21 +45,18 @@ export interface DashboardData {
   abastecimentos?: AbastecimentoItem[];
 }
 
-// Tipo para o sumário de abastecimento
 export interface AbastecimentoSummaryItem {
   veiculo: string;
   placa: string;
   volumeTotal: number;
 }
 
-// Tipos e dados mockados para Faturamentos
 export interface FaturamentoItem {
   name: string;
   faturamento: number;
   label: string;
 }
 
-// Tipos e dados mockados para Abastecimentos
 export interface AbastecimentoVolumeItem {
   name: string;
   volume: number;
@@ -91,15 +76,13 @@ export interface AbastecimentoReportItem {
   produto: string;
 }
 
-// Tipo para o volume de abastecimento por dia
 export interface AbastecimentoVolumePorDiaItem {
   data: string;
   volumeTotal: number;
 }
 
-// Interface para um item da lista de coleta
 export interface ColetaItem {
-  id: string; // Usar UUID para ID único
+  id: string;
   cooperado: string;
   motorista: string;
   tipoVeiculo: string;
@@ -110,7 +93,6 @@ export interface ColetaItem {
   status: "Pendente" | "Entregue" | "Atrasado";
 }
 
-// Interface para um item de Cooperado
 export interface CooperadoItem {
   id: string;
   matricula: number;
@@ -121,9 +103,55 @@ export interface CooperadoItem {
   certificado: "Ativo" | "Inativo";
   doamDejetos: "Sim" | "Não";
   fase: string;
+  // Novos campos
+  cpfCnpj?: string;
+  cabecasAlojadas?: string | number;
+  tecnico?: string;
+  telefone?: string;
+  numPropriedade?: string;
+  numEstabelecimento?: string;
+  municipio?: string;
+  latitude?: string;
+  longitude?: string;
+  distancia?: string;
+  responsavel?: string;
+  emailResponsavel?: string;
+  telefoneTecnico?: string;
+  emailTecnico?: string;
+  modalidade?: string;
 }
 
-// Novo tipo para os eventos do calendário
+// --- INTERFACES PARA TRANSPORTADORA (NOVO) ---
+export interface ContactInfo {
+  nome: string;
+  telefone: string;
+  email: string;
+}
+
+export interface VeiculoInfo {
+  tipo: string;
+  capacidade: string;
+}
+
+export interface TransportadoraItem {
+  id: string;
+  nomeFantasia: string;
+  razaoSocial: string;
+  cnpj: string;
+  telefone: string;
+  email: string;
+  cidade: string;
+  uf: string;
+  endereco?: string;
+  categoria?: string;
+  // Detalhes
+  contatoPrincipal?: ContactInfo;
+  contatoComercial?: ContactInfo;
+  contatoFinanceiro?: ContactInfo;
+  contatoJuridico?: ContactInfo;
+  veiculos?: VeiculoInfo[];
+}
+
 export interface CalendarEvent {
   id: string | number;
   title: string;
@@ -133,7 +161,6 @@ export interface CalendarEvent {
   resource?: any;
 }
 
-// Novo tipo para os dados da agenda customizada
 export interface AgendaItem {
   id: number;
   cooperado: string;
@@ -157,7 +184,6 @@ export interface AgendaData {
   status: "Realizado" | "Planejado";
 }
 
-// Interface da Portaria Atualizada
 export interface PortariaItem {
   id: string;
   categoria: 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
@@ -168,16 +194,11 @@ export interface PortariaItem {
   tipoVeiculo: string;
   placa: string;
   atividade: string;
-  
-  // Status atualizado para incluir os passos
   status: 'Concluído' | 'Pendente' | 'Em processo' | 'Pesagem';
-  
-  // Campos novos (opcionais) que adicionamos
   cpf_cnpj?: string;
   balancaEntrada?: string;
   balancaSaida?: string;
 }
-
 
 export interface QualidadeDejetosItem {
   id: string;
@@ -197,27 +218,4 @@ export interface QualidadeDejetosItem {
   recip_st_duplicata?: string;
   pesagem_p4_amostra?: string;
   recip_sf_duplicata?: string;
-}
-
-export interface CooperadoItem {
-  id: string;
-  matricula: number;
-  filial: string; // Isso será usado como "Transportadora"
-  motorista: string;
-  tipoVeiculo: string;
-  placa: string;
-  certificado: "Ativo" | "Inativo";
-  doamDejetos: "Sim" | "Não";
-  fase: string;
-  
-  // --- NOVOS CAMPOS PARA O FORMULÁRIO COMPLETO ---
-  cpfCnpj?: string;
-  cabecasAlojadas?: string | number;
-  tecnico?: string;
-  telefone?: string;
-  numPropriedade?: string;
-  numEstabelecimento?: string;
-  municipio?: string;
-  latitude?: string;
-  longitude?: string;
 }

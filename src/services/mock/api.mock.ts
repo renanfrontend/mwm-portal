@@ -1,5 +1,7 @@
 // src/services/mock/api.mock.ts
 
+import { v4 as uuidv4 } from 'uuid';
+
 // EXPORT all types for the app
 export type {
   AbastecimentoItem,
@@ -18,10 +20,13 @@ export type {
   QualidadeDejetosItem,
   StockItem,
   CalendarEvent,
-  AgendaItem
-} from "../../types/models"; // Import types from the new models file
+  AgendaItem,
+  TransportadoraItem, // Novo
+  ContactInfo, // Novo
+  VeiculoInfo // Novo
+} from "../../types/models"; 
 
-// Import types *also* for local use
+// Import types locally
 import {
   type AbastecimentoItem,
   type AbastecimentoReportItem,
@@ -30,121 +35,28 @@ import {
   type AbastecimentoVolumePorDiaItem,
   type AgendaData,
   type ColetaItem,
-  // CORREÇÃO: Removido CooperativeAnalysisItem (usado apenas dentro de DashboardData)
   type CooperadoItem,
   type DashboardData,
   type FaturamentoItem,
-  // CORREÇÃO: Removido Metric (usado apenas dentro de DashboardData)
   type PortariaItem,
   type QualidadeDejetosItem,
-  // CORREÇÃO: Removido StockItem (usado apenas dentro de DashboardData)
-} from "../../types/models"; // Import types from the new models file
+  type Metric,
+  type StockItem,
+  type CooperativeAnalysisItem,
+  type TransportadoraItem
+} from "../../types/models";
+
+// --- DADOS ORIGINAIS DO SEU DASHBOARD (MANTIDOS INTACTOS) ---
 
 let abastecimentoReportMockData: AbastecimentoReportItem[] = [
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:09:21",
-    horaTermino: "17:09:21",
-    volume: 134.56,
-    odometro: 391396,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:08:56",
-    horaTermino: "17:08:56",
-    volume: 157.66,
-    odometro: 370306,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:05:53",
-    horaTermino: "17:05:53",
-    volume: 166.03,
-    odometro: 381134,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:05:32",
-    horaTermino: "17:05:33",
-    volume: 206.63,
-    odometro: 384328,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:04:57",
-    horaTermino: "17:04:58",
-    volume: 136.78,
-    odometro: 390768,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Dejeto)",
-    placa: "BBW-9C55",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:04:10",
-    horaTermino: "17:04:10",
-    volume: 94.72,
-    odometro: 370055,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:03:29",
-    horaTermino: "17:03:30",
-    volume: 171.27,
-    odometro: 534723,
-    usuario: "vanessa",
-  },
-  {
-    status: "Concluído",
-    cliente: "Primato Cooperativa Agroindustrial",
-    veiculo: "Caminhão (Ração)",
-    placa: "BCK-0138",
-    produto: "Biometano",
-    data: "2025-09-25",
-    horaInicio: "17:03:01",
-    horaTermino: "17:03:01",
-    volume: 107.41,
-    odometro: 399801,
-    usuario: "vanessa",
-  },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:09:21", horaTermino: "17:09:21", volume: 134.56, odometro: 391396, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:08:56", horaTermino: "17:08:56", volume: 157.66, odometro: 370306, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:05:53", horaTermino: "17:05:53", volume: 166.03, odometro: 381134, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:05:32", horaTermino: "17:05:33", volume: 206.63, odometro: 384328, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:04:57", horaTermino: "17:04:58", volume: 136.78, odometro: 390768, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:04:10", horaTermino: "17:04:10", volume: 94.72, odometro: 370055, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:03:29", horaTermino: "17:03:30", volume: 171.27, odometro: 534723, usuario: "vanessa" },
+  { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:03:01", horaTermino: "17:03:01", volume: 107.41, odometro: 399801, usuario: "vanessa" },
 ];
 
 const faturamentoMockData: FaturamentoItem[] = [
@@ -174,32 +86,13 @@ const mockData: DashboardData = {
   metrics: [
     { id: 1, icon: "density_medium", label: "Densidade dos dejetos", value: 1014, trend: "up" },
     { id: 2, icon: "water_drop", label: "Volume recebido", value: "34.6M", trend: "up", unit: "M³" },
-    {
-      id: 3,
-      icon: "timer",
-      label: "TMO diário",
-      value: "16:00:00",
-      trend: "up",
-    },
-    {
-      id: 4,
-      icon: "power_settings_new",
-      label: "Status operacional",
-      value: "Operando",
-      trend: "up",
-    },
+    { id: 3, icon: "timer", label: "TMO diário", value: "16:00:00", trend: "up" },
+    { id: 4, icon: "power_settings_new", label: "Status operacional", value: "Operando", trend: "up" },
   ],
   stock: [
     { id: 1, label: "Fertilizantes", value: 74480, capacity: 78400, unit: "t", color: "is-link" },
     { id: 2, label: "Bio Metano", value: 65000, capacity: 100000, unit: "M³", color: "is-success" },
-    {
-      id: 3,
-      label: "CO₂",
-      value: 38000,
-      capacity: 100000,
-      unit: "M³",
-      color: "is-warning",
-    },
+    { id: 3, label: "CO₂", value: 38000, capacity: 100000, unit: "M³", color: "is-warning" },
   ],
   cooperativeAnalysis: [
     { name: "Ademir E.", value: 2.5, color: "#334bff" },
@@ -243,11 +136,27 @@ let mockColetaData: ColetaItem[] = [
   { id: "3", cooperado: "Primato", motorista: "Ana Cássia", tipoVeiculo: "Caminhão de dejetos", placa: "GHI-7890", odometro: 345678, dataPrevisao: "2025-01-03", horaPrevisao: "11:30", status: "Atrasado" },
 ];
 
+// --- DADOS DOS COOPERADOS (COM NOVOS CAMPOS PARA LOGÍSTICA) ---
 let mockCooperadosData: CooperadoItem[] = [
-  { id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa" },
-  { id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC" },
-  { id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário" },
-  { id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD" },
+  { 
+    id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa",
+    cabecasAlojadas: 1450, // Adicionado
+    latitude: '-24.7229319', longitude: '-53.8641137' // Adicionado
+  },
+  { 
+    id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC",
+    cabecasAlojadas: 5000, // Adicionado
+    latitude: '-24.950000', longitude: '-53.450000' // Adicionado
+  },
+  { 
+    id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário",
+    cabecasAlojadas: 3000, // Adicionado
+    latitude: '-24.819445', longitude: '-53.483921' // Adicionado
+  },
+  { 
+    id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD",
+    cabecasAlojadas: 8500 // Adicionado
+  },
 ];
 
 const newMockAgendaData: AgendaData[] = [
@@ -271,12 +180,62 @@ let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
   { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
 ];
 
-// --- Funções Mock ---
+// --- DADOS DAS TRANSPORTADORAS (NOVO) ---
+const mockVeiculos = [
+  { tipo: "Caminhão de dejetos: Vácuo", capacidade: "16.000L" },
+  { tipo: "Caminhão de dejetos: Hidrojato", capacidade: "20.000L" },
+  { tipo: "Caminhão de dejetos: Hidrovácuo", capacidade: "20.000L" },
+  { tipo: "Caminhão de insumos", capacidade: "16.000m³" },
+  { tipo: "Expedição: Truck", capacidade: "6x2" },
+  { tipo: "Expedição: Baú", capacidade: "6x4" },
+  { tipo: "Expedição: Container", capacidade: "6x2" },
+  { tipo: "Industrialização: VUC", capacidade: "3.000 kg" },
+  { tipo: "Industrialização: Toco", capacidade: "16.000 kg" }
+];
+
+const transportadoras: TransportadoraItem[] = [
+  { 
+    id: '1', nomeFantasia: 'Primato', razaoSocial: 'Primato Cooperativa Agroindustrial', cnpj: '07.456.789/0001-12', telefone: '(45) 3376-1170', email: 'contato@primato.com.br', cidade: 'Toledo', uf: 'PR',
+    endereco: 'Rua Brasil, 50 - Toledo Paraná', categoria: 'Entrega de dejetos',
+    contatoPrincipal: { nome: 'João Silva', telefone: '(45) 9 9999-1234', email: 'joao@primato.com.br' },
+    contatoComercial: { nome: 'Maria Souza', telefone: '(45) 9 8888-5678', email: 'comercial@primato.com.br' },
+    contatoFinanceiro: { nome: 'Pedro Santos', telefone: '(45) 9 7777-9012', email: 'financeiro@primato.com.br' },
+    veiculos: mockVeiculos
+  },
+  { 
+    id: '2', nomeFantasia: 'Agrocampo', razaoSocial: 'Agrocampo Transportes Ltda', cnpj: '12.345.678/0001-90', telefone: '(45) 3225-4455', email: 'logistica@agrocampo.com', cidade: 'Cascavel', uf: 'PR',
+    endereco: 'Av. Tancredo Neves, 1200 - Cascavel Paraná', categoria: 'Coleta de Ração',
+    contatoPrincipal: { nome: 'Carlos Oliveira', telefone: '(45) 9 9988-7766', email: 'carlos@agrocampo.com' },
+    veiculos: mockVeiculos.slice(0, 3)
+  },
+  { 
+    id: '3', nomeFantasia: 'MWM', razaoSocial: 'MWM Logística', cnpj: '98.765.432/0001-00', telefone: '(41) 3000-0000', email: 'contato@mwm.com', cidade: 'Curitiba', uf: 'PR',
+    endereco: 'Rod. BR-277, km 100 - Curitiba Paraná', categoria: 'Logística Geral',
+    contatoPrincipal: { nome: 'Ana Lima', telefone: '(41) 9 9123-4567', email: 'ana@mwm.com' },
+    veiculos: mockVeiculos
+  },
+  { 
+    id: '4', nomeFantasia: 'Tupy', razaoSocial: 'Tupy Transportes S.A.', cnpj: '11.222.333/0001-44', telefone: '(47) 3441-8000', email: 'contato@tupy.com.br', cidade: 'Joinville', uf: 'SC',
+    endereco: 'Rua Dona Francisca, 500 - Joinville Santa Catarina', categoria: 'Transporte Pesado',
+    contatoPrincipal: { nome: 'Marcos Tupy', telefone: '(47) 9 9999-0000', email: 'marcos@tupy.com' },
+    veiculos: mockVeiculos
+  }
+];
+
+// --- FUNÇÕES MOCK ---
 
 export const mockFetchCooperadosData = (): Promise<CooperadoItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockCooperadosData);
+    }, 500);
+  });
+};
+
+export const mockFetchTransportadorasData = (): Promise<TransportadoraItem[]> => { // NOVO
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(transportadoras);
     }, 500);
   });
 };

@@ -1,9 +1,9 @@
-// src/components/CooperadoContactModal.tsx (VERSÃO CORRETA - BASEADA NO ÚLTIMO PRINT)
+// src/components/CooperadoContactModal.tsx
 
 import React from 'react';
 import type { CooperadoItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { MdPhone } from 'react-icons/md'; // Ícone de telefone
+import { MdPerson, MdPhone, MdEmail } from 'react-icons/md';
 
 interface Props {
   isActive: boolean;
@@ -11,21 +11,23 @@ interface Props {
   data: CooperadoItem | null;
 }
 
-// Dados mockados estáticos que você pediu
-const mockContact = {
-  tecnicoNome: "Daniel",
-  telefone: "(DDD)9 1234-5678"
-};
+const ContactSection: React.FC<{ title: string; name: string; phone: string; email: string; textColor: string }> = ({ title, name, phone, email, textColor }) => (
+  <div className="mb-5">
+    <p className="is-size-7 has-text-grey has-text-weight-bold is-uppercase mb-3">{title}</p>
+    
+    <div className="is-flex is-align-items-center mb-2">
+      <span className="icon has-text-grey-light mr-2"><MdPerson /></span>
+      <span className="subtitle is-6 has-text-weight-semibold" style={{ color: textColor }}>{name}</span>
+    </div>
 
-// Helper para criar cada entrada (Motorista, Técnico, Filial)
-// Exatamente como no print
-const ContactEntry: React.FC<{ label: string; name: string; phone: string; textColor: string }> = ({ label, name, phone, textColor }) => (
-  <div className="field">
-    <label className="label" style={{ color: textColor, marginBottom: '0.25rem' }}>{label}</label>
-    <p className="subtitle is-6" style={{ color: textColor, fontWeight: 'bold' }}>{name}</p>
-    <div className="icon-text">
-      <span className="icon"><MdPhone /></span>
-      <span>{phone}</span>
+    <div className="is-flex is-align-items-center mb-2">
+      <span className="icon has-text-grey-light mr-2"><MdPhone /></span>
+      <span className="subtitle is-6" style={{ color: textColor }}>{phone}</span>
+    </div>
+
+    <div className="is-flex is-align-items-center">
+      <span className="icon has-text-grey-light mr-2"><MdEmail /></span>
+      <span className="subtitle is-6" style={{ color: textColor }}>{email}</span>
     </div>
   </div>
 );
@@ -36,57 +38,68 @@ const CooperadoContactModal: React.FC<Props> = ({ isActive, onClose, data }) => 
 
   if (!data) return null;
 
+  // Dados mockados complementares
+  const contactData = {
+    responsavel: {
+      nome: data.motorista,
+      telefone: data.telefone || '(00) 9 1234-5678',
+      email: 'email@cooperado.com.br'
+    },
+    tecnico: {
+      nome: data.tecnico || 'Daniel',
+      telefone: '(45) 3376-1170',
+      email: 'email@tecnico.com.br'
+    }
+  };
+
   return (
     <div className={`modal ${isActive ? 'is-active' : ''}`}>
       <div className="modal-background" onClick={onClose}></div>
-      {/* Modal menor, como no print */}
-      <div className="modal-card" style={{ maxWidth: '440px' }}> 
+      <div className="modal-card" style={{ maxWidth: '450px', width: '100%', borderRadius: '8px' }}>
         
-        <header className="modal-card-head" style={{ borderBottom: '1px solid var(--border-color)' }}>
-          <p className="modal-card-title" style={{ color: textColor }}>
-            {/* Título CORRETO que você pediu */}
-            Contato
+        {/* Cabeçalho com o Título Solicitado */}
+        <header className="modal-card-head" style={{ borderBottom: '1px solid #ededed', padding: '1.5rem', backgroundColor: '#fff' }}>
+          <p className="modal-card-title has-text-weight-bold" style={{ color: textColor }}>
+            Informações de contato
           </p>
           <button className="delete" aria-label="close" onClick={onClose}></button>
         </header>
 
-        <section className="modal-card-body">
-          {/* Layout IDÊNTICO AO NOVO PRINT E AO SEU TEXTO */}
+        <section className="modal-card-body" style={{ padding: '2rem 1.5rem' }}>
           
-          <ContactEntry 
-            label="Motorista"
-            name={data.motorista} // "Renato Ivan" (Vem do item)
-            phone={mockContact.telefone} // "(DDD)9 1234-5678"
+          {/* Nome do Produtor em Destaque */}
+          <div className="mb-5">
+            <p className="is-size-7 has-text-grey has-text-weight-bold is-uppercase mb-1">PRODUTOR</p>
+            <p className="title is-5 has-text-weight-bold" style={{ color: textColor }}>
+              {data.motorista.toUpperCase()}
+            </p>
+          </div>
+
+          <hr className="divider" style={{ margin: '1.5rem 0', backgroundColor: '#f0f0f0' }} />
+
+          {/* Seção 1: Responsável */}
+          <ContactSection 
+            title="Responsável pela propriedade"
+            name={contactData.responsavel.nome}
+            phone={contactData.responsavel.telefone}
+            email={contactData.responsavel.email}
             textColor={textColor}
           />
-          
-          <hr className="divider" style={{ margin: '1rem 0' }} />
 
-          <ContactEntry 
-            label="Técnico"
-            name={mockContact.tecnicoNome} // "Daniel" (Dado mockado)
-            phone={mockContact.telefone} // "(DDD)9 1234-5678"
-            textColor={textColor}
-          />
+          <hr className="divider" style={{ margin: '1.5rem 0', backgroundColor: '#f0f0f0' }} />
 
-          <hr className="divider" style={{ margin: '1rem 0' }} />
-
-          <ContactEntry 
-            label="Filial"
-            name={data.filial} // "Primato" (Vem do item)
-            phone={mockContact.telefone} // "(DDD)9 1234-5678"
+          {/* Seção 2: Técnico */}
+          <ContactSection 
+            title="Técnico responsável"
+            name={contactData.tecnico.nome}
+            phone={contactData.tecnico.telefone}
+            email={contactData.tecnico.email}
             textColor={textColor}
           />
 
         </section>
 
-        <footer 
-          className="modal-card-foot" 
-          style={{ 
-            borderTop: '1px solid var(--border-color)', 
-            justifyContent: 'flex-end'
-          }}
-        >
+        <footer className="modal-card-foot is-justify-content-flex-end" style={{ borderTop: '1px solid #ededed', backgroundColor: 'white', padding: '1rem 1.5rem' }}>
           <button className="button" onClick={onClose}>Fechar</button>
         </footer>
       </div>

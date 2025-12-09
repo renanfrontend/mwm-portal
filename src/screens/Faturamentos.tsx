@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react'; // CORREÇÃO: Removido 'React'
+// src/screens/Faturamentos.tsx
+
+import React, { useState, useEffect } from 'react';
+import { MdArrowBack } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 import MonthlyBarChart from '../components/MonthlyBarChart';
-import { fetchFaturamentoData, fetchAbastecimentoVolumeData } from '../services/api'; // Functions still from api.ts
-import { type FaturamentoItem, type AbastecimentoVolumeItem } from '../types/models'; // Types from models.ts
+import { fetchFaturamentoData, fetchAbastecimentoVolumeData } from '../services/api';
+import { type FaturamentoItem, type AbastecimentoVolumeItem } from '../types/models';
 
 const Faturamentos = () => {
+  const navigate = useNavigate();
   const [faturamentoData, setFaturamentoData] = useState<FaturamentoItem[]>([]);
   const [abastecimentoData, setAbastecimentoData] = useState<AbastecimentoVolumeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,35 +36,61 @@ const Faturamentos = () => {
   }, []);
 
   return (
-    <div className="section">
-      <div className="container">
-        <h1 className="title is-4">Faturamentos</h1>
-        {loading ? (
-          <progress className="progress is-large is-info" max="100"></progress>
-        ) : error ? (
-          <div className="notification is-danger">{error}</div>
-        ) : (
-          <div className="columns">
-            <div className="column">
-              <MonthlyBarChart
-                chartData={faturamentoData.map(item => ({ name: item.name, value: item.faturamento }))}
-                title="Faturamentos Realizados (mês)"
-                dataKey="value"
-                barColor="#007bff"
-                yAxisLabel="(R$)"
-              />
-            </div>
-            <div className="column">
-              <MonthlyBarChart
-                chartData={abastecimentoData.map(item => ({ name: item.name, value: item.volume }))}
-                title="Abastecimentos Realizados (m³)"
-                dataKey="value"
-                barColor="#3298dc"
-                yAxisLabel="(M³)"
-              />
-            </div>
+    <div className="screen-container p-2">
+      {/* HEADER / TOOLBAR */}
+      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem' }}>
+        <div className="level is-mobile">
+          <div className="level-left">
+            <button className="button is-white mr-2" onClick={() => navigate(-1)}>
+              <span className="icon"><MdArrowBack size={24} /></span>
+            </button>
+            <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Faturamentos</span>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* CONTEÚDO SCROLLÁVEL */}
+      <div className="screen-content">
+        <div className="container is-fluid px-0">
+          
+          {loading ? (
+            <div className="p-6">
+              <progress className="progress is-large is-info" max="100"></progress>
+            </div>
+          ) : error ? (
+            <div className="notification is-danger mt-4">{error}</div>
+          ) : (
+            <div className="columns mt-4">
+              <div className="column is-half">
+                <div className="card h-100">
+                  <div className="card-content">
+                    <MonthlyBarChart
+                      chartData={faturamentoData.map(item => ({ name: item.name, value: item.faturamento }))}
+                      title="Faturamentos Realizados (mês)"
+                      dataKey="value"
+                      barColor="#007bff"
+                      yAxisLabel="(R$)"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="column is-half">
+                <div className="card h-100">
+                   <div className="card-content">
+                    <MonthlyBarChart
+                      chartData={abastecimentoData.map(item => ({ name: item.name, value: item.volume }))}
+                      title="Abastecimentos Realizados (m³)"
+                      dataKey="value"
+                      barColor="#3298dc"
+                      yAxisLabel="(M³)"
+                    />
+                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+        </div>
       </div>
     </div>
   );
