@@ -7,9 +7,9 @@ import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable';
 import { CooperadoListItem } from '../components/CooperadoListItem';
 import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
+// IMPORT ATUALIZADO
 import { TransportadoraList } from '../components/TransportadoraList';
 
-// IMPORTS DOS MODAIS
 import CooperadoContactModal from '../components/CooperadoContactModal';
 import CooperadoLocationModal from '../components/CooperadoLocationModal';
 import CooperadoInfoModal from '../components/CooperadoInfoModal';
@@ -35,7 +35,6 @@ const Logistica: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
   const [filterTransportadora, setFilterTransportadora] = useState<string[]>([]);
 
-  // --- ESTADOS DOS MODAIS ---
   const [selectedCooperado, setSelectedCooperado] = useState<CooperadoItem | null>(null);
   const [isContactModalActive, setIsContactModalActive] = useState(false);
   const [isLocationModalActive, setIsLocationModalActive] = useState(false);
@@ -79,7 +78,7 @@ const Logistica: React.FC = () => {
       } else if (activeTab === 'cadastro') {
         setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
       }
-      toast.success("Itens excluídos com sucesso.");
+      toast.success("Itens excluídos.");
       setSelectedItems([]); setIsModalOpen(false); setIsDeleteMode(false);
     } catch {
       toast.error("Erro ao excluir.");
@@ -89,18 +88,16 @@ const Logistica: React.FC = () => {
   const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => { setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]); };
   const clearFilters = () => { setFilterStatus([]); setFilterTransportadora([]); };
 
-  // --- HANDLERS ---
   const handleOpenContactModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsContactModalActive(true); };
   const handleOpenLocationModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsLocationModalActive(true); };
   const handleOpenViewModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsInfoModalActive(true); };
   const handleOpenEditModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsEditModalActive(true); };
   const handleOpenCalendarModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsCalendarModalActive(true); };
-  
   const handleOpenCreateModal = () => { setIsCreateModalActive(true); };
 
   const handleSaveNewCooperado = (newItem: CooperadoItem) => {
     setCooperadosData(prev => [newItem, ...prev]);
-    toast.success("Novo cooperado adicionado com sucesso!");
+    toast.success("Novo cooperado adicionado!");
     setIsCreateModalActive(false);
   };
 
@@ -115,8 +112,6 @@ const Logistica: React.FC = () => {
 
   return (
     <div className="screen-container">
-      
-      {/* CABEÇALHO (TOOLBAR) */}
       <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem' }}>
         <div className="level is-mobile">
           <div className="level-left">
@@ -131,7 +126,6 @@ const Logistica: React.FC = () => {
         </div>
       </div>
 
-      {/* ABAS */}
       <div className="tabs is-toggle is-fullwidth mb-0" style={{ borderBottom: '1px solid #dbdbdb', backgroundColor: '#fff' }}>
         <ul>
           <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cooperados</span></a></li>
@@ -140,10 +134,7 @@ const Logistica: React.FC = () => {
         </ul>
       </div>
 
-      {/* CONTEÚDO SCROLLÁVEL */}
       <div className="screen-content">
-        
-        {/* ABA CADASTRO */}
         {activeTab === 'cadastro' && (
           <div className="container is-fluid px-0">
             <div className="box mb-4">
@@ -151,17 +142,9 @@ const Logistica: React.FC = () => {
                 <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
                 <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }}><span className="icon"><MdDelete /></span></button></div>
                 <div className="control"><button className="button is-pill"><span className="icon"><MdFilterList /></span></button></div>
-                
-                {/* BOTÃO ADICIONAR (APENAS AQUI) */}
-                <div className="control">
-                  <button className="button is-link" onClick={handleOpenCreateModal}>
-                    <span className="icon"><MdPersonAdd /></span>
-                    <span>Adicionar</span>
-                  </button>
-                </div>
+                <div className="control"><button className="button is-link" onClick={handleOpenCreateModal}><span className="icon"><MdPersonAdd /></span><span>Adicionar</span></button></div>
               </div>
             </div>
-            
             {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button></div></div>}
             {!loading && !error && filteredCooperadosData.map(item => (
               <CooperadoListItem 
@@ -172,7 +155,6 @@ const Logistica: React.FC = () => {
           </div>
         )}
 
-        {/* ABA AGENDA */}
         {activeTab === 'agenda' && (
           <div className="container is-fluid px-0">
             <div className="box mb-4">
@@ -182,31 +164,23 @@ const Logistica: React.FC = () => {
                   <div className="control">
                       <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
                           <div className="dropdown-trigger"><button className="button is-pill" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => setShowFilters(!showFilters)}><span className="icon"><MdFilterList /></span></button></div>
-                          <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}>
-                              <div className="dropdown-content">
-                                  <div className="dropdown-item"><label className="label is-small">STATUS</label><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Planejado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Planejado')} /> Planejado</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterStatus.includes('Realizado')} onChange={() => handleCheckboxChange(setFilterStatus, 'Realizado')} /> Realizado</label></div><hr className="dropdown-divider" />
-                                  <div className="dropdown-item"><label className="label is-small">TRANSPORTADORA</label><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Primato')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Primato')} /> Primato</label><br /><label className="checkbox is-small"><input type="checkbox" checked={filterTransportadora.includes('Agrocampo')} onChange={() => handleCheckboxChange(setFilterTransportadora, 'Agrocampo')} /> Agrocampo</label></div><hr className="dropdown-divider" />
-                                  <div className="dropdown-item field is-grouped is-justify-content-space-between"><p className="control"><button className="button is-small is-light" onClick={clearFilters}>Limpar</button></p><p className="control"><button className="button is-small is-info" onClick={() => setShowFilters(false)}>Aplicar</button></p></div>
-                              </div>
-                          </div>
+                          <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}><div className="dropdown-content"></div></div>
                       </div>
                   </div>
               </div>
             </div>
-            
             <div className="box p-0">
                {!loading && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
             </div>
           </div>
         )}
 
-        {/* ABA TRANSPORTADORA */}
+        {/* ABA TRANSPORTADORA (CARDS) */}
         {activeTab === 'transportadora' && (
           <div className="container is-fluid px-0">
             <TransportadoraList />
           </div>
         )}
-
       </div>
 
       <div className={`modal ${isModalOpen ? 'is-active' : ''}`}>
@@ -218,14 +192,12 @@ const Logistica: React.FC = () => {
         </div>
       </div>
 
-      {/* MODAIS */}
       <CooperadoContactModal isActive={isContactModalActive} onClose={closeAllModals} data={selectedCooperado} />
       <CooperadoLocationModal isActive={isLocationModalActive} onClose={closeAllModals} data={selectedCooperado} />
       <CooperadoInfoModal isActive={isInfoModalActive} onClose={closeAllModals} data={selectedCooperado} onOpenMap={handleOpenMapFromInfo} />
       <CooperadoEditModal isActive={isEditModalActive} onClose={closeAllModals} data={selectedCooperado} onSave={handleSaveCooperado} />
       <CooperadoCalendarModal isActive={isCalendarModalActive} onClose={closeAllModals} onSave={handleSaveCalendar} data={selectedCooperado} />
       <CooperadoCreateModal isActive={isCreateModalActive} onClose={closeAllModals} onSave={handleSaveNewCooperado} />
-
     </div>
   );
 };

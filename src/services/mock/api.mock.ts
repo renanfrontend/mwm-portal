@@ -21,7 +21,9 @@ export type {
   StockItem,
   CalendarEvent,
   AgendaItem,
-  TransportadoraItem
+  TransportadoraItem, // Novo
+  ContactInfo, // Novo
+  VeiculoInfo // Novo
 } from "../../types/models"; 
 
 // Import types locally
@@ -44,7 +46,8 @@ import {
   type TransportadoraItem
 } from "../../types/models";
 
-// --- DADOS DE RELATÓRIO (MANTIDOS) ---
+// --- DADOS ORIGINAIS DO SEU DASHBOARD (MANTIDOS INTACTOS) ---
+
 let abastecimentoReportMockData: AbastecimentoReportItem[] = [
   { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:09:21", horaTermino: "17:09:21", volume: 134.56, odometro: 391396, usuario: "vanessa" },
   { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Dejeto)", placa: "BBW-9C55", produto: "Biometano", data: "2025-09-25", horaInicio: "17:08:56", horaTermino: "17:08:56", volume: 157.66, odometro: 370306, usuario: "vanessa" },
@@ -56,7 +59,6 @@ let abastecimentoReportMockData: AbastecimentoReportItem[] = [
   { status: "Concluído", cliente: "Primato Cooperativa Agroindustrial", veiculo: "Caminhão (Ração)", placa: "BCK-0138", produto: "Biometano", data: "2025-09-25", horaInicio: "17:03:01", horaTermino: "17:03:01", volume: 107.41, odometro: 399801, usuario: "vanessa" },
 ];
 
-// --- DADOS DE FATURAMENTO (MANTIDOS) ---
 const faturamentoMockData: FaturamentoItem[] = [
   { name: "Janeiro", faturamento: 2774.38, label: "3.50" },
   { name: "Fevereiro", faturamento: 2637.99, label: "3.72" },
@@ -72,7 +74,6 @@ const faturamentoMockData: FaturamentoItem[] = [
   { name: "Dezembro", faturamento: 0, label: "0.0" },
 ];
 
-// --- DADOS DE ABASTECIMENTO (MANTIDOS) ---
 const abastecimentoMockData: AbastecimentoItem[] = [
   { veiculo: "Veículo 1", m3: 2500 },
   { veiculo: "Veículo 2", m3: 1500 },
@@ -81,10 +82,9 @@ const abastecimentoMockData: AbastecimentoItem[] = [
   { veiculo: "Veículo 5", m3: 1000 },
 ];
 
-// --- DADOS DO DASHBOARD (AQUI ESTAVA O ERRO ANTERIOR - RESTAURADO) ---
 const mockData: DashboardData = {
   metrics: [
-    { id: 1, icon: "density_medium", label: "Densidade dos dejetos", value: 1014, trend: "up", unit: " g/cm³" },
+    { id: 1, icon: "density_medium", label: "Densidade dos dejetos", value: 1014, trend: "up" },
     { id: 2, icon: "water_drop", label: "Volume recebido", value: "34.6M", trend: "up", unit: "M³" },
     { id: 3, icon: "timer", label: "TMO diário", value: "16:00:00", trend: "up" },
     { id: 4, icon: "power_settings_new", label: "Status operacional", value: "Operando", trend: "up" },
@@ -130,50 +130,32 @@ const mockData: DashboardData = {
   abastecimentos: [],
 };
 
-// --- DADOS DE COLETA ---
 let mockColetaData: ColetaItem[] = [
   { id: "1", cooperado: "Primato", motorista: "Luiz Carlos", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", odometro: 123456, dataPrevisao: "2025-01-01", horaPrevisao: "15:00", status: "Pendente" },
   { id: "2", cooperado: "Primato", motorista: "Marcos Paulo", tipoVeiculo: "Caminhão de ração", placa: "XYZ-4567", odometro: 234567, dataPrevisao: "2025-01-02", horaPrevisao: "10:00", status: "Entregue" },
   { id: "3", cooperado: "Primato", motorista: "Ana Cássia", tipoVeiculo: "Caminhão de dejetos", placa: "GHI-7890", odometro: 345678, dataPrevisao: "2025-01-03", horaPrevisao: "11:30", status: "Atrasado" },
 ];
 
-// --- DADOS DE COOPERADOS (ATUALIZADOS) ---
-// ADICIONEI: cabecasAlojadas, latitude, longitude
+// --- DADOS DOS COOPERADOS (COM NOVOS CAMPOS PARA LOGÍSTICA) ---
 let mockCooperadosData: CooperadoItem[] = [
   { 
-    id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan Kunzler", 
-    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", 
-    doamDejetos: "Não", fase: "Fase Term. Firmesa",
-    // Novos campos
-    cabecasAlojadas: 123456,
-    latitude: '-24.7229319', 
-    longitude: '-53.8641137', 
-    distancia: '', // Deixe vazio para testar o cálculo automático
-    tecnico: 'Daniel', telefone: '(45) 3376-1170'
+    id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa",
+    cabecasAlojadas: 1450, // Adicionado
+    latitude: '-24.7229319', longitude: '-53.8641137' // Adicionado
   },
   { 
-    id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", 
-    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
-    doamDejetos: "Sim", fase: "GRSC",
-    cabecasAlojadas: 5000,
-    latitude: '-24.950000', 
-    longitude: '-53.450000',
-    tecnico: 'Roberto'
+    id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC",
+    cabecasAlojadas: 5000, // Adicionado
+    latitude: '-24.950000', longitude: '-53.450000' // Adicionado
   },
   { 
-    id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", 
-    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
-    doamDejetos: "Sim", fase: "Fase Crechário",
-    cabecasAlojadas: 3000,
-    latitude: '-24.819445', 
-    longitude: '-53.483921'
+    id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário",
+    cabecasAlojadas: 3000, // Adicionado
+    latitude: '-24.819445', longitude: '-53.483921' // Adicionado
   },
   { 
-    id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", 
-    tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", 
-    doamDejetos: "Sim", fase: "UPD",
-    cabecasAlojadas: 8500
-    // Sem coordenadas
+    id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD",
+    cabecasAlojadas: 8500 // Adicionado
   },
 ];
 
@@ -198,12 +180,62 @@ let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
   { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
 ];
 
-// --- FUNÇÕES MOCK (GARANTIA DE FUNCIONAMENTO) ---
+// --- DADOS DAS TRANSPORTADORAS (NOVO) ---
+const mockVeiculos = [
+  { tipo: "Caminhão de dejetos: Vácuo", capacidade: "16.000L" },
+  { tipo: "Caminhão de dejetos: Hidrojato", capacidade: "20.000L" },
+  { tipo: "Caminhão de dejetos: Hidrovácuo", capacidade: "20.000L" },
+  { tipo: "Caminhão de insumos", capacidade: "16.000m³" },
+  { tipo: "Expedição: Truck", capacidade: "6x2" },
+  { tipo: "Expedição: Baú", capacidade: "6x4" },
+  { tipo: "Expedição: Container", capacidade: "6x2" },
+  { tipo: "Industrialização: VUC", capacidade: "3.000 kg" },
+  { tipo: "Industrialização: Toco", capacidade: "16.000 kg" }
+];
+
+const transportadoras: TransportadoraItem[] = [
+  { 
+    id: '1', nomeFantasia: 'Primato', razaoSocial: 'Primato Cooperativa Agroindustrial', cnpj: '07.456.789/0001-12', telefone: '(45) 3376-1170', email: 'contato@primato.com.br', cidade: 'Toledo', uf: 'PR',
+    endereco: 'Rua Brasil, 50 - Toledo Paraná', categoria: 'Entrega de dejetos',
+    contatoPrincipal: { nome: 'João Silva', telefone: '(45) 9 9999-1234', email: 'joao@primato.com.br' },
+    contatoComercial: { nome: 'Maria Souza', telefone: '(45) 9 8888-5678', email: 'comercial@primato.com.br' },
+    contatoFinanceiro: { nome: 'Pedro Santos', telefone: '(45) 9 7777-9012', email: 'financeiro@primato.com.br' },
+    veiculos: mockVeiculos
+  },
+  { 
+    id: '2', nomeFantasia: 'Agrocampo', razaoSocial: 'Agrocampo Transportes Ltda', cnpj: '12.345.678/0001-90', telefone: '(45) 3225-4455', email: 'logistica@agrocampo.com', cidade: 'Cascavel', uf: 'PR',
+    endereco: 'Av. Tancredo Neves, 1200 - Cascavel Paraná', categoria: 'Coleta de Ração',
+    contatoPrincipal: { nome: 'Carlos Oliveira', telefone: '(45) 9 9988-7766', email: 'carlos@agrocampo.com' },
+    veiculos: mockVeiculos.slice(0, 3)
+  },
+  { 
+    id: '3', nomeFantasia: 'MWM', razaoSocial: 'MWM Logística', cnpj: '98.765.432/0001-00', telefone: '(41) 3000-0000', email: 'contato@mwm.com', cidade: 'Curitiba', uf: 'PR',
+    endereco: 'Rod. BR-277, km 100 - Curitiba Paraná', categoria: 'Logística Geral',
+    contatoPrincipal: { nome: 'Ana Lima', telefone: '(41) 9 9123-4567', email: 'ana@mwm.com' },
+    veiculos: mockVeiculos
+  },
+  { 
+    id: '4', nomeFantasia: 'Tupy', razaoSocial: 'Tupy Transportes S.A.', cnpj: '11.222.333/0001-44', telefone: '(47) 3441-8000', email: 'contato@tupy.com.br', cidade: 'Joinville', uf: 'SC',
+    endereco: 'Rua Dona Francisca, 500 - Joinville Santa Catarina', categoria: 'Transporte Pesado',
+    contatoPrincipal: { nome: 'Marcos Tupy', telefone: '(47) 9 9999-0000', email: 'marcos@tupy.com' },
+    veiculos: mockVeiculos
+  }
+];
+
+// --- FUNÇÕES MOCK ---
 
 export const mockFetchCooperadosData = (): Promise<CooperadoItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(mockCooperadosData);
+    }, 500);
+  });
+};
+
+export const mockFetchTransportadorasData = (): Promise<TransportadoraItem[]> => { // NOVO
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(transportadoras);
     }, 500);
   });
 };
@@ -394,12 +426,10 @@ export const mockFetchAbastecimentoVolumeData = (): Promise<AbastecimentoVolumeI
       });
 };
 
-// --- CORREÇÃO AQUI: Retornando os dados reais do mockData ---
 export const mockFetchDashboardData = (): Promise<DashboardData> => {
     return new Promise((resolve) => {
         setTimeout(() => {
           const dashboardDataWithAbastecimentos = { ...mockData };
-          // Garante que abastecimentos tenha valor se estiver vazio
           if (
             !dashboardDataWithAbastecimentos.abastecimentos ||
             dashboardDataWithAbastecimentos.abastecimentos.length === 0

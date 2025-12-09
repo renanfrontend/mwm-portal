@@ -157,7 +157,7 @@ const CooperadoEditModal: React.FC<Props> = ({ isActive, onClose, onSave, data }
 
         <footer className="modal-card-foot is-justify-content-flex-end" style={{ borderTop: '1px solid #ededed', backgroundColor: 'white', gap: '10px', padding: '1.5rem' }}>
           <button className="button" onClick={onClose}>Cancelar</button>
-          <button className="button is-success" onClick={handleSubmit}><span className="icon is-small"><MdSave /></span><span>Salvar Alterações</span></button>
+          <button className="button is-success" onClick={handleSubmit}><span className="icon is-small"><MdSave /></span><span>Salvar</span></button>
         </footer>
       </div>
     </div>

@@ -93,7 +93,6 @@ export interface ColetaItem {
   status: "Pendente" | "Entregue" | "Atrasado";
 }
 
-// --- COOPERADO ATUALIZADO ---
 export interface CooperadoItem {
   id: string;
   matricula: number;
@@ -104,10 +103,9 @@ export interface CooperadoItem {
   certificado: "Ativo" | "Inativo";
   doamDejetos: "Sim" | "Não";
   fase: string;
-  
-  // Campos novos para layout e modal
+  // Novos campos
   cpfCnpj?: string;
-  cabecasAlojadas?: string | number; // Campo da lista
+  cabecasAlojadas?: string | number;
   tecnico?: string;
   telefone?: string;
   numPropriedade?: string;
@@ -115,12 +113,24 @@ export interface CooperadoItem {
   municipio?: string;
   latitude?: string;
   longitude?: string;
-  modalidade?: string;
-  distancia?: string; // Campo da lista
+  distancia?: string;
   responsavel?: string;
   emailResponsavel?: string;
   telefoneTecnico?: string;
   emailTecnico?: string;
+  modalidade?: string;
+}
+
+// --- INTERFACES PARA TRANSPORTADORA (NOVO) ---
+export interface ContactInfo {
+  nome: string;
+  telefone: string;
+  email: string;
+}
+
+export interface VeiculoInfo {
+  tipo: string;
+  capacidade: string;
 }
 
 export interface TransportadoraItem {
@@ -132,6 +142,14 @@ export interface TransportadoraItem {
   email: string;
   cidade: string;
   uf: string;
+  endereco?: string;
+  categoria?: string;
+  // Detalhes
+  contatoPrincipal?: ContactInfo;
+  contatoComercial?: ContactInfo;
+  contatoFinanceiro?: ContactInfo;
+  contatoJuridico?: ContactInfo;
+  veiculos?: VeiculoInfo[];
 }
 
 export interface CalendarEvent {
