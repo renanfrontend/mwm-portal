@@ -1,7 +1,7 @@
 // src/components/TransportadoraCreateModal.tsx
 
 import React, { useState } from 'react';
-import type { TransportadoraItem, ContactInfo, VeiculoInfo } from '../types/models';
+import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
 import { MdSave } from 'react-icons/md';
 import { v4 as uuidv4 } from 'uuid'; // Import para gerar ID fictício

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { CooperadoItem } from '../types/models';
-import { MdVerified, MdCheck, MdPhone, MdLocationOn, MdVisibility, MdEdit, MdCalendarMonth } from 'react-icons/md';
+import { MdVerified, MdCheck, MdPhone, MdLocationOn, MdVisibility, MdEdit } from 'react-icons/md';
 
 interface Props {
   item: CooperadoItem;
@@ -35,7 +35,7 @@ const BASE_LNG = -53.742277;
 
 export const CooperadoListItem: React.FC<Props> = ({ 
   item, isDeleteMode, isSelected, onSelectItem,
-  onContactItem, onLocationItem, onViewItem, onEditItem, onCalendarItem 
+  onContactItem, onLocationItem, onViewItem, onEditItem
 }) => {
   const certificadoClass = item.certificado === 'Ativo' ? 'has-text-success' : 'has-text-grey';
   const doamDejetosClass = item.doamDejetos === 'Sim' ? 'has-text-success' : 'has-text-grey';

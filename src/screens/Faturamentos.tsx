@@ -1,6 +1,6 @@
 // src/screens/Faturamentos.tsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MdArrowBack } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import MonthlyBarChart from '../components/MonthlyBarChart';

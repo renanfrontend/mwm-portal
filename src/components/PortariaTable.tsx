@@ -1,101 +1,83 @@
 // src/components/PortariaTable.tsx
-
 import React from 'react';
-import { type PortariaItem } from '../services/api';
+import { type PortariaItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
-import { MdEdit, MdLogin, MdQrCodeScanner } from 'react-icons/md';
+import { FaWeightHanging } from 'react-icons/fa';
 
 interface Props {
   data: PortariaItem[];
-  onCheckIn: (item: PortariaItem) => void;
-  onEdit: (item: PortariaItem) => void;
+  onCheckInClick: (item: PortariaItem) => void;
 }
 
-export const PortariaTable: React.FC<Props> = ({ data, onCheckIn, onEdit }) => {
+export const PortariaTable: React.FC<Props> = ({ data, onCheckInClick }) => {
   const { theme } = useTheme();
-  const textColor = theme === 'dark' ? '#a0aec0' : '#363636';
-
-  // Função para definir a cor da tag de status
-  const getStatusTag = (status: string) => {
-    switch (status) {
-      case 'Concluído': return 'is-success';
-      case 'Pendente': return 'is-warning';
-      case 'Em processo': return 'is-info';
-      case 'Pesagem': return 'is-link';
-      default: return 'is-light';
-    }
-  };
 
   return (
     <div className="table-container">
-      <table className="table is-fullwidth is-hoverable is-striped">
+      <table className={`table is-hoverable is-fullwidth ${theme === 'dark' ? 'is-dark' : ''}`}>
         <thead>
-          <tr>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Data/Hora</th>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Motorista</th>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Empresa</th>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Veículo</th>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Atividade</th>
-            <th style={{ color: textColor, padding: '12px 15px' }}>Status</th>
-            <th style={{ color: textColor, padding: '12px 15px', textAlign: 'right' }}>Ações</th>
+          <tr className="has-text-grey-light is-size-7">
+            <th className="has-text-weight-normal">Data</th>
+            <th className="has-text-weight-normal">Empresa/Cooperado</th>
+            <th className="has-text-weight-normal">Atividade realizada</th>
+            <th className="has-text-weight-normal">Transportadora</th>
+            <th className="has-text-weight-normal">Tipo de veículo</th>
+            <th className="has-text-weight-normal">Placa</th>
+            <th className="has-text-weight-normal">Motorista</th>
+            <th className="has-text-weight-normal">Status</th>
+            <th className="has-text-weight-normal">Ação pendente</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                <div>
-                    <p className="has-text-weight-semibold">{item.data}</p>
-                    <p className="is-size-7 has-text-grey">{item.horario}</p>
-                </div>
+          {data.map(item => (
+            <tr key={item.id} className="is-vcentered">
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Data</div>
+                <div className="has-text-weight-semibold is-size-6">{item.data} {item.horario}H</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                <span className="has-text-weight-medium">{item.motorista}</span>
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Empresa/Cooperado</div>
+                <div className="is-size-6">{item.empresa}</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                {item.empresa}
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Atividade realizada</div>
+                <div>{item.atividade}</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                <p>{item.tipoVeiculo}</p>
-                <span className="tag is-light is-rounded is-small mt-1">{item.placa}</span>
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Transportadora</div>
+                <div>{item.transportadora || '-'}</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                {item.atividade}
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Tipo de veículo</div>
+                <div>{item.tipoVeiculo}</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px' }}>
-                <span className={`tag ${getStatusTag(item.status)} is-light`}>
-                  {item.status}
-                </span>
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Placa</div>
+                <div>{item.placa}</div>
               </td>
-              <td style={{ verticalAlign: 'middle', padding: '12px 15px', textAlign: 'right' }}>
-                <div className="buttons is-right are-small">
-                  {item.status !== 'Concluído' && (
-                    <button 
-                        className="button is-link is-light" 
-                        title="Check-in / Avançar"
-                        onClick={() => onCheckIn(item)}
-                    >
-                        <span className="icon"><MdQrCodeScanner /></span>
-                    </button>
-                  )}
-                  <button 
-                    className="button is-white" 
-                    title="Editar"
-                    onClick={() => onEdit(item)}
-                  >
-                    <span className="icon"><MdEdit /></span>
-                  </button>
-                </div>
+              <td className="is-size-7">
+                <div className="has-text-grey-light mb-1">Motorista</div>
+                <div>{item.motorista}</div>
+              </td>
+              <td className="is-size-7 is-vcentered">
+                <div className="has-text-grey-light mb-1">Status</div>
+                <span className="tag is-light is-rounded has-text-weight-semibold">{item.status}</span>
+              </td>
+              <td className="is-vcentered">
+                <div className="has-text-grey-light mb-1 is-size-7">Ação pendente</div>
+                <button 
+                  className="button is-small has-text-weight-bold border-0"
+                  style={{ backgroundColor: '#ecfdf5', color: '#047857' }}
+                  onClick={() => onCheckInClick(item)}
+                >
+                  <span className="icon is-small mr-1">
+                    <FaWeightHanging />
+                  </span>
+                  <span>Pesar Veículo</span>
+                </button>
               </td>
             </tr>
           ))}
-          {data.length === 0 && (
-            <tr>
-              <td colSpan={7} className="has-text-centered py-6 has-text-grey">
-                Nenhum registro encontrado.
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>

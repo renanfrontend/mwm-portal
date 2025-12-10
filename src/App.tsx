@@ -26,7 +26,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { MdMenu } from 'react-icons/md';
 
 const AppContent = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {

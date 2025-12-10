@@ -1,6 +1,5 @@
 // src/components/Sidebar.tsx
 
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { MdDashboard, MdBusiness, MdLocalShipping, MdEvStation, MdAssignment, MdAttachMoney, MdSettings, MdExitToApp, MdScience } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
