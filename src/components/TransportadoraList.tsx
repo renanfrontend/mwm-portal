@@ -103,14 +103,6 @@ export const TransportadoraList: React.FC = () => {
   };
 
   // Veículos (Lógica do Modal)
-  const handleDeleteTransportadoraFromModal = () => {
-      if (selectedItem && window.confirm("Excluir esta transportadora?")) {
-          setData(prev => prev.filter(t => t.id !== selectedItem.id));
-          toast.success("Transportadora removida.");
-          closeModals();
-      }
-  };
-  const handleOpenAddVehicle = () => setIsAddVehicleOpen(true);
   const handleSaveNewVehicle = (vehicle: VeiculoInfo) => {
       if (selectedItem) {
           const updated = { ...selectedItem, veiculos: [...(selectedItem.veiculos || []), vehicle] };
@@ -120,14 +112,16 @@ export const TransportadoraList: React.FC = () => {
           setIsAddVehicleOpen(false);
       }
   };
-  const handleRemoveVehicle = (index: number) => {
-      if (selectedItem && window.confirm("Remover veículo?")) {
-          const updatedVs = [...(selectedItem.veiculos || [])];
-          updatedVs.splice(index, 1);
+
+  const handleOpenAddVehicle = () => setIsAddVehicleOpen(true);
+
+  const handleDeleteVehicle = (indices: number[]) => {
+      if (selectedItem && window.confirm("Remover veículo(s) selecionado(s)?")) {
+          const updatedVs = (selectedItem.veiculos || []).filter((_, i) => !indices.includes(i));
           const updated = { ...selectedItem, veiculos: updatedVs };
           setSelectedItem(updated);
           setData(prev => prev.map(i => i.id === updated.id ? updated : i));
-          toast.success("Veículo removido.");
+          toast.success("Veículo(s) removido(s).");
       }
   };
 
@@ -211,9 +205,8 @@ export const TransportadoraList: React.FC = () => {
           isActive={isVehiclesOpen} 
           onClose={closeModals} 
           data={selectedItem} 
-          onAddVehicle={handleOpenAddVehicle}
-          onDeleteTransportadora={handleDeleteTransportadoraFromModal}
-          onRemoveVehicle={handleRemoveVehicle}
+          onOpenAddModal={handleOpenAddVehicle}
+          onDeleteVehicles={handleDeleteVehicle}
       />
       
       <TransportadoraEditModal isActive={isEditOpen} onClose={closeModals} data={selectedItem} onSave={handleSaveEdit} />

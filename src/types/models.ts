@@ -186,15 +186,18 @@ export interface AgendaData {
 
 export interface PortariaItem {
   id: string;
-  categoria: 'Entregas' | 'Abastecimentos' | 'Coletas' | 'Visitas';
+  // Alterado para string para aceitar qualquer categoria ou mantido o union se preferir
+  categoria: string; 
   data: string;
   horario: string;
   empresa: string;
+  transportadora?: string; // Campo novo opcional
   motorista: string;
   tipoVeiculo: string;
   placa: string;
   atividade: string;
-  status: 'Concluído' | 'Pendente' | 'Em processo' | 'Pesagem';
+  // ATENÇÃO: Adicionei 'Em andamento' e mantive 'Em processo' para evitar erros de compilação na api.ts
+  status: 'Concluído' | 'Pendente' | 'Em processo' | 'Em andamento' | 'Pesagem';
   cpf_cnpj?: string;
   balancaEntrada?: string;
   balancaSaida?: string;

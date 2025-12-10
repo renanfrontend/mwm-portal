@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { TransportadoraItem } from '../types/models';
-import { MdEdit, MdPhone, MdLocationOn, MdLocalShipping } from 'react-icons/md';
+import { MdEdit, MdPhone, MdLocalShipping } from 'react-icons/md';
 
 interface Props {
   item: TransportadoraItem;

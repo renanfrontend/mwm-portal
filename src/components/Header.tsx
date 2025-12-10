@@ -1,7 +1,7 @@
 // src/components/Header.tsx
 
 import React, { useState } from 'react';
-import { MdNotifications, MdMenu, MdAccountCircle, MdLogout } from 'react-icons/md'; 
+import { MdNotifications, MdAccountCircle, MdLogout } from 'react-icons/md'; 
 import { useAuth } from '../context/AuthContext'; 
 
 interface HeaderProps {
@@ -25,7 +25,7 @@ const NotificationButton: React.FC = () => {
     );
 };
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick, children }) => {
+const Header: React.FC<HeaderProps> = ({ children }) => {
   const { user, logout } = useAuth();
 
   return (

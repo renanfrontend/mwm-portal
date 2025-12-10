@@ -1,7 +1,5 @@
 // src/services/mock/api.mock.ts
 
-import { v4 as uuidv4 } from 'uuid';
-
 // EXPORT all types for the app
 export type {
   AbastecimentoItem,
@@ -40,9 +38,6 @@ import {
   type FaturamentoItem,
   type PortariaItem,
   type QualidadeDejetosItem,
-  type Metric,
-  type StockItem,
-  type CooperativeAnalysisItem,
   type TransportadoraItem
 } from "../../types/models";
 
