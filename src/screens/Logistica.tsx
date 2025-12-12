@@ -1,15 +1,15 @@
 // src/screens/Logistica.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable';
 import { CooperadoListItem } from '../components/CooperadoListItem';
 import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
-// IMPORT ATUALIZADO
 import { TransportadoraList } from '../components/TransportadoraList';
 
+// Modais
 import CooperadoContactModal from '../components/CooperadoContactModal';
 import CooperadoLocationModal from '../components/CooperadoLocationModal';
 import CooperadoInfoModal from '../components/CooperadoInfoModal';
@@ -25,16 +25,12 @@ const Logistica: React.FC = () => {
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const [showFilters, setShowFilters] = useState(false);
-  const [filterStatus] = useState<string[]>([]);
-  const [filterTransportadora] = useState<string[]>([]);
-
+  // Modais State
   const [selectedCooperado, setSelectedCooperado] = useState<CooperadoItem | null>(null);
   const [isContactModalActive, setIsContactModalActive] = useState(false);
   const [isLocationModalActive, setIsLocationModalActive] = useState(false);
@@ -44,7 +40,7 @@ const Logistica: React.FC = () => {
   const [isCreateModalActive, setIsCreateModalActive] = useState(false);
 
   const loadData = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
     try {
       if (activeTab === 'agenda') {
         const data = await fetchNewAgendaData();
@@ -54,7 +50,6 @@ const Logistica: React.FC = () => {
         setCooperadosData(data || []);
       }
     } catch (err) {
-      setError("Erro ao buscar dados.");
       toast.error("Falha ao carregar dados.");
     } finally {
       setLoading(false);
@@ -66,18 +61,15 @@ const Logistica: React.FC = () => {
     setSearchTerm(''); setSelectedItems([]); setIsDeleteMode(false);
   }, [activeTab, loadData]);
   
-  const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus.length === 0 || filterStatus.includes(item.status)) && (filterTransportadora.length === 0 || filterTransportadora.includes(item.transportadora))), [searchTerm, agendaData, filterStatus, filterTransportadora]);
+  const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, agendaData]);
   const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase())) || (item.filial && item.filial.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
   
   const handleSelectItem = (id: string | number) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]) };
   
   const handleConfirmDelete = () => {
     try {
-      if (activeTab === 'agenda') {
-        setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      } else if (activeTab === 'cadastro') {
-        setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      }
+      if (activeTab === 'agenda') setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+      else setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
       toast.success("Itens excluídos.");
       setSelectedItems([]); setIsModalOpen(false); setIsDeleteMode(false);
     } catch {
@@ -85,45 +77,43 @@ const Logistica: React.FC = () => {
       setIsModalOpen(false);
     }
   };
-  
-  const handleOpenContactModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsContactModalActive(true); };
-  const handleOpenLocationModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsLocationModalActive(true); };
-  const handleOpenViewModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsInfoModalActive(true); };
-  const handleOpenEditModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsEditModalActive(true); };
-  const handleOpenCalendarModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsCalendarModalActive(true); };
-  const handleOpenCreateModal = () => { setIsCreateModalActive(true); };
-
-  const handleSaveNewCooperado = (newItem: CooperadoItem) => {
-    setCooperadosData(prev => [newItem, ...prev]);
-    toast.success("Novo cooperado adicionado!");
-    setIsCreateModalActive(false);
-  };
-
-  const handleSaveCooperado = (editedItem: CooperadoItem) => { setCooperadosData(prev => prev.map(item => item.id === editedItem.id ? editedItem : item)); toast.success("Atualizado!"); setIsEditModalActive(false); setSelectedCooperado(null); };
-  const handleSaveCalendar = () => { setIsCalendarModalActive(false); setSelectedCooperado(null); setActiveTab('agenda'); toast.success("Agendamento realizado!"); };
-  const handleOpenMapFromInfo = (item: CooperadoItem) => { setIsInfoModalActive(false); setTimeout(() => { setSelectedCooperado(item); setIsLocationModalActive(true); }, 100); };
 
   const closeAllModals = () => {
     setIsContactModalActive(false); setIsLocationModalActive(false); setIsInfoModalActive(false); setIsEditModalActive(false); setIsCalendarModalActive(false); setIsCreateModalActive(false); 
     setTimeout(() => setSelectedCooperado(null), 200);
   };
 
+  // Handlers
+  const handleOpenContactModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsContactModalActive(true); };
+  const handleOpenLocationModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsLocationModalActive(true); };
+  const handleOpenViewModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsInfoModalActive(true); };
+  const handleOpenEditModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsEditModalActive(true); };
+  const handleOpenCalendarModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsCalendarModalActive(true); };
+  const handleOpenCreateModal = () => { setIsCreateModalActive(true); };
+  const handleSaveNewCooperado = (newItem: CooperadoItem) => { setCooperadosData(prev => [newItem, ...prev]); toast.success("Adicionado!"); setIsCreateModalActive(false); };
+  const handleSaveCooperado = (editedItem: CooperadoItem) => { setCooperadosData(prev => prev.map(item => item.id === editedItem.id ? editedItem : item)); toast.success("Atualizado!"); setIsEditModalActive(false); setSelectedCooperado(null); };
+  const handleSaveCalendar = () => { setIsCalendarModalActive(false); toast.success("Agendamento realizado!"); };
+  const handleOpenMapFromInfo = (item: CooperadoItem) => { setIsInfoModalActive(false); setTimeout(() => { setSelectedCooperado(item); setIsLocationModalActive(true); }, 100); };
+
   return (
-    <div className="screen-container">
+    // ESTRUTURA FIXA COM FUNDO BRANCO
+    <div className="screen-container" style={{ backgroundColor: '#fff' }}>
+      
+      {/* HEADER FIXO */}
       <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem' }}>
         <div className="level is-mobile">
           <div className="level-left">
             <div className="buttons">
-              <button className="button is-white mr-2" onClick={() => navigate(-1)}>
+              <button className="button is-white border mr-2" onClick={() => navigate(-1)}>
                 <span className="icon"><MdArrowBack size={24} /></span>
               </button>
               <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Logística</span>
             </div>
           </div>
-          <div className="level-right"></div>
         </div>
       </div>
 
+      {/* ABAS FIXAS */}
       <div className="tabs is-toggle is-fullwidth mb-0" style={{ borderBottom: '1px solid #dbdbdb', backgroundColor: '#fff' }}>
         <ul>
           <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cooperados</span></a></li>
@@ -132,19 +122,49 @@ const Logistica: React.FC = () => {
         </ul>
       </div>
 
-      <div className="screen-content">
+      {/* CONTEÚDO COM SCROLL */}
+      <div className="screen-content p-5">
+        
+        {/* ABA CADASTRO */}
         {activeTab === 'cadastro' && (
           <div className="container is-fluid px-0">
-            <div className="box mb-4">
-              <div className="field is-grouped">
-                <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
-                <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }}><span className="icon"><MdDelete /></span></button></div>
-                <div className="control"><button className="button is-pill"><span className="icon"><MdFilterList /></span></button></div>
-                <div className="control"><button className="button is-link" onClick={handleOpenCreateModal}><span className="icon"><MdPersonAdd /></span><span>Adicionar</span></button></div>
-              </div>
+            {/* Barra de Busca Padronizada */}
+            <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
+                <div className="control has-icons-right">
+                    <input 
+                      className="input" 
+                      type="text" 
+                      placeholder="Buscar cooperado..." 
+                      style={{ width: '300px' }} 
+                      value={searchTerm} 
+                      onChange={e => setSearchTerm(e.target.value)} 
+                    />
+                    <span className="icon is-right"><MdSearch /></span>
+                </div>
+                
+                <div className="buttons">
+                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
+                        <span className="icon"><MdDelete /></span>
+                    </button>
+                    <button className="button is-white border">
+                        <span className="icon"><MdFilterList /></span>
+                        <span>Filtrar</span>
+                    </button>
+                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenCreateModal}>
+                        <span className="icon"><MdAdd /></span>
+                        <span>Adicionar</span>
+                    </button>
+                </div>
             </div>
-            {isDeleteMode && selectedItems.length > 0 && <div className="level is-mobile mb-4"><div className="level-left"><p>{selectedItems.length} item(s) selecionado(s)</p></div><div className="level-right"><button className="button is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button></div></div>}
-            {!loading && !error && filteredCooperadosData.map(item => (
+            
+            {isDeleteMode && selectedItems.length > 0 && (
+                <div className="notification is-danger is-light mb-4 py-2 px-4 is-flex is-justify-content-space-between is-align-items-center">
+                    <span>{selectedItems.length} selecionado(s)</span>
+                    <button className="button is-small is-danger" onClick={() => setIsModalOpen(true)}>Confirmar Exclusão</button>
+                </div>
+            )}
+            
+            {!loading && filteredCooperadosData.map(item => (
               <CooperadoListItem 
                 key={item.id} item={item} isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem}
                 onContactItem={handleOpenContactModal} onLocationItem={handleOpenLocationModal} onViewItem={handleOpenViewModal} onEditItem={handleOpenEditModal} onCalendarItem={handleOpenCalendarModal}
@@ -153,30 +173,35 @@ const Logistica: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'agenda' && (
-          <div className="container is-fluid px-0">
-            <div className="box mb-4">
-              <div className="field is-grouped">
-                  <div className="control is-expanded"><div className="field has-addons"><div className="control is-expanded"><input className="input" type="text" placeholder="Digite nome..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div><div className="control"><button className="button"><span className="icon"><MdSearch /></span></button></div></div></div>
-                  <div className="control"><button className={`button is-pill ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); }}><span className="icon"><MdDelete /></span></button></div>
-                  <div className="control">
-                      <div className={`dropdown is-right ${showFilters ? 'is-active' : ''}`}>
-                          <div className="dropdown-trigger"><button className="button is-pill" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => setShowFilters(!showFilters)}><span className="icon"><MdFilterList /></span></button></div>
-                          <div className="dropdown-menu" id="dropdown-menu" role="menu" style={{width: '280px'}}><div className="dropdown-content"></div></div>
-                      </div>
-                  </div>
-              </div>
-            </div>
-            <div className="box p-0">
-               {!loading && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={() => setIsModalOpen(true)} />}
-            </div>
-          </div>
-        )}
-
-        {/* ABA TRANSPORTADORA (CARDS) */}
+        {/* ABA TRANSPORTADORA */}
         {activeTab === 'transportadora' && (
           <div className="container is-fluid px-0">
             <TransportadoraList />
+          </div>
+        )}
+
+        {/* ABA AGENDA */}
+        {activeTab === 'agenda' && (
+          <div className="container is-fluid px-0">
+             <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
+                <div className="control has-icons-right">
+                    <input className="input" type="text" placeholder="Buscar na agenda..." style={{ width: '300px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                    <span className="icon is-right"><MdSearch /></span>
+                </div>
+                <div className="buttons">
+                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
+                        <span className="icon"><MdDelete /></span>
+                    </button>
+                    <button className="button is-white border">
+                        <span className="icon"><MdFilterList /></span>
+                        <span>Filtrar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div className="box p-0 shadow-none border">
+               {!loading && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={handleConfirmDelete} />}
+            </div>
           </div>
         )}
       </div>

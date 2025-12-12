@@ -12,6 +12,16 @@ interface Props {
 export const PortariaTable: React.FC<Props> = ({ data, onCheckInClick }) => {
   const { theme } = useTheme();
 
+  // Função para formatar a data (yyyy-mm-dd -> dd/mm/aaaa)
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    if (dateString.includes('-')) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+    }
+    return dateString;
+  };
+
   return (
     <div className="table-container">
       <table className={`table is-hoverable is-fullwidth ${theme === 'dark' ? 'is-dark' : ''}`}>
@@ -33,7 +43,9 @@ export const PortariaTable: React.FC<Props> = ({ data, onCheckInClick }) => {
             <tr key={item.id} className="is-vcentered">
               <td className="is-size-7">
                 <div className="has-text-grey-light mb-1">Data</div>
-                <div className="has-text-weight-semibold is-size-6">{item.data} {item.horario}H</div>
+                <div className="has-text-weight-semibold is-size-6">
+                    {formatDate(item.data)} {item.horario}H
+                </div>
               </td>
               <td className="is-size-7">
                 <div className="has-text-grey-light mb-1">Empresa/Cooperado</div>

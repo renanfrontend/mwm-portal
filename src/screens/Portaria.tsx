@@ -1,4 +1,5 @@
 // src/screens/Portaria.tsx
+
 import React, { useState } from 'react';
 import { MdSearch, MdFilterList, MdDelete, MdAdd, MdCalendarToday } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -28,14 +29,26 @@ const Portaria: React.FC = () => {
     setIsCheckInOpen(true);
   };
 
-  const handleConfirmCheckIn = (peso: string) => {
+  // --- Função Ajustada para 2 Pesos ---
+  const handleConfirmCheckIn = (entrada: string, saida: string) => {
     if (!selectedItem) return;
+
+    // Lógica: Se ambos preenchidos = Concluído, senão Pesagem
+    // (Mas como o modal pede ambos como obrigatório visualmente, assume-se que virão)
+    const novoStatus = (entrada && saida) ? 'Concluído' : 'Pesagem';
+
     setData(prev => prev.map(item => 
       item.id === selectedItem.id 
-        ? { ...item, balancaEntrada: peso, status: 'Pesagem' } 
+        ? { 
+            ...item, 
+            balancaEntrada: entrada, 
+            balancaSaida: saida, 
+            status: novoStatus 
+          } 
         : item
     ));
-    toast.success(`Peso de ${peso}kg registrado para ${selectedItem.placa}`);
+
+    toast.success(`Pesagem registrada para ${selectedItem.placa}`);
     setIsCheckInOpen(false);
     setSelectedItem(null);
   };

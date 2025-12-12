@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 import { fetchTransportadorasData } from '../services/api';
 import { TransportadoraListItem } from './TransportadoraListItem';
 
-// Modais
 import TransportadoraContactModal from './TransportadoraContactModal';
 import TransportadoraVehiclesModal from './TransportadoraVehiclesModal';
 import TransportadoraEditModal from './TransportadoraEditModal';
@@ -19,12 +18,12 @@ export const TransportadoraList: React.FC = () => {
   const [data, setData] = useState<TransportadoraItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // States de Seleção/Exclusão
+  // States
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
-  // States Modais
+  // Modais
   const [selectedItem, setSelectedItem] = useState<TransportadoraItem | null>(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isVehiclesOpen, setIsVehiclesOpen] = useState(false);
@@ -52,36 +51,13 @@ export const TransportadoraList: React.FC = () => {
     item.cnpj.includes(searchTerm)
   );
 
-  // --- LÓGICA DE EXCLUSÃO MÚLTIPLA ---
-  const toggleDeleteMode = () => {
-    setIsDeleteMode(!isDeleteMode);
-    setSelectedItems([]);
-  };
+  const toggleDeleteMode = () => { setIsDeleteMode(!isDeleteMode); setSelectedItems([]); };
+  const handleSelectItem = (id: string) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]); };
+  const confirmDelete = () => { setData(prev => prev.filter(i => !selectedItems.includes(i.id))); toast.success("Removidos."); setIsConfirmDeleteOpen(false); setSelectedItems([]); setIsDeleteMode(false); };
 
-  const handleSelectItem = (id: string) => {
-    setSelectedItems(prev => 
-      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
-    );
-  };
-
-  const handleOpenDeleteModal = () => {
-      if (selectedItems.length === 0) return;
-      setIsConfirmDeleteOpen(true);
-  };
-
-  const confirmDelete = () => {
-      setData(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      toast.success(`${selectedItems.length} transportadora(s) removida(s) com sucesso.`);
-      setIsConfirmDeleteOpen(false);
-      setSelectedItems([]);
-      setIsDeleteMode(false);
-  };
-
-  // --- Handlers Modais ---
   const closeModals = () => {
       if (isAddVehicleOpen) { setIsAddVehicleOpen(false); return; }
-      setSelectedItem(null);
-      setIsContactOpen(false); setIsVehiclesOpen(false); setIsEditOpen(false); setIsCreateOpen(false);
+      setSelectedItem(null); setIsContactOpen(false); setIsVehiclesOpen(false); setIsEditOpen(false); setIsCreateOpen(false);
   };
 
   const handleContact = (item: TransportadoraItem) => { setSelectedItem(item); setIsContactOpen(true); };
@@ -89,91 +65,88 @@ export const TransportadoraList: React.FC = () => {
   const handleEdit = (item: TransportadoraItem) => { setSelectedItem(item); setIsEditOpen(true); };
   const handleAdd = () => setIsCreateOpen(true);
 
-  // --- Ações de Dados ---
-  const handleSaveEdit = (updated: TransportadoraItem) => {
-      setData(prev => prev.map(i => i.id === updated.id ? updated : i));
-      toast.success("Transportadora atualizada!");
-      closeModals();
+  // Logic
+  const handleSaveEdit = (updated: TransportadoraItem) => { setData(prev => prev.map(i => i.id === updated.id ? updated : i)); toast.success("Atualizado!"); closeModals(); };
+  const handleSaveNew = (newItem: TransportadoraItem) => { setData(prev => [newItem, ...prev]); toast.success("Cadastrado!"); closeModals(); };
+  
+  const handleSaveNewVehicle = (v: VeiculoInfo) => { 
+      if (selectedItem) { 
+          const up = { ...selectedItem, veiculos: [...(selectedItem.veiculos || []), v] }; 
+          setSelectedItem(up); 
+          setData(prev => prev.map(i => i.id === up.id ? up : i)); 
+          toast.success("Veículo adicionado!"); 
+          setIsAddVehicleOpen(false); 
+      } 
   };
-
-  const handleSaveNew = (newItem: TransportadoraItem) => {
-      setData(prev => [newItem, ...prev]);
-      toast.success("Transportadora cadastrada!");
-      closeModals();
+  
+  const handleDeleteTransportadora = () => { 
+      if (selectedItem) { 
+          if(window.confirm("Deseja realmente remover esta transportadora?")) {
+            setData(prev => prev.filter(t => t.id !== selectedItem.id)); 
+            toast.success("Transportadora removida."); 
+            closeModals(); 
+          }
+      } 
   };
-
-  // Veículos (Lógica do Modal)
-  const handleSaveNewVehicle = (vehicle: VeiculoInfo) => {
-      if (selectedItem) {
-          const updated = { ...selectedItem, veiculos: [...(selectedItem.veiculos || []), vehicle] };
-          setSelectedItem(updated);
-          setData(prev => prev.map(i => i.id === updated.id ? updated : i));
-          toast.success("Veículo adicionado!");
-          setIsAddVehicleOpen(false);
-      }
-  };
-
-  const handleOpenAddVehicle = () => setIsAddVehicleOpen(true);
-
-  const handleDeleteVehicle = (indices: number[]) => {
-      if (selectedItem && window.confirm("Remover veículo(s) selecionado(s)?")) {
-          const updatedVs = (selectedItem.veiculos || []).filter((_, i) => !indices.includes(i));
-          const updated = { ...selectedItem, veiculos: updatedVs };
-          setSelectedItem(updated);
-          setData(prev => prev.map(i => i.id === updated.id ? updated : i));
-          toast.success("Veículo(s) removido(s).");
-      }
+  
+  const handleRemoveVehicle = (idx: number) => { 
+      if (selectedItem) { 
+          if(window.confirm("Remover este veículo?")) {
+            const vs = [...(selectedItem.veiculos || [])]; 
+            vs.splice(idx, 1); 
+            const up = { ...selectedItem, veiculos: vs }; 
+            setSelectedItem(up); 
+            setData(prev => prev.map(i => i.id === up.id ? up : i)); 
+            toast.success("Veículo removido."); 
+          }
+      } 
   };
 
   return (
     <div>
-      {/* TOOLBAR */}
-      <div className="box mb-4" style={{ border: '1px solid #f0f0f0', boxShadow: 'none' }}>
-        <div className="field is-grouped">
-            <div className="control is-expanded has-icons-left">
-                <input className="input" type="text" placeholder="Buscar transportadora..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                <span className="icon is-small is-left"><MdSearch /></span>
-            </div>
-            
-            {/* Botão Lixeira (Substitui Buscar) */}
-            <div className="control">
-                <button 
-                    className={`button ${isDeleteMode ? 'is-danger' : 'is-white'}`} 
-                    onClick={toggleDeleteMode} 
-                    title={isDeleteMode ? "Cancelar exclusão" : "Excluir itens"}
-                >
-                    <span className="icon"><MdDelete /></span>
-                </button>
-            </div>
-
-            <div className="control"><button className="button is-pill"><span className="icon"><MdFilterList /></span></button></div>
-            <div className="control"><button className="button is-link" onClick={handleAdd}><span className="icon"><MdAdd /></span><span>Adicionar</span></button></div>
+      <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
+        <div className="control has-icons-right">
+            <input 
+              className="input" 
+              type="text" 
+              placeholder="Buscar transportadora..." 
+              style={{ width: '300px' }} 
+              value={searchTerm} 
+              onChange={e => setSearchTerm(e.target.value)} 
+            />
+            <span className="icon is-right"><MdSearch /></span>
+        </div>
+        
+        <div className="buttons">
+            <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={toggleDeleteMode}>
+                <span className="icon"><MdDelete /></span>
+            </button>
+            <button className="button is-white border">
+                <span className="icon"><MdFilterList /></span>
+                <span>Filtrar</span>
+            </button>
+            <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleAdd}>
+                <span className="icon"><MdAdd /></span>
+                <span>Adicionar</span>
+            </button>
         </div>
       </div>
 
-      {/* BARRA DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {isDeleteMode && selectedItems.length > 0 && (
           <div className="notification is-danger is-light mb-4 py-2 px-4 is-flex is-justify-content-space-between is-align-items-center">
-              <span className="has-text-weight-bold">{selectedItems.length} transportadora(s) selecionada(s)</span>
-              <button className="button is-small is-danger" onClick={handleOpenDeleteModal}>
-                  Excluir Selecionados
-              </button>
+              <span>{selectedItems.length} selecionado(s)</span>
+              <button className="button is-small is-danger" onClick={() => setIsConfirmDeleteOpen(true)}>Confirmar Exclusão</button>
           </div>
       )}
 
-      {/* LISTA */}
-      <div className="box p-0" style={{ border: '1px solid #dbdbdb', boxShadow: 'none' }}>
+      <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
           {loading ? <div className="p-4 has-text-centered">Carregando...</div> : 
             filteredData.length > 0 ? (
                 filteredData.map((item) => (
                     <TransportadoraListItem 
                         key={item.id} item={item}
-                        isDeleteMode={isDeleteMode}
-                        isSelected={selectedItems.includes(item.id)}
-                        onSelectItem={handleSelectItem}
-                        onContact={handleContact} 
-                        onVehicles={handleVehicles}
-                        onEdit={handleEdit}
+                        isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem}
+                        onContact={handleContact} onVehicles={handleVehicles} onEdit={handleEdit}
                     />
                 ))
             ) : (
@@ -182,36 +155,30 @@ export const TransportadoraList: React.FC = () => {
           }
       </div>
 
-      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       <div className={`modal ${isConfirmDeleteOpen ? 'is-active' : ''}`}>
         <div className="modal-background" onClick={() => setIsConfirmDeleteOpen(false)}></div>
         <div className="modal-card">
-          <header className="modal-card-head"><p className="modal-card-title">Confirmar Exclusão</p></header>
-          <section className="modal-card-body">
-              <p>Tem certeza que deseja excluir as <strong>{selectedItems.length}</strong> transportadoras selecionadas?</p>
-              <p className="help is-danger">Esta ação não pode ser desfeita.</p>
-          </section>
-          <footer className="modal-card-foot is-justify-content-flex-end">
-              <button className="button" onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</button>
-              <button className="button is-danger" onClick={confirmDelete}>Excluir</button>
-          </footer>
+          <header className="modal-card-head"><p className="modal-card-title">Confirmar</p></header>
+          <section className="modal-card-body"><p>Excluir {selectedItems.length} itens?</p></section>
+          <footer className="modal-card-foot"><button className="button" onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</button><button className="button is-danger" onClick={confirmDelete}>Excluir</button></footer>
         </div>
       </div>
 
-      {/* Modais Funcionais */}
       <TransportadoraContactModal isActive={isContactOpen} onClose={closeModals} data={selectedItem} />
       
+      {/* CORREÇÃO: Passando todas as props exigidas */}
       <TransportadoraVehiclesModal 
           isActive={isVehiclesOpen} 
           onClose={closeModals} 
           data={selectedItem} 
-          onOpenAddModal={handleOpenAddVehicle}
-          onDeleteVehicles={handleDeleteVehicle}
+          onAddVehicle={() => setIsAddVehicleOpen(true)} 
+          onDeleteTransportadora={handleDeleteTransportadora} 
+          onRemoveVehicle={handleRemoveVehicle} 
       />
       
       <TransportadoraEditModal isActive={isEditOpen} onClose={closeModals} data={selectedItem} onSave={handleSaveEdit} />
       <TransportadoraCreateModal isActive={isCreateOpen} onClose={closeModals} onCreate={handleSaveNew} />
-      <TransportadoraAddVehicleModal isActive={isAddVehicleOpen} onClose={closeModals} onSave={handleSaveNewVehicle} />
+      <TransportadoraAddVehicleModal isActive={isAddVehicleOpen} onClose={() => setIsAddVehicleOpen(false)} onSave={handleSaveNewVehicle} />
     </div>
   );
 };

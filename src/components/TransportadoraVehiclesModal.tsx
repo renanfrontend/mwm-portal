@@ -1,51 +1,32 @@
 // src/components/TransportadoraVehiclesModal.tsx
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
-import { MdLocalShipping, MdAdd, MdDelete, MdCheck, MdClose } from 'react-icons/md';
+import { MdLocalShipping, MdAdd, MdDelete } from 'react-icons/md';
 
+// CORREÇÃO AQUI: Interface atualizada para aceitar as novas props
 interface Props {
   isActive: boolean;
   onClose: () => void;
   data: TransportadoraItem | null;
-  onOpenAddModal: () => void; // Abre o modal de adicionar
-  onDeleteVehicles: (indices: number[]) => void; // Deleta os selecionados
+  onAddVehicle: () => void;        
+  onDeleteTransportadora: () => void; 
+  onRemoveVehicle: (index: number) => void;
 }
 
 const TransportadoraVehiclesModal: React.FC<Props> = ({ 
   isActive, 
   onClose, 
   data, 
-  onOpenAddModal, 
-  onDeleteVehicles
+  onAddVehicle, 
+  onDeleteTransportadora, 
+  onRemoveVehicle 
 }) => {
   const { theme } = useTheme();
   const textColor = theme === 'dark' ? '#a0aec0' : '#363636';
 
-  // Controle do Modo de Exclusão e Seleção
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
-
-  // Reseta estados ao fechar ou trocar dados
-  useEffect(() => {
-      setIsDeleteMode(false);
-      setSelectedIndices([]);
-  }, [isActive, data]);
-
   if (!data) return null;
-
-  const toggleSelection = (index: number) => {
-      setSelectedIndices(prev => 
-        prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
-      );
-  };
-
-  const handleConfirmDelete = () => {
-      onDeleteVehicles(selectedIndices);
-      setIsDeleteMode(false);
-      setSelectedIndices([]);
-  };
 
   return (
     <div className={`modal ${isActive ? 'is-active' : ''}`}>
@@ -70,26 +51,10 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
 
           <hr className="divider" style={{ margin: '1rem 0', backgroundColor: '#f0f0f0' }} />
 
-          {/* LISTA DE VEÍCULOS */}
           {data.veiculos && data.veiculos.length > 0 ? (
               data.veiculos.map((v, index) => (
-                  <div key={index} className={`box p-3 mb-3 ${selectedIndices.includes(index) ? 'has-background-danger-light' : ''}`} style={{ border: '1px solid #f5f5f5', boxShadow: 'none' }}>
+                  <div key={index} className="box p-3 mb-3" style={{ border: '1px solid #f5f5f5', boxShadow: 'none' }}>
                       <div className="columns is-mobile is-vcentered">
-                          
-                          {/* CHECKBOX (Só aparece se estiver em modo de exclusão) */}
-                          {isDeleteMode && (
-                              <div className="column is-narrow">
-                                  <label className="checkbox">
-                                      <input 
-                                        type="checkbox" 
-                                        checked={selectedIndices.includes(index)}
-                                        onChange={() => toggleSelection(index)}
-                                        style={{ transform: 'scale(1.2)' }}
-                                      />
-                                  </label>
-                              </div>
-                          )}
-
                           <div className="column">
                               <div className="columns is-mobile is-variable is-1">
                                   <div className="column is-7">
@@ -102,6 +67,16 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
                                   </div>
                               </div>
                           </div>
+                          {/* Botão de excluir o veículo individualmente */}
+                          <div className="column is-narrow">
+                              <button 
+                                className="button is-small is-white has-text-grey-light" 
+                                onClick={() => onRemoveVehicle(index)}
+                                title="Remover este veículo"
+                              >
+                                  <span className="icon"><MdDelete /></span>
+                              </button>
+                          </div>
                       </div>
                   </div>
               ))
@@ -111,37 +86,18 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
 
         </section>
 
-        {/* RODAPÉ DO MODAL */}
-        <footer className="modal-card-foot" style={{ borderTop: '1px solid #ededed', backgroundColor: 'white', padding: '1.5rem', justifyContent: 'flex-end', gap: '10px' }}>
-          
-          {/* MODO NORMAL: MOSTRA REMOVER E ADICIONAR */}
-          {!isDeleteMode ? (
-            <>
-                <button className="button is-danger is-light" onClick={() => setIsDeleteMode(true)} disabled={!data.veiculos || data.veiculos.length === 0}>
-                    <span className="icon is-small"><MdDelete /></span>
-                    <span>Remover</span>
-                </button>
+        <footer className="modal-card-foot" style={{ borderTop: '1px solid #ededed', backgroundColor: 'white', padding: '1.5rem', justifyContent: 'space-between' }}>
+          {/* Botão Remover Transportadora (Vermelho) */}
+          <button className="button is-danger is-light" onClick={onDeleteTransportadora}>
+            <span className="icon is-small"><MdDelete /></span>
+            <span>Remover</span>
+          </button>
 
-                <button className="button is-info" onClick={onOpenAddModal}>
-                    <span className="icon is-small"><MdAdd /></span>
-                    <span>Adicionar</span>
-                </button>
-            </>
-          ) : (
-            /* MODO DE EXCLUSÃO: MOSTRA CANCELAR E CONFIRMAR */
-            <>
-                <button className="button" onClick={() => { setIsDeleteMode(false); setSelectedIndices([]); }}>
-                    <span className="icon is-small"><MdClose /></span>
-                    <span>Cancelar</span>
-                </button>
-
-                <button className="button is-danger" onClick={handleConfirmDelete} disabled={selectedIndices.length === 0}>
-                    <span className="icon is-small"><MdCheck /></span>
-                    <span>Confirmar Exclusão ({selectedIndices.length})</span>
-                </button>
-            </>
-          )}
-
+          {/* Botão Adicionar Veículo (Azul) */}
+          <button className="button is-info" onClick={onAddVehicle}>
+            <span className="icon is-small"><MdAdd /></span>
+            <span>Adicionar</span>
+          </button>
         </footer>
       </div>
     </div>

@@ -1,7 +1,7 @@
 // src/components/Sidebar.tsx
 
 import { NavLink } from 'react-router-dom';
-import { MdDashboard, MdBusiness, MdLocalShipping, MdEvStation, MdAssignment, MdAttachMoney, MdSettings, MdExitToApp, MdScience } from 'react-icons/md';
+import { MdDashboard, MdBusiness, MdEvStation, MdAssignment, MdAttachMoney, MdSettings, MdExitToApp, MdScience } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import useTheme from '../hooks/useTheme';
 
@@ -16,20 +16,11 @@ export default function Sidebar() {
       <p className="menu-label">Geral</p>
       <ul className="menu-list">
         <li><NavLink to="/" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdDashboard /></span>Dashboard</NavLink></li>
-        
-        {/* LINK ATUALIZADO */}
-        <li>
-          <NavLink to="/logistica" className={({ isActive }) => isActive ? 'is-active' : ''}>
-            <span className="icon"><MdBusiness /></span>
-            Logística
-          </NavLink>
-        </li>
-
-        <li><NavLink to="/coleta" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdLocalShipping /></span>Coleta</NavLink></li>
+        <li><NavLink to="/logistica" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdBusiness /></span>Logística</NavLink></li>
         <li><NavLink to="/portaria" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdAssignment /></span>Portaria</NavLink></li>
         <li><NavLink to="/qualidade" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdScience /></span>Qualidade</NavLink></li>
       </ul>
-      {/* ... restante do arquivo igual ... */}
+      
       <p className="menu-label">Operacional</p>
       <ul className="menu-list">
         <li><NavLink to="/abastecimentos" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdEvStation /></span>Abastecimentos</NavLink></li>
