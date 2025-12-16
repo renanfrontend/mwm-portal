@@ -1,7 +1,7 @@
 // src/screens/Logistica.tsx
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd } from 'react-icons/md';
+import { MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, MdContentCopy, MdDateRange } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AgendaTable } from '../components/AgendaTable';
@@ -16,6 +16,8 @@ import CooperadoInfoModal from '../components/CooperadoInfoModal';
 import CooperadoEditModal from '../components/CooperadoEditModal';
 import CooperadoCalendarModal from '../components/CooperadoCalendarModal';
 import CooperadoCreateModal from '../components/CooperadoCreateModal';
+import ReplicateWeekModal from '../components/ReplicateWeekModal';
+import ReplicateMonthModal from '../components/ReplicateMonthModal';
 
 const Logistica: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
@@ -23,14 +25,19 @@ const Logistica: React.FC = () => {
 
   const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
-  
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Estados de Seleção
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Modais State
+  // Modais de Replicação
+  const [isReplicateWeekOpen, setIsReplicateWeekOpen] = useState(false);
+  const [isReplicateMonthOpen, setIsReplicateMonthOpen] = useState(false);
+
+  // Modais Gerais
   const [selectedCooperado, setSelectedCooperado] = useState<CooperadoItem | null>(null);
   const [isContactModalActive, setIsContactModalActive] = useState(false);
   const [isLocationModalActive, setIsLocationModalActive] = useState(false);
@@ -61,9 +68,13 @@ const Logistica: React.FC = () => {
     setSearchTerm(''); setSelectedItems([]); setIsDeleteMode(false);
   }, [activeTab, loadData]);
   
-  const filteredAgendaData = useMemo(() => (agendaData || []).filter(item => (item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, agendaData]);
-  const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase())) || (item.filial && item.filial.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
+  // Filtros
+  const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
   
+  const agendaBase = useMemo(() => (agendaData || []).filter(item => item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm, agendaData]);
+  const plannedAgenda = agendaBase.filter(item => item.status === 'Planejado');
+  const realizedAgenda = agendaBase.filter(item => item.status === 'Realizado');
+
   const handleSelectItem = (id: string | number) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]) };
   
   const handleConfirmDelete = () => {
@@ -78,12 +89,57 @@ const Logistica: React.FC = () => {
     }
   };
 
+  const handleUpdateAgendaItem = (id: number, field: string, value: number) => {
+      setAgendaData(prev => prev.map(item => {
+          if (item.id === id) {
+              const updated = { ...item, [field]: value };
+              updated.qtd = (updated.seg||0) + (updated.ter||0) + (updated.qua||0) + (updated.qui||0) + (updated.sex||0) + (updated.sab||0) + (updated.dom||0);
+              return updated;
+          }
+          return item;
+      }));
+  };
+
+  const confirmReplicateWeek = (date: string) => {
+      toast.success(`Planejamento replicado para a semana: ${date}`);
+      setIsReplicateWeekOpen(false);
+  };
+
+  const confirmReplicateMonth = (month: string) => {
+      toast.success(`Planejamento replicado para o mês: ${month}`);
+      setIsReplicateMonthOpen(false);
+  };
+
+  // --- HANDLER DO BOTÃO ADICIONAR (CORRIGIDO) ---
+  const handleOpenAgendaAdd = () => {
+      // Cria um objeto temporário para garantir que o modal abra
+      const dummyCooperado: CooperadoItem = {
+          id: 'new',
+          matricula: 0,
+          filial: '',
+          motorista: 'Selecione um Cooperado', // Texto placeholder
+          tipoVeiculo: '',
+          placa: '',
+          certificado: 'Ativo',
+          doamDejetos: 'Sim',
+          fase: ''
+      };
+      setSelectedCooperado(dummyCooperado);
+      setIsCalendarModalActive(true);
+  };
+
+  const handleSaveCalendar = () => {
+      setIsCalendarModalActive(false); 
+      toast.success("Agendamento realizado!"); 
+  };
+
   const closeAllModals = () => {
-    setIsContactModalActive(false); setIsLocationModalActive(false); setIsInfoModalActive(false); setIsEditModalActive(false); setIsCalendarModalActive(false); setIsCreateModalActive(false); 
+    setIsContactModalActive(false); setIsLocationModalActive(false); setIsInfoModalActive(false); 
+    setIsEditModalActive(false); setIsCalendarModalActive(false); setIsCreateModalActive(false); 
+    setIsReplicateWeekOpen(false); setIsReplicateMonthOpen(false);
     setTimeout(() => setSelectedCooperado(null), 200);
   };
 
-  // Handlers
   const handleOpenContactModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsContactModalActive(true); };
   const handleOpenLocationModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsLocationModalActive(true); };
   const handleOpenViewModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsInfoModalActive(true); };
@@ -92,15 +148,12 @@ const Logistica: React.FC = () => {
   const handleOpenCreateModal = () => { setIsCreateModalActive(true); };
   const handleSaveNewCooperado = (newItem: CooperadoItem) => { setCooperadosData(prev => [newItem, ...prev]); toast.success("Adicionado!"); setIsCreateModalActive(false); };
   const handleSaveCooperado = (editedItem: CooperadoItem) => { setCooperadosData(prev => prev.map(item => item.id === editedItem.id ? editedItem : item)); toast.success("Atualizado!"); setIsEditModalActive(false); setSelectedCooperado(null); };
-  const handleSaveCalendar = () => { setIsCalendarModalActive(false); toast.success("Agendamento realizado!"); };
   const handleOpenMapFromInfo = (item: CooperadoItem) => { setIsInfoModalActive(false); setTimeout(() => { setSelectedCooperado(item); setIsLocationModalActive(true); }, 100); };
 
   return (
-    // ESTRUTURA FIXA COM FUNDO BRANCO
-    <div className="screen-container" style={{ backgroundColor: '#fff' }}>
+    <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       
-      {/* HEADER FIXO */}
-      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem' }}>
+      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem', flexShrink: 0 }}>
         <div className="level is-mobile">
           <div className="level-left">
             <div className="buttons">
@@ -113,8 +166,7 @@ const Logistica: React.FC = () => {
         </div>
       </div>
 
-      {/* ABAS FIXAS */}
-      <div className="tabs is-toggle is-fullwidth mb-0" style={{ borderBottom: '1px solid #dbdbdb', backgroundColor: '#fff' }}>
+      <div className="tabs is-toggle is-fullwidth mb-0" style={{ borderBottom: '1px solid #dbdbdb', backgroundColor: '#fff', flexShrink: 0 }}>
         <ul>
           <li className={activeTab === 'cadastro' ? 'is-active' : ''}><a onClick={() => setActiveTab('cadastro')}><span>Cooperados</span></a></li>
           <li className={activeTab === 'transportadora' ? 'is-active' : ''}><a onClick={() => setActiveTab('transportadora')}><span>Transportadoras</span></a></li>
@@ -122,47 +174,23 @@ const Logistica: React.FC = () => {
         </ul>
       </div>
 
-      {/* CONTEÚDO COM SCROLL */}
-      <div className="screen-content p-5">
+      <div className="screen-content p-5" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         
-        {/* ABA CADASTRO */}
         {activeTab === 'cadastro' && (
           <div className="container is-fluid px-0">
-            {/* Barra de Busca Padronizada */}
             <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
                 <div className="control has-icons-right">
-                    <input 
-                      className="input" 
-                      type="text" 
-                      placeholder="Buscar cooperado..." 
-                      style={{ width: '300px' }} 
-                      value={searchTerm} 
-                      onChange={e => setSearchTerm(e.target.value)} 
-                    />
+                    <input className="input" type="text" placeholder="Buscar cooperado..." style={{ width: '300px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                     <span className="icon is-right"><MdSearch /></span>
                 </div>
-                
                 <div className="buttons">
-                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
-                        <span className="icon"><MdDelete /></span>
-                    </button>
-                    <button className="button is-white border">
-                        <span className="icon"><MdFilterList /></span>
-                        <span>Filtrar</span>
-                    </button>
-                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenCreateModal}>
-                        <span className="icon"><MdAdd /></span>
-                        <span>Adicionar</span>
-                    </button>
+                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}><span className="icon"><MdDelete /></span></button>
+                    <button className="button is-white border"><span className="icon"><MdFilterList /></span><span>Filtrar</span></button>
+                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenCreateModal}><span className="icon"><MdAdd /></span><span>Adicionar</span></button>
                 </div>
             </div>
             
-            {isDeleteMode && selectedItems.length > 0 && (
-                <div className="notification is-danger is-light mb-4 py-2 px-4 is-flex is-justify-content-space-between is-align-items-center">
-                    <span>{selectedItems.length} selecionado(s)</span>
-                    <button className="button is-small is-danger" onClick={() => setIsModalOpen(true)}>Confirmar Exclusão</button>
-                </div>
-            )}
+            {isDeleteMode && selectedItems.length > 0 && <div className="notification is-danger is-light mb-4"><button className="button is-small is-danger" onClick={() => setIsModalOpen(true)}>Excluir Selecionados</button></div>}
             
             {!loading && filteredCooperadosData.map(item => (
               <CooperadoListItem 
@@ -173,35 +201,69 @@ const Logistica: React.FC = () => {
           </div>
         )}
 
-        {/* ABA TRANSPORTADORA */}
-        {activeTab === 'transportadora' && (
-          <div className="container is-fluid px-0">
-            <TransportadoraList />
-          </div>
-        )}
+        {activeTab === 'transportadora' && <div className="container is-fluid px-0"><TransportadoraList /></div>}
 
-        {/* ABA AGENDA */}
         {activeTab === 'agenda' && (
           <div className="container is-fluid px-0">
+             
              <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
                 <div className="control has-icons-right">
                     <input className="input" type="text" placeholder="Buscar na agenda..." style={{ width: '300px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                     <span className="icon is-right"><MdSearch /></span>
                 </div>
+                
                 <div className="buttons">
+                    <button className="button is-white border" onClick={() => setIsReplicateWeekOpen(true)} title="Replicar semana">
+                        <span className="icon has-text-info"><MdContentCopy /></span><span>Semana</span>
+                    </button>
+                    <button className="button is-white border" onClick={() => setIsReplicateMonthOpen(true)} title="Replicar mês">
+                        <span className="icon has-text-success"><MdDateRange /></span><span>Mês</span>
+                    </button>
+
                     <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
                         <span className="icon"><MdDelete /></span>
                     </button>
-                    <button className="button is-white border">
-                        <span className="icon"><MdFilterList /></span>
-                        <span>Filtrar</span>
+                    
+                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenAgendaAdd}>
+                        <span className="icon"><MdAdd /></span><span>Adicionar</span>
                     </button>
                 </div>
             </div>
             
-            <div className="box p-0 shadow-none border">
-               {!loading && <AgendaTable data={filteredAgendaData} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={handleConfirmDelete} />}
+            <div className="mb-6">
+                <p className="is-size-6 mb-2 has-text-grey">Planejado no período: de <strong>13/10/2025</strong> à <strong>17/10/2025</strong></p>
+                <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
+                   {!loading && (
+                       <AgendaTable 
+                           data={plannedAgenda} 
+                           isDeleteMode={isDeleteMode} 
+                           selectedItems={selectedItems} 
+                           onSelectItem={handleSelectItem} 
+                           onConfirmDelete={handleConfirmDelete} 
+                           onUpdateItem={handleUpdateAgendaItem} 
+                           showActions={false}
+                       />
+                   )}
+                </div>
             </div>
+
+            <div className="mb-6">
+                <p className="is-size-6 mb-2 has-text-grey">Realizado no período: de <strong>13/10/2025</strong> à <strong>17/10/2025</strong></p>
+                <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
+                   {!loading && (
+                       <AgendaTable 
+                           data={realizedAgenda} 
+                           isDeleteMode={isDeleteMode} 
+                           selectedItems={selectedItems} 
+                           onSelectItem={handleSelectItem} 
+                           onConfirmDelete={handleConfirmDelete}
+                           readOnly={true}
+                           showActions={false}
+                       />
+                   )}
+                </div>
+            </div>
+
           </div>
         )}
       </div>
@@ -215,12 +277,26 @@ const Logistica: React.FC = () => {
         </div>
       </div>
 
+      {/* Modais Globais */}
       <CooperadoContactModal isActive={isContactModalActive} onClose={closeAllModals} data={selectedCooperado} />
       <CooperadoLocationModal isActive={isLocationModalActive} onClose={closeAllModals} data={selectedCooperado} />
       <CooperadoInfoModal isActive={isInfoModalActive} onClose={closeAllModals} data={selectedCooperado} onOpenMap={handleOpenMapFromInfo} />
       <CooperadoEditModal isActive={isEditModalActive} onClose={closeAllModals} data={selectedCooperado} onSave={handleSaveCooperado} />
-      <CooperadoCalendarModal isActive={isCalendarModalActive} onClose={closeAllModals} onSave={handleSaveCalendar} data={selectedCooperado} />
+      
+      {/* Modal de Calendário (RENDERIZADO) */}
+      <CooperadoCalendarModal 
+        isActive={isCalendarModalActive} 
+        onClose={closeAllModals} 
+        onSave={handleSaveCalendar} 
+        data={selectedCooperado} 
+        title={selectedCooperado?.id === 'new' ? "Novo Agendamento Geral" : undefined}
+      />
+      
       <CooperadoCreateModal isActive={isCreateModalActive} onClose={closeAllModals} onSave={handleSaveNewCooperado} />
+
+      {/* Novos Modais de Replicação */}
+      <ReplicateWeekModal isActive={isReplicateWeekOpen} onClose={() => setIsReplicateWeekOpen(false)} onConfirm={confirmReplicateWeek} />
+      <ReplicateMonthModal isActive={isReplicateMonthOpen} onClose={() => setIsReplicateMonthOpen(false)} onConfirm={confirmReplicateMonth} />
     </div>
   );
 };

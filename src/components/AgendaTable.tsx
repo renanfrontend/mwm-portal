@@ -1,151 +1,189 @@
-import React, { useMemo } from 'react';
+// src/components/AgendaTable.tsx
+
+import React, { useState } from 'react';
+import { MdEdit, MdCheckCircle, MdFactCheck } from 'react-icons/md';
 import type { AgendaData } from '../services/api';
 import useTheme from '../hooks/useTheme';
-import { FaCheckCircle, FaRegCircle, FaTrash } from 'react-icons/fa'; // Adicionado FaTrash
+import { toast } from 'react-toastify';
 
 interface Props {
   data: AgendaData[];
   isDeleteMode: boolean;
   selectedItems: (string | number)[];
-  onSelectItem: (id: string | number) => void;
-  onConfirmDelete?: () => void;
+  onSelectItem: (id: number | string) => void; // Ajustado para aceitar string ou number
+  onConfirmDelete?: () => void; // <--- ADICIONADO PARA CORRIGIR O ERRO
+  onUpdateItem?: (id: number, field: string, value: number) => void;
+  readOnly?: boolean;
+  showActions?: boolean;
 }
 
-const REALIZADO_ID_COLOR = '#d4edda';
-const PLANEJADO_ID_COLOR = '#cce5ff';
+const quantityOptions = [0, 1, 2, 3, 4, 5, 10];
 
 export const AgendaTable: React.FC<Props> = ({ 
   data, 
   isDeleteMode, 
   selectedItems, 
   onSelectItem,
-  onConfirmDelete // Adicionado na desestruturação
+  onUpdateItem,
+  readOnly = false,
+  showActions = true
 }) => {
   const { theme } = useTheme();
+  
+  const [editingCell, setEditingCell] = useState<{ id: number, field: string } | null>(null);
+  const todayIndex = new Date().getDay(); 
 
-  // Ordena os dados: 'Realizado' primeiro, depois por Qtd
-  const sortedData = useMemo(() => {
-    const statusPriority: Record<string, number> = { 'Realizado': 1, 'Planejado': 2 };
-    return [...data].sort((a, b) => {
-      const statusComparison = statusPriority[a.status] - statusPriority[b.status];
-      if (statusComparison !== 0) return statusComparison;
-      return b.qtd - a.qtd;
-    });
-  }, [data]);
+  const dayColumns = [
+    { key: 'seg', label: 'Seg', dayIdx: 1 },
+    { key: 'ter', label: 'Ter', dayIdx: 2 },
+    { key: 'qua', label: 'Qua', dayIdx: 3 },
+    { key: 'qui', label: 'Qui', dayIdx: 4 },
+    { key: 'sex', label: 'Sex', dayIdx: 5 },
+    { key: 'sab', label: 'Sáb', dayIdx: 6 },
+    { key: 'dom', label: 'Dom', dayIdx: 0 },
+  ];
 
-  // Calcula os totais para o rodapé
-  const totals = useMemo(() => {
-    const initial = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0, qtd: 0, km: 0 };
-    return (data || []).reduce((acc, item) => {
-      acc.seg += item.seg;
-      acc.ter += item.ter;
-      acc.qua += item.qua;
-      acc.qui += item.qui;
-      acc.sex += item.sex;
-      acc.qtd += item.qtd;
-      acc.km += item.km;
-      return acc;
-    }, initial);
-  }, [data]);
-
-  // Define a classe de cor da linha para itens 'Realizado'
-  const getRowClass = (item: AgendaData) => {
-    if (item.status === 'Realizado') {
-      if (item.qtd < 30) return 'has-background-danger-light';
-      return 'has-background-warning-light';
-    }
-    return '';
+  const handleDoubleClick = (item: AgendaData, colKey: string, dayIdx: number) => {
+      if (readOnly) return;
+      if (todayIndex > dayIdx && todayIndex !== 0 && dayIdx !== 0) { 
+           toast.warning("Não é possível alterar data retroativa.");
+           return;
+      }
+      setEditingCell({ id: item.id, field: colKey });
   };
 
-  return (
-    <div>
-      {/* Botão de Excluir Condicional */}
-      {isDeleteMode && selectedItems.length > 0 && (
-        <div className="field is-grouped is-grouped-right mb-3">
-          <p className="control">
-            <button 
-              className="button is-danger" 
-              onClick={onConfirmDelete}
-              disabled={!onConfirmDelete}
-            >
-              <span className="icon">
-                <FaTrash />
-              </span>
-              <span>Excluir ({selectedItems.length})</span>
-            </button>
-          </p>
-        </div>
-      )}
+  const handleBlur = () => { setEditingCell(null); };
 
-      <div className="table-container">
-        <table className={`table is-hoverable is-fullwidth is-narrow ${theme === 'dark' ? 'is-dark' : ''}`}>
-            <thead>
-              <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
-                {isDeleteMode && <th style={{ width: '40px' }}></th>}
-                <th>Cooperado</th>
-                <th className="has-text-centered">Seg</th>
-                <th className="has-text-centered">Ter</th>
-                <th className="has-text-centered">Qua</th>
-                <th className="has-text-centered">Qui</th>
-                <th className="has-text-centered">Sex</th>
-                <th className="has-text-centered">Sáb</th>
-                <th className="has-text-centered">Dom</th>
-                <th className="has-text-centered">Qtd.</th>
-                <th className="has-text-centered">KM</th>
-                <th>Transportadora</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedData.map(item => (
-                <tr key={item.id} className={getRowClass(item)}>
-                  {isDeleteMode && (
-                    <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>
-                      <label className="checkbox">
-                        <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => onSelectItem(item.id)} />
-                      </label>
+  const handleChange = (id: number, field: string, value: string) => {
+      if (onUpdateItem) onUpdateItem(id, field, Number(value));
+      setEditingCell(null);
+  };
+
+  const totals = dayColumns.reduce((acc, col) => {
+      acc[col.key] = data.reduce((sum, item) => sum + (Number(item[col.key as keyof typeof item]) || 0), 0);
+      return acc;
+  }, {} as Record<string, number>);
+  const totalQtd = data.reduce((sum, item) => sum + (item.qtd || 0), 0);
+  const totalKm = data.reduce((sum, item) => sum + (item.km || 0), 0);
+
+  return (
+    <div className="table-container">
+      <table className={`table is-hoverable is-fullwidth is-size-7 ${theme === 'dark' ? 'is-dark' : ''}`} style={{ tableLayout: 'fixed', borderCollapse: 'separate', borderSpacing: '0' }}>
+        <thead>
+          <tr className="has-background-white-ter has-text-grey">
+            {isDeleteMode && <th style={{ width: '40px' }}></th>}
+            <th className="has-text-weight-normal" style={{ width: '20%' }}>Cooperado</th>
+            {dayColumns.map(col => (
+                <th key={col.key} className="has-text-centered has-text-weight-normal" style={{ width: '5%' }}>{col.label}</th>
+            ))}
+            <th className="has-text-centered has-text-weight-normal" style={{ width: '6%' }}>Qtd.</th>
+            <th className="has-text-centered has-text-weight-normal" style={{ width: '6%' }}>KM</th>
+            <th className="has-text-centered has-text-weight-normal" style={{ width: '15%' }}>Transportadora</th>
+            <th className="has-text-centered has-text-weight-normal" style={{ width: '13%' }}>Status</th>
+            {showActions && <th className="has-text-centered has-text-weight-normal" style={{ width: '6%' }}>Ações</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => {
+            let rowStyle: React.CSSProperties = { verticalAlign: 'middle' };
+            let textClass = "";
+
+            if (readOnly) {
+                if (item.qtd < 5) {
+                    rowStyle = { ...rowStyle, backgroundColor: '#FEF2F2', color: '#991B1B' }; 
+                    textClass = "has-text-weight-bold";
+                } else {
+                    rowStyle = { ...rowStyle, backgroundColor: '#FFFBEB', color: '#92400E' }; 
+                    textClass = "has-text-weight-medium";
+                }
+            } else {
+                textClass = "has-text-weight-medium";
+                rowStyle = { ...rowStyle, color: '#2b2b2b' };
+            }
+
+            return (
+            <tr key={item.id} style={rowStyle} className={textClass}>
+              {isDeleteMode && (
+                <td className="is-vcentered">
+                  <label className="checkbox"><input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => onSelectItem(item.id)} style={{ transform: 'scale(1.2)' }} /></label>
+                </td>
+              )}
+              
+              <td className="is-vcentered" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }} title={item.cooperado}>
+                  {item.cooperado}
+              </td>
+
+              {dayColumns.map((col) => {
+                  const isEditing = editingCell?.id === item.id && editingCell?.field === col.key;
+                  const value = item[col.key as keyof typeof item] || 0;
+                  
+                  return (
+                    <td 
+                        key={col.key} 
+                        className={`has-text-centered p-1 is-vcentered`}
+                        onDoubleClick={() => handleDoubleClick(item, col.key, col.dayIdx)}
+                        style={{ cursor: !readOnly ? 'pointer' : 'default', color: 'inherit' }}
+                    >
+                        {isEditing ? (
+                            <div className="select is-small is-fullwidth" style={{ height: '26px', minHeight: '26px' }}>
+                                <select value={value} onChange={(e) => handleChange(item.id, col.key, e.target.value)} onBlur={handleBlur} autoFocus style={{ padding: '0', fontSize: '0.75rem', textAlign: 'center', border: '1px solid #3273dc' }}>
+                                    {quantityOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                </select>
+                            </div>
+                        ) : (<span>{value}</span>)}
                     </td>
-                  )}
-                  <th style={{ verticalAlign: 'middle' }}>{item.cooperado}</th>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.seg}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.ter}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.qua}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.qui}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.sex}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>0</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>-</td>
-                  <td className="has-text-centered has-text-weight-bold" style={{ verticalAlign: 'middle' }}>{item.qtd}</td>
-                  <td className="has-text-centered" style={{ verticalAlign: 'middle' }}>{item.km}</td>
-                  <td style={{ verticalAlign: 'middle' }}><b>{item.transportadora}</b></td>
-                  <td style={{ verticalAlign: 'middle', backgroundColor: item.status === 'Realizado' ? REALIZADO_ID_COLOR : PLANEJADO_ID_COLOR}}>
-                    <div className={`icon-text has-text-weight-bold ${item.status === 'Realizado' ? 'has-text-success-dark' : 'has-text-info-dark'}`}>
-                      <span className="icon">
-                        {item.status === 'Realizado' ? <FaCheckCircle /> : <FaRegCircle />}
+                  );
+              })}
+
+              <td className="has-text-centered is-vcentered has-text-weight-bold" style={{ color: 'inherit' }}>{item.qtd}</td>
+              <td className="has-text-centered is-vcentered" style={{ color: 'inherit' }}>{item.km}</td>
+              <td className="has-text-centered is-vcentered" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>{item.transportadora}</td>
+              
+              <td className="has-text-centered is-vcentered px-2">
+                  <div 
+                    style={{ 
+                        backgroundColor: item.status === 'Realizado' ? '#F0FDF4' : '#EFF6FF', 
+                        color: item.status === 'Realizado' ? '#166534' : '#1E40AF',
+                        border: `1px solid ${item.status === 'Realizado' ? '#BBF7D0' : '#BFDBFE'}`, 
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        width: '100%',
+                        whiteSpace: 'nowrap'
+                    }}
+                  >
+                      <span style={{ display: 'flex', marginRight: '6px' }}>
+                          {item.status === 'Realizado' ? <MdCheckCircle size={16} /> : <MdFactCheck size={16} />}
                       </span>
-                      <span>{item.status}</span>
-                    </div>
+                      {item.status}
+                  </div>
+              </td>
+
+              {showActions && (
+                  <td className="has-text-centered is-vcentered">
+                      <button className="button is-small is-white" title="Editar"><span className="icon"><MdEdit /></span></button>
                   </td>
-                </tr>
+              )}
+            </tr>
+          );
+          })}
+          
+          <tr className="has-background-white-ter has-text-weight-bold" style={{ borderTop: '2px solid #dbdbdb' }}>
+              {isDeleteMode && <td></td>}
+              <td>Total Geral</td>
+              {dayColumns.map(col => (
+                  <td key={col.key} className="has-text-centered">{totals[col.key]}</td>
               ))}
-            </tbody>
-            <tfoot>
-              <tr className={theme === 'dark' ? 'has-background-grey-darker' : 'has-background-white-ter'}>
-                {isDeleteMode && <th></th>}
-                <th>Total Geral</th>
-                <th className="has-text-centered">{totals.seg}</th>
-                <th className="has-text-centered">{totals.ter}</th>
-                <th className="has-text-centered">{totals.qua}</th>
-                <th className="has-text-centered">{totals.qui}</th>
-                <th className="has-text-centered">{totals.sex}</th>
-                <th className="has-text-centered">0</th>
-                <th className="has-text-centered">-</th>
-                <th className="has-text-centered">{totals.qtd}</th>
-                <th className="has-text-centered">{totals.km}</th>
-                <th colSpan={2}></th>
-              </tr>
-            </tfoot>
-        </table>
-      </div>
+              <td className="has-text-centered">{totalQtd}</td>
+              <td className="has-text-centered">{totalKm}</td>
+              <td colSpan={showActions ? 3 : 2}></td> 
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };
