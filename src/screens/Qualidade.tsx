@@ -1,7 +1,7 @@
 // src/screens/Qualidade.tsx
 
-import React, { useState, useEffect } from 'react';
-import { MdSave, MdAddCircleOutline, MdArrowBack } from 'react-icons/md';
+import React, { useState, useEffect, useMemo } from 'react';
+import { MdSave, MdAddCircleOutline, MdArrowBack, MdSearch, MdDelete, MdFilterList, MdAdd } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -11,7 +11,7 @@ import {
   type CooperadoItem 
 } from '../services/api';
 
-// Definição das abas (REMOVIDA 'Entrega de dejetos')
+// Definição das abas
 type Tab = 'Análise' | 'Qualidade dos Dejetos' | 'Qualidade das Amostras';
 type AmostraOrigem = 'cooperado' | 'pontoDeColeta';
 
@@ -33,7 +33,7 @@ const recipienteOptions = Array.from({ length: 24 }, (_, i) => (i + 1).toString(
 const Qualidade: React.FC = () => {
   const navigate = useNavigate();
 
-  // Controle de Abas (Inicia em Análise, já que Entrega de Dejetos foi removida)
+  // Controle de Abas
   const [activeTab, setActiveTab] = useState<Tab>('Análise');
 
   // Dados Gerais
@@ -41,6 +41,11 @@ const Qualidade: React.FC = () => {
   
   // Estados de Controle
   const [saving, setSaving] = useState(false);
+  
+  // Estados de Lista (Busca e Seleção)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
   
   // --- FORMULÁRIO ANÁLISE ---
   const [formStep, setFormStep] = useState(0); 
@@ -50,6 +55,7 @@ const Qualidade: React.FC = () => {
   // Dados Mockados para visualização das tabelas
   const mockDejetosList = [
     {
+        id: 1,
         data: '2025-02-20',
         cooperado: 'Ademir Engelsing',
         status: 'Concluído',
@@ -65,6 +71,7 @@ const Qualidade: React.FC = () => {
         sv: '4200'
     },
     {
+        id: 2,
         data: '2025-02-21',
         cooperado: 'João da Silva',
         status: 'Em Análise',
@@ -83,6 +90,7 @@ const Qualidade: React.FC = () => {
 
   const mockAmostrasList = [
     {
+        id: 101,
         data: '2025-02-22',
         ecoponto: 'Ecoponto Central',
         status: 'Concluído',
@@ -102,6 +110,13 @@ const Qualidade: React.FC = () => {
         p4: '12.0'
     }
   ];
+
+  // Limpa estados ao mudar de aba
+  useEffect(() => {
+      setSearchTerm('');
+      setIsDeleteMode(false);
+      setSelectedItems([]);
+  }, [activeTab]);
 
   // Loaders
   useEffect(() => {
@@ -149,6 +164,31 @@ const Qualidade: React.FC = () => {
         setSaving(false); 
     }
   };
+
+  const handleSelectItem = (id: number | string) => {
+      setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const handleDeleteSelected = () => {
+      toast.success("Itens excluídos com sucesso!");
+      setSelectedItems([]);
+      setIsDeleteMode(false);
+  };
+
+  // Filtros
+  const filteredDejetos = useMemo(() => {
+      return mockDejetosList.filter(item => 
+          item.cooperado.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.status.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [searchTerm]);
+
+  const filteredAmostras = useMemo(() => {
+      return mockAmostrasList.filter(item => 
+          item.ecoponto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.status.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [searchTerm]);
 
   return (
     <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -259,7 +299,7 @@ const Qualidade: React.FC = () => {
                               <label className="label">Local/Equipamento</label>
                               <div className="control">
                                   <div className="select is-fullwidth">
-                                      <select name="cooperado" value={formData.cooperado || ''} onChange={handleInputChange}> {/* Usando 'cooperado' como campo genérico para local */}
+                                      <select name="cooperado" value={formData.cooperado || ''} onChange={handleInputChange}>
                                           <option value="">Selecionar</option>
                                           <option value="Biodigestor 1">Biodigestor 1</option>
                                           <option value="Biodigestor 2">Biodigestor 2</option>
@@ -393,7 +433,6 @@ const Qualidade: React.FC = () => {
                       <div className="column">
                         <p className="label has-text-centered has-text-info">AMOSTRA</p>
                         
-                        {/* ID RECIPIENTE (READ ONLY) */}
                         <div className="field">
                             <label className="label">ID Recipiente</label>
                             <div className="control">
@@ -413,7 +452,6 @@ const Qualidade: React.FC = () => {
                       <div className="column">
                         <p className="label has-text-centered has-text-info">DUPLICATA</p>
                         
-                        {/* ID RECIPIENTE (READ ONLY) */}
                         <div className="field">
                             <label className="label">ID Recipiente</label>
                             <div className="control">
@@ -441,7 +479,6 @@ const Qualidade: React.FC = () => {
                       <div className="column">
                         <p className="label has-text-centered has-text-info">AMOSTRA</p>
                         
-                        {/* ID RECIPIENTE (READ ONLY) */}
                         <div className="field">
                             <label className="label">ID Recipiente</label>
                             <div className="control">
@@ -461,7 +498,6 @@ const Qualidade: React.FC = () => {
                       <div className="column">
                         <p className="label has-text-centered has-text-info">DUPLICATA</p>
                         
-                        {/* ID RECIPIENTE (READ ONLY) */}
                         <div className="field">
                             <label className="label">ID Recipiente</label>
                             <div className="control">
@@ -507,74 +543,162 @@ const Qualidade: React.FC = () => {
 
         {/* --- ABA: LISTA DE DEJETOS --- */}
         {activeTab === 'Qualidade dos Dejetos' && (
-          <div className="box">
-            <h2 className="title is-5 mb-4">Qualidade dos dejetos por cooperado</h2>
-            <div className="table-container">
-                <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
-                    <thead>
-                        <tr className="has-background-light">
-                            <th>Data</th><th>Cooperado</th><th>Status</th><th>Peso Inicial</th><th>Peso Final</th><th>Total Recebido</th><th>Densidade</th><th>MS (%)</th><th>N (mg/L)</th><th>P2O5 (mg/L)</th><th>K2O (mg/L)</th><th>ST (mg/L)</th><th>SV (mg/L)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mockDejetosList.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.data}</td>
-                                <td>{item.cooperado}</td>
-                                <td><span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>{item.status}</span></td>
-                                <td>{item.pesoInicial}</td>
-                                <td>{item.pesoFinal}</td>
-                                <td>{item.totalRecebido}</td>
-                                <td>{item.densidade}</td>
-                                <td>{item.ms}</td>
-                                <td>{item.n}</td>
-                                <td>{item.p}</td>
-                                <td>{item.k}</td>
-                                <td>{item.st}</td>
-                                <td>{item.sv}</td>
+          <div className="container is-fluid px-0">
+            {/* TOOLBAR */}
+            <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
+                <div className="control has-icons-right">
+                    <input 
+                        className="input" 
+                        type="text" 
+                        placeholder="Buscar..." 
+                        style={{ width: '300px' }} 
+                        value={searchTerm} 
+                        onChange={e => setSearchTerm(e.target.value)} 
+                    />
+                    <span className="icon is-right"><MdSearch /></span>
+                </div>
+                <div className="buttons">
+                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
+                        <span className="icon"><MdDelete /></span>
+                    </button>
+                    <button className="button is-white border">
+                        <span className="icon"><MdFilterList /></span>
+                        <span>Filtrar</span>
+                    </button>
+                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={() => setActiveTab('Análise')}>
+                        <span className="icon"><MdAdd /></span>
+                        <span>Adicionar</span>
+                    </button>
+                </div>
+            </div>
+
+            {isDeleteMode && selectedItems.length > 0 && (
+                <div className="notification is-danger is-light mb-4">
+                    <button className="button is-small is-danger" onClick={handleDeleteSelected}>Excluir Selecionados</button>
+                </div>
+            )}
+
+            <div className="box">
+                <h2 className="title is-5 mb-4">Qualidade dos dejetos por cooperado</h2>
+                <div className="table-container">
+                    <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
+                        <thead>
+                            <tr className="has-background-light">
+                                {isDeleteMode && <th style={{ width: '40px' }}></th>}
+                                <th>Data</th><th>Cooperado</th><th>Status</th><th>Peso Inicial</th><th>Peso Final</th><th>Total Recebido</th><th>Densidade</th><th>MS (%)</th><th>N (mg/L)</th><th>P2O5 (mg/L)</th><th>K2O (mg/L)</th><th>ST (mg/L)</th><th>SV (mg/L)</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredDejetos.map((item, index) => (
+                                <tr key={item.id}>
+                                    {isDeleteMode && (
+                                        <td>
+                                            <label className="checkbox">
+                                                <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} />
+                                            </label>
+                                        </td>
+                                    )}
+                                    <td>{item.data}</td>
+                                    <td>{item.cooperado}</td>
+                                    <td><span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>{item.status}</span></td>
+                                    <td>{item.pesoInicial}</td>
+                                    <td>{item.pesoFinal}</td>
+                                    <td>{item.totalRecebido}</td>
+                                    <td>{item.densidade}</td>
+                                    <td>{item.ms}</td>
+                                    <td>{item.n}</td>
+                                    <td>{item.p}</td>
+                                    <td>{item.k}</td>
+                                    <td>{item.st}</td>
+                                    <td>{item.sv}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
           </div>
         )}
 
         {/* --- ABA: AMOSTRAS --- */}
         {activeTab === 'Qualidade das Amostras' && (
-            <div className="box">
-                <h2 className="title is-5 mb-4">Qualidade das amostras por ponto de coleta</h2>
-                <div className="table-container">
-                    <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
-                        <thead>
-                            <tr className="has-background-light">
-                                <th>Data</th><th>Ecoponto</th><th>Status</th><th>Referência</th><th>Recepiente</th><th>ST (%)</th><th>SV/ST (%)</th><th>ST (mg/L)</th><th>ST Var. (%)</th><th>SV Var. (%)</th><th>MV/MF (%)</th><th>Var. (%)</th><th>Data Análise</th><th>P1 (g)</th><th>P2 (g)</th><th>P3 (g)</th><th>P4 (g)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {mockAmostrasList.map((item, index) => (
-                                <tr key={index}>
-                                    <td>{item.data}</td>
-                                    <td>{item.ecoponto}</td>
-                                    <td><span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>{item.status}</span></td>
-                                    <td>{item.referencia}</td>
-                                    <td>{item.recipiente}</td>
-                                    <td>{item.st_perc}</td>
-                                    <td>{item.sv_st_perc}</td>
-                                    <td>{item.st_mg}</td>
-                                    <td>{item.st_var}</td>
-                                    <td>{item.sv_var}</td>
-                                    <td>{item.mv_mf}</td>
-                                    <td>{item.var_perc}</td>
-                                    <td>{item.data_analise}</td>
-                                    <td>{item.p1}</td>
-                                    <td>{item.p2}</td>
-                                    <td>{item.p3}</td>
-                                    <td>{item.p4}</td>
+            <div className="container is-fluid px-0">
+                {/* TOOLBAR */}
+                <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
+                    <div className="control has-icons-right">
+                        <input 
+                            className="input" 
+                            type="text" 
+                            placeholder="Buscar..." 
+                            style={{ width: '300px' }} 
+                            value={searchTerm} 
+                            onChange={e => setSearchTerm(e.target.value)} 
+                        />
+                        <span className="icon is-right"><MdSearch /></span>
+                    </div>
+                    <div className="buttons">
+                        <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
+                            <span className="icon"><MdDelete /></span>
+                        </button>
+                        <button className="button is-white border">
+                            <span className="icon"><MdFilterList /></span>
+                            <span>Filtrar</span>
+                        </button>
+                        <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={() => setActiveTab('Análise')}>
+                            <span className="icon"><MdAdd /></span>
+                            <span>Adicionar</span>
+                        </button>
+                    </div>
+                </div>
+
+                {isDeleteMode && selectedItems.length > 0 && (
+                    <div className="notification is-danger is-light mb-4">
+                        <button className="button is-small is-danger" onClick={handleDeleteSelected}>Excluir Selecionados</button>
+                    </div>
+                )}
+
+                <div className="box">
+                    <h2 className="title is-5 mb-4">Qualidade das amostras por ponto de coleta</h2>
+                    <div className="table-container">
+                        <table className="table is-fullwidth is-striped is-hoverable is-bordered is-size-7">
+                            <thead>
+                                <tr className="has-background-light">
+                                    {isDeleteMode && <th style={{ width: '40px' }}></th>}
+                                    <th>Data</th><th>Ecoponto</th><th>Status</th><th>Referência</th><th>Recepiente</th><th>ST (%)</th><th>SV/ST (%)</th><th>ST (mg/L)</th><th>ST Var. (%)</th><th>SV Var. (%)</th><th>MV/MF (%)</th><th>Var. (%)</th><th>Data Análise</th><th>P1 (g)</th><th>P2 (g)</th><th>P3 (g)</th><th>P4 (g)</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredAmostras.map((item, index) => (
+                                    <tr key={item.id}>
+                                        {isDeleteMode && (
+                                            <td>
+                                                <label className="checkbox">
+                                                    <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} />
+                                                </label>
+                                            </td>
+                                        )}
+                                        <td>{item.data}</td>
+                                        <td>{item.ecoponto}</td>
+                                        <td><span className={`tag ${item.status === 'Concluído' ? 'is-success' : 'is-warning'} is-light`}>{item.status}</span></td>
+                                        <td>{item.referencia}</td>
+                                        <td>{item.recipiente}</td>
+                                        <td>{item.st_perc}</td>
+                                        <td>{item.sv_st_perc}</td>
+                                        <td>{item.st_mg}</td>
+                                        <td>{item.st_var}</td>
+                                        <td>{item.sv_var}</td>
+                                        <td>{item.mv_mf}</td>
+                                        <td>{item.var_perc}</td>
+                                        <td>{item.data_analise}</td>
+                                        <td>{item.p1}</td>
+                                        <td>{item.p2}</td>
+                                        <td>{item.p3}</td>
+                                        <td>{item.p4}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         )}
