@@ -589,7 +589,7 @@ const Qualidade: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredDejetos.map((item, index) => (
+                            {filteredDejetos.map((item) => (
                                 <tr key={item.id}>
                                     {isDeleteMode && (
                                         <td>
@@ -668,7 +668,7 @@ const Qualidade: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredAmostras.map((item, index) => (
+                                {filteredAmostras.map((item) => (
                                     <tr key={item.id}>
                                         {isDeleteMode && (
                                             <td>
