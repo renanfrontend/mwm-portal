@@ -1,11 +1,15 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { 
   MdAdd, MdSearch, MdFilterList, MdDelete, MdTimer, MdCheckCircle, 
-  MdOutlineLocalGasStation, MdSave, MdFileDownload, 
+  MdOutlineLocalGasStation, MdEdit, MdClose, MdSave, MdFileDownload, 
   MdPictureAsPdf, MdChevronLeft, MdChevronRight, MdCheck, MdArrowUpward, MdArrowDownward, MdViewColumn 
 } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+
+// --- IMPORTAÇÃO DO LOGO (CORREÇÃO ERRO 404 AZURE) ---
+// Certifique-se que o arquivo logo.png está dois níveis acima ou ajuste o caminho
+import logoMwm from '../../logo.png';
 
 // --- INTERFACES ---
 interface AbastecimentoItem {
@@ -201,7 +205,7 @@ const SignaturePad = ({ onSave, onCancel }: { onSave: (dataUrl: string) => void,
     );
 };
 
-// --- GERAR PDF ---
+// --- GERAR PDF COM LOGO IMPORTADO ---
 const printReceipt = (item: AbastecimentoItem) => {
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) return;
@@ -224,7 +228,7 @@ const printReceipt = (item: AbastecimentoItem) => {
         </head>
         <body>
             <div class="header">
-                <img src="/logo.png" style="max-height: 60px; margin-bottom: 10px;" alt="MWM Logo"/>
+                <img src="${logoMwm}" style="max-height: 60px; margin-bottom: 10px;" alt="MWM Logo"/>
                 <div class="logo">MWM - UMA EMPRESA TUPY</div>
                 <div>MWM-TUPY DO BRASIL LTDA.</div>
                 <div>SITIO LINHA ALVES, S/N OURO VERDE DO OESTE/PR - CEP 85933-000</div>

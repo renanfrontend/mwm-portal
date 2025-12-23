@@ -5,13 +5,19 @@ import { MdDashboard, MdBusiness, MdEvStation, MdAssignment, MdAttachMoney, MdSe
 import { useAuth } from '../context/AuthContext';
 import useTheme from '../hooks/useTheme';
 
+// --- IMPORTAÇÃO DO LOGO (CORREÇÃO ERRO 404 AZURE) ---
+import logoMwm from '../../logo.png'; 
+
 export default function Sidebar() {
   const { logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   return (
     <aside className="menu p-4" style={{ height: '100%', overflowY: 'auto', backgroundColor: theme === 'dark' ? '#1f2937' : '#fff' }}>
-      <div className="mb-5 px-2"><img src="/logo.png" alt="MWM Logo" style={{ maxWidth: '140px' }} /></div>
+      <div className="mb-5 px-2">
+        {/* Usando a variável importada ao invés do caminho fixo */}
+        <img src={logoMwm} alt="MWM Logo" style={{ maxWidth: '140px' }} />
+      </div>
       
       <p className="menu-label">Geral</p>
       <ul className="menu-list">
