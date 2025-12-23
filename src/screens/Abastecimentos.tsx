@@ -7,8 +7,7 @@ import {
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 
-// --- IMPORTAÇÃO DO LOGO (CORREÇÃO ERRO 404 AZURE) ---
-// Certifique-se que o arquivo logo.png está dois níveis acima ou ajuste o caminho
+// --- IMPORTAÇÃO DO LOGO PARA CORREÇÃO NO AZURE ---
 import logoMwm from '../../logo.png';
 
 // --- INTERFACES ---
@@ -205,7 +204,7 @@ const SignaturePad = ({ onSave, onCancel }: { onSave: (dataUrl: string) => void,
     );
 };
 
-// --- GERAR PDF COM LOGO IMPORTADO ---
+// --- GERAR PDF ---
 const printReceipt = (item: AbastecimentoItem) => {
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) return;
@@ -463,6 +462,60 @@ const Abastecimentos: React.FC = () => {
       );
   }, [abastecimentosList, searchTerm]);
 
+  // --- NOVA FUNÇÃO DE EXPORTAÇÃO ---
+  const handleExportReport = () => {
+      if (sortedReportList.length === 0) {
+          toast.warn("Não há dados filtrados para exportar.");
+          return;
+      }
+
+      // 1. Cabeçalhos
+      const headers = [
+          "ID", "Data", "Início", "Término", "Duração", "Veículo", "Tipo", "Produto", "Volume (m³)", "Preço Unit.", "Valor Total", "Usuário", "Status"
+      ];
+
+      // 2. Dados
+      const csvRows = sortedReportList.map(item => {
+          const duration = calculateDuration(item.horaInicio, item.horaTermino);
+          const unitPrice = getPriceForProduct(item.produto);
+          const totalValue = (parseFloat(item.volumeAbastecido || '0') * unitPrice).toFixed(2).replace('.', ',');
+          
+          const dataFormatted = item.data.split('-').reverse().join('/');
+          const volumeFormatted = (item.volumeAbastecido || '0').replace('.', ',');
+          const priceFormatted = unitPrice.toFixed(2).replace('.', ',');
+
+          // Formata CSV com ponto e vírgula
+          return [
+              item.id,
+              dataFormatted,
+              item.horaInicio,
+              item.horaTermino || '-',
+              duration,
+              item.placa,
+              item.tipoVeiculo || '-',
+              item.produto,
+              volumeFormatted,
+              `R$ ${priceFormatted}`,
+              `R$ ${totalValue}`,
+              item.usuario || '-',
+              item.status
+          ].join(';');
+      });
+
+      // 3. Monta string CSV com BOM para UTF-8
+      const csvString = "\uFEFF" + [headers.join(';'), ...csvRows].join('\n');
+
+      // 4. Download
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `relatorio_abastecimentos_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
+
   const customSidebarBlue = '#4f46e5';
 
   return (
@@ -563,7 +616,13 @@ const Abastecimentos: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        <div className="column has-text-right"><button className="button is-white border"><span className="icon"><MdFileDownload /></span> <span>Exportar</span></button></div>
+                        <div className="column has-text-right">
+                            {/* BOTÃO EXPORTAR COM EVENTO ATUALIZADO */}
+                            <button className="button is-white border" onClick={handleExportReport}>
+                                <span className="icon"><MdFileDownload /></span> 
+                                <span>Exportar</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
