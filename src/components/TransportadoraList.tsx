@@ -1,5 +1,3 @@
-// src/components/TransportadoraList.tsx
-
 import React, { useState, useEffect } from 'react';
 import { MdSearch, MdAdd, MdFilterList, MdDelete } from 'react-icons/md';
 import type { TransportadoraItem, VeiculoInfo } from '../types/models';
@@ -31,6 +29,10 @@ export const TransportadoraList: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
 
+  // Confirm Remoção Veículo
+  const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
+  const [isConfirmVehicleDeleteOpen, setIsConfirmVehicleDeleteOpen] = useState(false);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -57,7 +59,13 @@ export const TransportadoraList: React.FC = () => {
 
   const closeModals = () => {
       if (isAddVehicleOpen) { setIsAddVehicleOpen(false); return; }
-      setSelectedItem(null); setIsContactOpen(false); setIsVehiclesOpen(false); setIsEditOpen(false); setIsCreateOpen(false);
+      if (isConfirmVehicleDeleteOpen) { setIsConfirmVehicleDeleteOpen(false); setVehicleToDelete(null); return; }
+
+      setSelectedItem(null); 
+      setIsContactOpen(false); 
+      setIsVehiclesOpen(false); 
+      setIsEditOpen(false); 
+      setIsCreateOpen(false);
   };
 
   const handleContact = (item: TransportadoraItem) => { setSelectedItem(item); setIsContactOpen(true); };
@@ -79,27 +87,22 @@ export const TransportadoraList: React.FC = () => {
       } 
   };
   
-  const handleDeleteTransportadora = () => { 
-      if (selectedItem) { 
-          if(window.confirm("Deseja realmente remover esta transportadora?")) {
-            setData(prev => prev.filter(t => t.id !== selectedItem.id)); 
-            toast.success("Transportadora removida."); 
-            closeModals(); 
-          }
-      } 
+  const handleRequestRemoveVehicle = (idx: number) => { 
+      setVehicleToDelete(idx);
+      setIsConfirmVehicleDeleteOpen(true);
   };
-  
-  const handleRemoveVehicle = (idx: number) => { 
-      if (selectedItem) { 
-          if(window.confirm("Remover este veículo?")) {
-            const vs = [...(selectedItem.veiculos || [])]; 
-            vs.splice(idx, 1); 
-            const up = { ...selectedItem, veiculos: vs }; 
-            setSelectedItem(up); 
-            setData(prev => prev.map(i => i.id === up.id ? up : i)); 
-            toast.success("Veículo removido."); 
-          }
+
+  const handleConfirmRemoveVehicle = () => {
+      if (selectedItem && vehicleToDelete !== null && selectedItem.veiculos) { 
+          const vs = [...selectedItem.veiculos]; 
+          vs.splice(vehicleToDelete, 1); 
+          const up = { ...selectedItem, veiculos: vs }; 
+          setSelectedItem(up); 
+          setData(prev => prev.map(i => i.id === up.id ? up : i)); 
+          toast.success("Veículo removido."); 
       } 
+      setIsConfirmVehicleDeleteOpen(false);
+      setVehicleToDelete(null);
   };
 
   return (
@@ -164,16 +167,30 @@ export const TransportadoraList: React.FC = () => {
         </div>
       </div>
 
+      <div className={`modal ${isConfirmVehicleDeleteOpen ? 'is-active' : ''}`} style={{ zIndex: 1100 }}>
+        <div className="modal-background" onClick={() => setIsConfirmVehicleDeleteOpen(false)} style={{ backgroundColor: 'rgba(10,10,10,0.5)' }}></div>
+        <div className="modal-card" style={{ maxWidth: '400px', boxShadow: 'none', border: '1px solid #ededed', borderRadius: '8px' }}>
+          <header className="modal-card-head py-3 has-background-white" style={{ borderBottom: '1px solid #ededed', boxShadow: 'none' }}>
+            <p className="modal-card-title is-size-6 has-text-weight-bold has-text-centered w-full" style={{ color: '#363636' }}>Confirmar remoção</p>
+          </header>
+          <section className="modal-card-body py-5 has-text-centered has-background-white">
+            <p className="subtitle is-6" style={{ color: '#4a4a4a' }}>Deseja remover este veículo?</p>
+          </section>
+          <footer className="modal-card-foot is-justify-content-center pt-3 pb-3 has-background-white" style={{ borderTop: '1px solid #ededed' }}>
+            <button className="button is-small shadow-none" onClick={() => setIsConfirmVehicleDeleteOpen(false)}>Cancelar</button>
+            <button className="button is-small is-danger shadow-none" style={{ backgroundColor: '#ff5773', borderColor: 'transparent' }} onClick={handleConfirmRemoveVehicle}>Remover</button>
+          </footer>
+        </div>
+      </div>
+
       <TransportadoraContactModal isActive={isContactOpen} onClose={closeModals} data={selectedItem} />
       
-      {/* CORREÇÃO: Passando todas as props exigidas */}
       <TransportadoraVehiclesModal 
           isActive={isVehiclesOpen} 
           onClose={closeModals} 
           data={selectedItem} 
           onAddVehicle={() => setIsAddVehicleOpen(true)} 
-          onDeleteTransportadora={handleDeleteTransportadora} 
-          onRemoveVehicle={handleRemoveVehicle} 
+          onRemoveVehicle={handleRequestRemoveVehicle} 
       />
       
       <TransportadoraEditModal isActive={isEditOpen} onClose={closeModals} data={selectedItem} onSave={handleSaveEdit} />
