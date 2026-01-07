@@ -2,12 +2,14 @@ import React, { useState, useMemo, useRef } from 'react';
 import { 
   MdAdd, MdSearch, MdFilterList, MdDelete, MdTimer, MdCheckCircle, 
   MdOutlineLocalGasStation, MdSave, MdFileDownload, 
-  MdPictureAsPdf, MdChevronLeft, MdChevronRight, MdCheck, MdArrowUpward, MdArrowDownward, MdViewColumn 
+  MdPictureAsPdf, MdChevronLeft, MdChevronRight, MdCheck, MdArrowUpward, MdArrowDownward, MdViewColumn,
+  MdArrowBack // Adicionado ícone de voltar
 } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom'; // Adicionado hook de navegação
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 
-// --- IMPORTAÇÃO DO LOGO PARA CORREÇÃO NO AZURE ---
+// --- IMPORTAÇÃO DO LOGO ---
 import logoMwm from '../../logo.png';
 
 // --- INTERFACES ---
@@ -259,6 +261,8 @@ const printReceipt = (item: AbastecimentoItem) => {
 };
 
 const Abastecimentos: React.FC = () => {
+  const navigate = useNavigate(); // Hook para navegação
+
   // Estados
   const [activeTab, setActiveTab] = useState('Abastecimento');
   const [abastecimentosList, setAbastecimentosList] = useState<AbastecimentoItem[]>(initialAbastecimentos);
@@ -520,9 +524,21 @@ const Abastecimentos: React.FC = () => {
 
   return (
     <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <nav className="level is-mobile mb-0 px-4 py-3" style={{ borderBottom: '1px solid #dbdbdb', flexShrink: 0 }}>
-        <div className="level-left"><h1 className="title is-4 mb-0 text-gray-700">Abastecimento</h1></div>
-      </nav>
+      
+      {/* --- HEADER PADRONIZADO --- */}
+      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem', flexShrink: 0 }}>
+        <div className="level is-mobile">
+          <div className="level-left">
+            <div className="buttons">
+              <button className="button is-white border mr-2" onClick={() => navigate(-1)}>
+                <span className="icon"><MdArrowBack size={24} /></span>
+              </button>
+              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Abastecimento</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <section className="section py-0 pt-3" style={{ flexShrink: 0 }}>
         <div className="tabs is-toggle is-medium is-centered is-fullwidth mb-0">
           <ul>
@@ -565,7 +581,7 @@ const Abastecimentos: React.FC = () => {
                     </div>
                 </div>
                 {abastecimentosList.filter(i => i.status === 'Em andamento').length === 0 ? (
-                    <div className="has-text-centered p-6 mt-4" style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px dashed #dbdbdb' }}><MdOutlineLocalGasStation size={48} /><p>Sem abastecimentos em andamento</p><button className="button is-light" style={{ color: customSidebarBlue, borderColor: customSidebarBlue, backgroundColor: '#eef2ff' }} onClick={openCreateModal}><span className="icon"><MdAdd /></span><span>Registrar</span></button></div>
+                    <div className="has-text-centered p-6 mt-4" style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px dashed #dbdbdb' }}><MdOutlineLocalGasStation size={48} /><p>Sem abastecimentos em andamento</p></div>
                 ) : (
                     <div className="box p-0" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: 'none' }}>
                         <table className="table is-fullwidth is-hoverable is-size-7">

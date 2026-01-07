@@ -21,15 +21,20 @@ export const TransportadoraList: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
-  // Modais
+  // Modais Principais
   const [selectedItem, setSelectedItem] = useState<TransportadoraItem | null>(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  
+  // Controle do Modal de Lista de Veículos (Nível 1)
   const [isVehiclesOpen, setIsVehiclesOpen] = useState(false);
+  
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  
+  // Controle do Modal de ADICIONAR Veículo (Nível 2 - Sobreposto)
   const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
 
-  // Confirm Remoção Veículo
+  // --- Confirm Remoção Veículo ---
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [isConfirmVehicleDeleteOpen, setIsConfirmVehicleDeleteOpen] = useState(false);
 
@@ -38,6 +43,16 @@ export const TransportadoraList: React.FC = () => {
       setLoading(true);
       try {
         const result = await fetchTransportadorasData();
+        
+        // --- INJEÇÃO DE DADOS MOCKADOS PARA TESTE ---
+        if (result.length > 0) {
+            result[0].veiculos = [
+                { tipo: 'Caminhão de dejetos: Vácuo', capacidade: '16.000L', placa: 'ABC-1234', tipoAbastecimento: 'Diesel' } as any,
+                { tipo: 'Caminhão de dejetos: Hidrojato', capacidade: '20.000L', placa: 'XYZ-9876', tipoAbastecimento: 'Biometano', tag: 'A1B2C3D4E5F67890' } as any
+            ];
+        }
+        // --------------------------------------------
+
         setData(result);
       } catch (e) {
         toast.error("Erro ao carregar transportadoras");
@@ -58,9 +73,11 @@ export const TransportadoraList: React.FC = () => {
   const confirmDelete = () => { setData(prev => prev.filter(i => !selectedItems.includes(i.id))); toast.success("Removidos."); setIsConfirmDeleteOpen(false); setSelectedItems([]); setIsDeleteMode(false); };
 
   const closeModals = () => {
-      if (isAddVehicleOpen) { setIsAddVehicleOpen(false); return; }
-      if (isConfirmVehicleDeleteOpen) { setIsConfirmVehicleDeleteOpen(false); setVehicleToDelete(null); return; }
+      // Prioridade de fechamento (pilha de modais)
+      if (isAddVehicleOpen) { setIsAddVehicleOpen(false); return; } // Fecha só o form, mantém a lista
+      if (isConfirmVehicleDeleteOpen) { setIsConfirmVehicleDeleteOpen(false); setVehicleToDelete(null); return; } // Fecha confirmação
 
+      // Fecha modais principais
       setSelectedItem(null); 
       setIsContactOpen(false); 
       setIsVehiclesOpen(false); 
@@ -69,7 +86,15 @@ export const TransportadoraList: React.FC = () => {
   };
 
   const handleContact = (item: TransportadoraItem) => { setSelectedItem(item); setIsContactOpen(true); };
-  const handleVehicles = (item: TransportadoraItem) => { setSelectedItem(item); setIsVehiclesOpen(true); };
+  
+  // Abre apenas a lista inicialmente
+  const handleVehicles = (item: TransportadoraItem) => { 
+      setSelectedItem(item); 
+      setIsVehiclesOpen(true); 
+      // Garante que o de adicionar esteja fechado ao abrir a lista
+      setIsAddVehicleOpen(false); 
+  };
+  
   const handleEdit = (item: TransportadoraItem) => { setSelectedItem(item); setIsEditOpen(true); };
   const handleAdd = () => setIsCreateOpen(true);
 
@@ -83,6 +108,8 @@ export const TransportadoraList: React.FC = () => {
           setSelectedItem(up); 
           setData(prev => prev.map(i => i.id === up.id ? up : i)); 
           toast.success("Veículo adicionado!"); 
+          
+          // Fecha APENAS o modal de formulário, mantendo a lista aberta e atualizada
           setIsAddVehicleOpen(false); 
       } 
   };
@@ -158,6 +185,7 @@ export const TransportadoraList: React.FC = () => {
           }
       </div>
 
+      {/* Modal Confirmação Exclusão Transportadora (Massa) */}
       <div className={`modal ${isConfirmDeleteOpen ? 'is-active' : ''}`}>
         <div className="modal-background" onClick={() => setIsConfirmDeleteOpen(false)}></div>
         <div className="modal-card">
@@ -167,14 +195,15 @@ export const TransportadoraList: React.FC = () => {
         </div>
       </div>
 
-      <div className={`modal ${isConfirmVehicleDeleteOpen ? 'is-active' : ''}`} style={{ zIndex: 1100 }}>
+      {/* --- Modal Confirmação Remoção Veículo (z-index alto para ficar sobre a lista) --- */}
+      <div className={`modal ${isConfirmVehicleDeleteOpen ? 'is-active' : ''}`} style={{ zIndex: 1300 }}>
         <div className="modal-background" onClick={() => setIsConfirmVehicleDeleteOpen(false)} style={{ backgroundColor: 'rgba(10,10,10,0.5)' }}></div>
         <div className="modal-card" style={{ maxWidth: '400px', boxShadow: 'none', border: '1px solid #ededed', borderRadius: '8px' }}>
           <header className="modal-card-head py-3 has-background-white" style={{ borderBottom: '1px solid #ededed', boxShadow: 'none' }}>
             <p className="modal-card-title is-size-6 has-text-weight-bold has-text-centered w-full" style={{ color: '#363636' }}>Confirmar remoção</p>
           </header>
           <section className="modal-card-body py-5 has-text-centered has-background-white">
-            <p className="subtitle is-6" style={{ color: '#4a4a4a' }}>Deseja remover este veículo?</p>
+            <p className="subtitle is-6" style={{ color: '#4a4a4a' }}>Deseja remover este veículo da lista?</p>
           </section>
           <footer className="modal-card-foot is-justify-content-center pt-3 pb-3 has-background-white" style={{ borderTop: '1px solid #ededed' }}>
             <button className="button is-small shadow-none" onClick={() => setIsConfirmVehicleDeleteOpen(false)}>Cancelar</button>
@@ -185,6 +214,10 @@ export const TransportadoraList: React.FC = () => {
 
       <TransportadoraContactModal isActive={isContactOpen} onClose={closeModals} data={selectedItem} />
       
+      {/* 1. Modal de LISTA de Veículos 
+          - isActive={isVehiclesOpen}
+          - onAddVehicle={() => setIsAddVehicleOpen(true)} <- Isso ABRE o segundo modal
+      */}
       <TransportadoraVehiclesModal 
           isActive={isVehiclesOpen} 
           onClose={closeModals} 
@@ -193,9 +226,19 @@ export const TransportadoraList: React.FC = () => {
           onRemoveVehicle={handleRequestRemoveVehicle} 
       />
       
+      {/* 2. Modal de ADICIONAR Veículo (Formulário)
+          - isActive={isAddVehicleOpen} 
+          - zIndex superior no componente para sobrepor a lista
+          - onClose fecha apenas ele mesmo
+      */}
+      <TransportadoraAddVehicleModal 
+          isActive={isAddVehicleOpen} 
+          onClose={() => setIsAddVehicleOpen(false)} 
+          onSave={handleSaveNewVehicle} 
+      />
+      
       <TransportadoraEditModal isActive={isEditOpen} onClose={closeModals} data={selectedItem} onSave={handleSaveEdit} />
       <TransportadoraCreateModal isActive={isCreateOpen} onClose={closeModals} onCreate={handleSaveNew} />
-      <TransportadoraAddVehicleModal isActive={isAddVehicleOpen} onClose={() => setIsAddVehicleOpen(false)} onSave={handleSaveNewVehicle} />
     </div>
   );
 };

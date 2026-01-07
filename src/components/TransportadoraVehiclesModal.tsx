@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdAdd, MdDelete, MdDirectionsCar, MdLocalGasStation, MdConfirmationNumber } from 'react-icons/md';
 import type { TransportadoraItem } from '../types/models';
 
 interface Props {
@@ -31,19 +31,18 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
     }
   };
 
-  // --- ESTILOS REFINADOS (Flat & Espaçamento) ---
   const modalCardStyle = { 
-    maxWidth: '600px', 
+    maxWidth: '700px', 
     width: '100%', 
     borderRadius: '8px', 
-    boxShadow: 'none', // Remove sombra externa do modal
-    border: 'none'     // Remove borda padrão
+    boxShadow: 'none', 
+    border: 'none' 
   };
 
   const headerStyle = { 
-    borderBottom: 'none', // Remove a linha/sombra entre header e body
-    boxShadow: 'none',    // Garante sem sombra
-    padding: '20px 24px 5px 24px', // Padding inferior reduzido para aproximar do nome da empresa
+    borderBottom: 'none', 
+    boxShadow: 'none', 
+    padding: '20px 24px 5px 24px', 
     backgroundColor: '#fff',
     borderRadius: '8px 8px 0 0'
   };
@@ -57,19 +56,19 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
 
   const bodyStyle = { 
     backgroundColor: '#fff', 
-    padding: '0 24px 20px 24px' // Padding superior zerado
+    padding: '0 24px 20px 24px' 
   };
 
   const companyNameContainerStyle = {
     paddingTop: '5px',
     paddingBottom: '15px',
     marginBottom: '15px',
-    borderBottom: '1px solid #ededed' // A linha divisória fica AQUI
+    borderBottom: '1px solid #ededed'
   };
 
   const companyNameStyle = {
     color: '#7a7a7a',
-    fontWeight: 'normal' as const,
+    fontWeight: 'normal' as const, 
     fontSize: '0.875rem',
     textTransform: 'uppercase' as const,
     letterSpacing: '0.5px'
@@ -93,12 +92,25 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
     paddingRight: '1.5em'
   });
 
+  const labelStyle = { color: '#b5b5b5', fontSize: '0.7rem', marginBottom: '3px', textTransform: 'uppercase' as const, display: 'flex', alignItems: 'center' };
+  const valueStyleMain = (isSelected: boolean) => ({ 
+    color: isSelected ? '#4f46e5' : '#363636', 
+    fontWeight: '700' as const, 
+    fontSize: '1.1rem',
+    marginBottom: '0'
+  });
+  const valueStyleSecondary = (isSelected: boolean) => ({
+    color: isSelected ? '#4f46e5' : '#363636', 
+    fontWeight: '600' as const,
+    fontSize: '0.9rem',
+    marginBottom: '0'
+  });
+
   return (
     <div className={`modal ${isActive ? 'is-active' : ''}`} style={{ zIndex: 1000 }}>
       <div className="modal-background" onClick={onClose} style={{ backgroundColor: 'rgba(10, 10, 10, 0.5)' }}></div>
       <div className="modal-card" style={modalCardStyle}>
         
-        {/* Cabeçalho */}
         <header className="modal-card-head" style={headerStyle}>
           <p className="modal-card-title" style={titleStyle}>
             Veículos da transportadora
@@ -107,18 +119,17 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
         </header>
 
         <section className="modal-card-body" style={bodyStyle}>
-          {/* Nome da Transportadora (Colado visualmente ao header) */}
           <div style={companyNameContainerStyle}>
              <h6 style={companyNameStyle}>
                {data?.nomeFantasia || 'NOME DA TRANSPORTADORA'}
              </h6>
           </div>
 
-          {/* Lista de Cards */}
-          {data?.veiculos && data.veiculos.length > 0 ? (
-            <div className="content" style={{ maxHeight: '400px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
-              {data.veiculos.map((vehicle, idx) => {
+          <div className="content" style={{ maxHeight: '450px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
+            {data?.veiculos && data.veiculos.length > 0 ? (
+              data.veiculos.map((vehicle, idx) => {
                 const isSelected = selectedIdx === idx;
+                const v = vehicle as any;
                 
                 const cardStyle = {
                   cursor: 'pointer',
@@ -128,45 +139,57 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
                   boxShadow: 'none', 
                   padding: '16px',
                   marginBottom: '12px',
-                  transition: 'border-color 0.2s ease'
-                };
-
-                const labelStyle = { color: '#b5b5b5', fontSize: '0.75rem', marginBottom: '4px' };
-                const valueStyle = { 
-                  color: isSelected ? '#4f46e5' : '#363636', 
-                  fontWeight: '700' as const, 
-                  fontSize: '1rem',
-                  marginBottom: '0'
+                  transition: 'all 0.2s ease'
                 };
 
                 return (
                   <div 
                     key={idx} 
-                    className="is-flex is-justify-content-space-between is-align-items-center"
                     onClick={() => setSelectedIdx(idx)}
                     style={cardStyle}
                   >
-                    <div>
-                      <p style={labelStyle}>Tipo de veículo</p>
-                      <p style={valueStyle}>{vehicle.tipo}</p>
+                    <div className="columns is-mobile is-variable is-1 mb-2">
+                      <div className="column is-8 pb-0">
+                        <p style={labelStyle}>Tipo de veículo</p>
+                        <p style={valueStyleMain(isSelected)}>{v.tipo}</p>
+                      </div>
+                      <div className="column is-4 has-text-right pb-0">
+                        <p style={{...labelStyle, justifyContent: 'flex-end'}}>Capacidade</p>
+                        <p style={valueStyleMain(isSelected)}>{v.capacidade}</p>
+                      </div>
                     </div>
 
-                    <div className="has-text-right">
-                      <p style={labelStyle}>Capacidade</p>
-                      <p style={valueStyle}>{vehicle.capacidade}</p>
+                    <div className="columns is-mobile is-variable is-1 mb-0 mt-2 pt-2" style={{ borderTop: '1px dashed #f0f0f0' }}>
+                      <div className="column is-4 pt-0">
+                        <p style={labelStyle}><MdDirectionsCar className="mr-1" size={14}/> Placa</p>
+                        <p style={valueStyleSecondary(isSelected)}>{v.placa || '-'}</p>
+                      </div>
+                      <div className="column is-4 has-text-centered pt-0">
+                        <p style={{...labelStyle, justifyContent: 'center'}}><MdLocalGasStation className="mr-1" size={14}/> Combustível</p>
+                        <p style={valueStyleSecondary(isSelected)}>{v.tipoAbastecimento || 'Diesel'}</p>
+                      </div>
+                      <div className="column is-4 has-text-right pt-0">
+                        {v.tipoAbastecimento === 'Biometano' ? (
+                          <>
+                            <p style={{...labelStyle, justifyContent: 'flex-end'}}><MdConfirmationNumber className="mr-1" size={14}/> TAG</p>
+                            <p style={valueStyleSecondary(isSelected)}>{v.tag || 'N/A'}</p>
+                          </>
+                        ) : (
+                          <div style={{ height: '100%' }}></div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
-              })}
-            </div>
-          ) : (
-            <div className="has-text-centered p-5 has-text-grey-light">
-              <p>Nenhum veículo cadastrado.</p>
-            </div>
-          )}
+              })
+            ) : (
+              <div className="has-text-centered p-5 has-text-grey-light">
+                <p>Nenhum veículo cadastrado.</p>
+              </div>
+            )}
+          </div>
         </section>
         
-        {/* Rodapé */}
         <footer className="modal-card-foot" style={footerStyle}>
           <button 
             className="button" 

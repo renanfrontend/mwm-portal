@@ -193,21 +193,19 @@ const Qualidade: React.FC = () => {
   return (
     <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       
-      {/* Header Fixo */}
-      <nav className="level is-mobile mb-0 px-4 py-3" style={{ borderBottom: '1px solid #dbdbdb', flexShrink: 0 }}>
-        <div className="level-left">
-          <div className="level-item">
-             <button 
-                className="button is-white mr-2" 
-                onClick={() => navigate(-1)} 
-                title="Voltar"
-             >
+      {/* CABEÇALHO PADRÃO */}
+      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem', flexShrink: 0 }}>
+        <div className="level is-mobile">
+          <div className="level-left">
+            <div className="buttons">
+              <button className="button is-white border mr-2" onClick={() => navigate(-1)}>
                 <span className="icon"><MdArrowBack size={24} /></span>
-             </button>
-             <h1 className="title is-4 mb-0">Controle de Qualidade</h1>
+              </button>
+              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Qualidade</span>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Tabs Fixas */}
       <section className="section py-0 pt-3" style={{ flexShrink: 0 }}>

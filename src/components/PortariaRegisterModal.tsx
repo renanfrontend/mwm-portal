@@ -248,7 +248,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     </div>
 
                     {/* Placa (Selecionar ou Digitar) */}
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa * (Selecionar ou Digitar)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa *</label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.placa ? 'is-danger' : ''}`}
@@ -278,7 +278,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                 <>
                     <div className="column is-12 mt-4 mb-0"><h5 className="title is-6 has-text-grey has-text-weight-normal">Logística</h5></div>
                     
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Transportadora * (Digitável)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Transportadora *</label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.transportadora ? 'is-danger' : ''}`} 
@@ -328,7 +328,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     <div className="column is-12 mt-4 mb-0"><h5 className="title is-6 has-text-grey has-text-weight-normal">Logística</h5></div>
                     
                     {/* Transportadora (Selecionar ou Digitar) */}
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Transportadora * (Selecionar ou Digitar)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Transportadora * </label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.transportadora ? 'is-danger' : ''}`}
@@ -342,7 +342,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     </div>
 
                     {/* Tipo Veículo (Selecionar ou Digitar) */}
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Tipo de Veículo * (Selecionar ou Digitar)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Tipo de Veículo * </label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.tipoVeiculo ? 'is-danger' : ''}`}
@@ -356,7 +356,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     </div>
 
                     {/* Placa (Selecionar ou Digitar) */}
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa * (Selecionar ou Digitar)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa *</label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.placa ? 'is-danger' : ''}`}
@@ -420,7 +420,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     </div>
 
                     {/* Placa (Selecionar ou Digitar) */}
-                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa * (Selecionar ou Digitar)</label></div>
+                    <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Placa *</label></div>
                     <div className="column is-12 pt-1">
                         <input 
                             className={`input ${errors.placa ? 'is-danger' : ''}`}

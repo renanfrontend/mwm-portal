@@ -1,82 +1,60 @@
-// src/components/AbastecimentoPieChart.tsx
-
-import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer, Legend, Label } from 'recharts';
+/// <reference types="@testing-library/jest-dom" />
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import AbastecimentoPieChart from './AbastecimentoPieChart';
 import { type AbastecimentoSummaryItem } from '../services/api';
-import useTheme from '../hooks/useTheme';
 
-interface Props {
-  // Tornamos opcional (?) para evitar erro de TS se não for passado
-  chartData?: AbastecimentoSummaryItem[];
-  title?: string;
-}
+// Mock do hook useTheme para não depender do Contexto
+vi.mock('../hooks/useTheme', () => ({
+  default: () => ({ theme: 'light' }),
+}));
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
-
-// Definimos o valor padrão de chartData como []
-const AbastecimentoPieChart = ({ chartData = [], title = 'Abastecimento' }: Props) => {
-  const { theme } = useTheme();
-  const textColor = theme === 'dark' ? '#a0aec0' : '#7a7a7a';
-
-  // Garante que safeData seja sempre um array
-  const safeData = chartData || [];
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip" style={{ backgroundColor: 'var(--card-background-color)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '5px' }}>
-          <p className="label">{`${payload[0].name} : ${payload[0].value.toFixed(2)} m³`}</p>
-        </div>
-      );
-    }
-    return null;
+// Mock dos componentes da Recharts
+vi.mock('recharts', async () => {
+  const originalModule = await vi.importActual<typeof import('recharts')>('recharts');
+  return {
+    ...originalModule,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="responsive-container-mock">{children}</div>
+    ),
+    PieChart: ({ children }: { children: React.ReactNode }) => <div data-testid="pie-chart-mock">{children}</div>,
+    Pie: ({ children }: { children: React.ReactNode }) => <div data-testid="pie-mock">{children}</div>,
+    Cell: () => <div data-testid="cell-mock" />,
+    Tooltip: () => <div data-testid="tooltip-mock" />,
+    Legend: () => <div data-testid="legend-mock" />,
+    Label: ({ value }: { value: string }) => <div data-testid="label-mock">{value}</div>,
   };
+});
 
-  // Se não houver dados, exibe um estado vazio em vez de quebrar
-  if (safeData.length === 0) {
-    return (
-      <div className="card" style={{ height: '100%' }}>
-        <header className="card-header">
-          <p className="card-header-title">{title}</p>
-        </header>
-        <div className="card-content" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-           <p className="has-text-grey">Sem dados para exibir no momento.</p>
-        </div>
-      </div>
-    );
-  }
+const mockChartData: AbastecimentoSummaryItem[] = [
+  { veiculo: 'Caminhão (Ração)', placa: 'ABC-1234', volumeTotal: 150.5 },
+  { veiculo: 'Carro', placa: 'XYZ-5678', volumeTotal: 50.2 },
+];
 
-  return (
-    <div className="card" style={{ height: '100%' }}>
-      <header className="card-header">
-        <p className="card-header-title">{title}</p>
-      </header>
-      <div className="card-content">
-        <ResponsiveContainer width="100%" height={400}>
-          <PieChart>
-            <Pie
-              data={safeData}
-              dataKey="volumeTotal"
-              nameKey="placa"
-              outerRadius={150}
-              innerRadius={100}
-              fill="#8884d8"
-              paddingAngle={5}
-              labelLine={false}
-            >
-              {safeData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-              <Label value="Volume por Veículo" position="center" fill={textColor} fontSize="16px" />
-            </Pie>
-            <Tooltip
-              content={<CustomTooltip />}
-            />
-            <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ color: textColor }} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
+describe('AbastecimentoPieChart', () => {
+  it('deve renderizar o título fornecido', () => {
+    render(<AbastecimentoPieChart chartData={[]} title="Teste de Título" />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
+    expect(screen.getByText('Teste de Título')).toBeInTheDocument();
+  });
 
-export default AbastecimentoPieChart;
+  it('deve usar o título padrão se nenhum for fornecido', () => {
+    render(<AbastecimentoPieChart chartData={[]} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
+    expect(screen.getByText('Abastecimento')).toBeInTheDocument();
+  });
+
+  it('deve renderizar a label central "Volume por Veículo" mesmo com dados vazios', () => {
+    render(<AbastecimentoPieChart chartData={[]} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
+    expect(screen.getByText('Volume por Veículo')).toBeInTheDocument();
+  });
+
+  it('deve renderizar os componentes do gráfico quando houver dados', () => {
+    render(<AbastecimentoPieChart chartData={mockChartData} />);
+    // CORRIGIDO: (TS2339) - A referência na linha 1 corrige este erro
+    expect(screen.getByTestId('pie-chart-mock')).toBeInTheDocument();
+    expect(screen.getByTestId('legend-mock')).toBeInTheDocument();
+  });
+});

@@ -10,7 +10,7 @@ import logoMwm from '../../logo.png';
 
 export default function Sidebar() {
   const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <aside className="menu p-4" style={{ height: '100%', overflowY: 'auto', backgroundColor: theme === 'dark' ? '#1f2937' : '#fff' }}>
@@ -40,9 +40,6 @@ export default function Sidebar() {
         <li><NavLink to="/conta" className={({ isActive }) => isActive ? 'is-active' : ''}><span className="icon"><MdSettings /></span>Conta</NavLink></li>
         <li><a onClick={logout}><span className="icon"><MdExitToApp /></span>Sair</a></li>
       </ul>
-      <div className="mt-auto pt-4 px-2">
-        <button className="button is-small is-fullwidth is-rounded" onClick={toggleTheme}>{theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}</button>
-      </div>
     </aside>
   );
 }

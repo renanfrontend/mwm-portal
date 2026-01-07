@@ -7,7 +7,7 @@ import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
 import { loadDashboardData } from '../features/dashboard/dashboardSlice';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import type { Metric } from '../services/api';
-import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater, MdFilterList } from 'react-icons/md'; 
+import { MdWaterDrop, MdPowerSettingsNew, MdTimer, MdAnalytics, MdWater } from 'react-icons/md'; 
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,9 +33,6 @@ const Dashboard = () => {
     dispatch(loadDashboardData());
   }, [isAuthenticated, navigate, dispatch]);
   
-  const handleFilterClick = () => {
-      console.log('Filtros clicado');
-  };
 
   return (
     // ESTRUTURA DE LAYOUT PADRÃO (CORRIGE SCROLL E SOBREPOSIÇÃO)
@@ -46,7 +43,7 @@ const Dashboard = () => {
         <div className="container is-fluid px-0">
             
             {/* SEU HEADER ORIGINAL */}
-            <div className="level is-mobile mb-4">
+            {/* <div className="level is-mobile mb-4">
                 <div className="level-left">
                     <div className="level-item">
                         <p className="is-size-5 has-text-weight-semibold">Toledo - PR</p> 
@@ -62,7 +59,7 @@ const Dashboard = () => {
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> */}
             
             {loading && !data && (
                 <div className="section has-text-centered">
@@ -75,7 +72,7 @@ const Dashboard = () => {
             {/* SEUS CARDS ORIGINAIS */}
             {data && (
                 <>
-                    <div className="columns is-multiline">
+                    <div className="columns mt-4  is-multiline">
                       {data.metrics.map((metric: Metric) => (
                         <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
                           <MetricCard
