@@ -1,6 +1,6 @@
 // src/screens/Dashboard.tsx
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import MetricCard from '../components/MetricCard';
 import StockStatus from '../components/StockStatus';
 import CooperativeAnalysisChart from '../components/CooperativeAnalysisChart';
@@ -33,16 +33,23 @@ const Dashboard = () => {
     dispatch(loadDashboardData());
   }, [isAuthenticated, navigate, dispatch]);
   
-
   return (
     // ESTRUTURA DE LAYOUT PADRÃO (CORRIGE SCROLL E SOBREPOSIÇÃO)
-    <div className="screen-container">
+    <div className="screen-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       
-      {/* ÁREA DE CONTEÚDO COM SCROLL */}
-      <div className="screen-content">
+      {/* ÁREA DE CONTEÚDO COM SCROLL E PADDING SOLICITADO */}
+      <div 
+        className="screen-content" 
+        style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          overflowX: 'hidden', 
+          padding: '32px' // <--- 32px DE ESPAÇAMENTO NAS LATERAIS, TOPO E EMBAIXO
+        }}
+      >
         <div className="container is-fluid px-0">
             
-            {/* SEU HEADER ORIGINAL */}
+            {/* SEU HEADER ORIGINAL (Comentado no seu código, mantido aqui) */}
             {/* <div className="level is-mobile mb-4">
                 <div className="level-left">
                     <div className="level-item">
@@ -72,7 +79,7 @@ const Dashboard = () => {
             {/* SEUS CARDS ORIGINAIS */}
             {data && (
                 <>
-                    <div className="columns mt-4  is-multiline">
+                    <div className="columns is-multiline">
                       {data.metrics.map((metric: Metric) => (
                         <div key={metric.id} className="column is-12 is-6-tablet is-3-desktop">
                           <MetricCard
@@ -84,11 +91,12 @@ const Dashboard = () => {
                         </div>
                       ))}
                     </div>
-                    <div className="columns mt-4">
-                      <div className="column is-4">
+                    
+                    <div className="columns mt-4 is-multiline">
+                      <div className="column is-12-tablet is-4-desktop">
                         <StockStatus stockItems={data.stock} />
                       </div>
-                      <div className="column is-8">
+                      <div className="column is-12-tablet is-8-desktop">
                         <CooperativeAnalysisChart chartData={data.cooperativeAnalysis} title="Análise de Cooperados" />
                       </div>
                     </div>
