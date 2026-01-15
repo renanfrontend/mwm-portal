@@ -1,5 +1,3 @@
-// src/screens/Qualidade.tsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { MdSave, MdAddCircleOutline, MdArrowBack, MdSearch, MdDelete, MdFilterList, MdAdd } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -207,9 +205,9 @@ const Qualidade: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs Fixas */}
-      <section className="section py-0 pt-3" style={{ flexShrink: 0 }}>
-        <div className="tabs is-toggle is-medium is-centered is-fullwidth mb-0">
+      {/* TABS PADRONIZADAS (Boxed & Left Aligned - Igual Logística) */}
+      <div className="px-5 pt-4" style={{ backgroundColor: '#fff' }}>
+        <div className="tabs is-boxed mb-0">
           <ul>
             <li className={activeTab === 'Análise' ? 'is-active' : ''}>
               <a onClick={() => setActiveTab('Análise')}>
@@ -228,7 +226,7 @@ const Qualidade: React.FC = () => {
             </li>
           </ul>
         </div>
-      </section>
+      </div>
       
       {/* --- ÁREA DE CONTEÚDO COM SCROLL AUTOMÁTICO --- */}
       <div className="screen-content p-5" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -263,12 +261,20 @@ const Qualidade: React.FC = () => {
                         <div className="field">
                           <label className="label">Nome do cooperado</label>
                           <div className="control">
-                            <div className="select is-fullwidth">
-                              <select name="cooperado" value={formData.cooperado || ''} onChange={handleInputChange}>
-                                <option value="">Selecionar</option>
-                                {cooperados.map(c => <option key={c.id} value={c.motorista}>{c.motorista}</option>)}
-                              </select>
-                            </div>
+                            {/* ALTERAÇÃO: Campo Input com Datalist para permitir digitação/pesquisa */}
+                            <input 
+                                className="input" 
+                                list="cooperados-options" 
+                                name="cooperado" 
+                                placeholder="Digite ou selecione..." 
+                                value={formData.cooperado || ''} 
+                                onChange={handleInputChange} 
+                            />
+                            <datalist id="cooperados-options">
+                                {cooperados.map(c => (
+                                    <option key={c.id} value={c.motorista} />
+                                ))}
+                            </datalist>
                           </div>
                         </div>
                       </div>

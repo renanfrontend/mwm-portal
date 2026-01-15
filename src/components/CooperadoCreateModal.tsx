@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import type { CooperadoItem } from '../services/api';
 import useTheme from '../hooks/useTheme';
 import { MdMap, MdSave } from 'react-icons/md';
@@ -80,14 +79,14 @@ const CooperadoCreateModal: React.FC<Props> = ({ isActive, onClose, onSave }) =>
     }
 
     const newItem: CooperadoItem = {
-      id: uuidv4(),
+      id: 5,
       matricula: Number(matricula),
       motorista: nomeProdutor,
       filial: filiada, 
       cpfCnpj,
       fase,
       cabecasAlojadas: cabecas,
-      certificado: certificado as "Ativo" | "Inativo",
+      certificado: certificado as "Sim" | "Não",
       doamDejetos: doamDejetos as "Sim" | "Não",
       telefone: responsavel,
       tecnico,

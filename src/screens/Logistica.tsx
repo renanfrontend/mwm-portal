@@ -143,7 +143,7 @@ const Logistica: React.FC = () => {
   const confirmReplicateMonth = (month: string) => { toast.success(`Planejamento replicado: ${month}`); setIsReplicateMonthOpen(false); };
   
   const handleOpenAgendaAdd = () => {
-      const dummy: CooperadoItem = { id: 'new', matricula: 0, filial: '', motorista: 'Novo Agendamento', tipoVeiculo: '', placa: '', certificado: 'Ativo', doamDejetos: 'Sim', fase: '' };
+      const dummy: CooperadoItem = { id: 0, matricula: 0, filial: '', motorista: 'Novo Agendamento', tipoVeiculo: '', placa: '', certificado: 'Sim', doamDejetos: 'Sim', fase: '' };
       setSelectedCooperado(dummy); setIsCalendarModalActive(true);
   };
   const handleSaveCalendar = () => { setIsCalendarModalActive(false); toast.success("Agendamento realizado!"); };
@@ -339,7 +339,7 @@ const Logistica: React.FC = () => {
       <CooperadoLocationModal isActive={isLocationModalActive} onClose={closeAllModals} data={selectedCooperado} />
       <CooperadoInfoModal isActive={isInfoModalActive} onClose={closeAllModals} data={selectedCooperado} onOpenMap={handleOpenMapFromInfo} />
       <CooperadoEditModal isActive={isEditModalActive} onClose={closeAllModals} data={selectedCooperado} onSave={handleSaveCooperado} />
-      <CooperadoCalendarModal isActive={isCalendarModalActive} onClose={closeAllModals} onSave={handleSaveCalendar} data={selectedCooperado} title={selectedCooperado?.id === 'new' ? "Novo Agendamento Geral" : undefined} />
+      <CooperadoCalendarModal isActive={isCalendarModalActive} onClose={closeAllModals} onSave={handleSaveCalendar} data={selectedCooperado} title={selectedCooperado?.id === null ? "Novo Agendamento Geral" : undefined} />
       <CooperadoCreateModal isActive={isCreateModalActive} onClose={closeAllModals} onSave={handleSaveNewCooperado} />
       <ReplicateWeekModal isActive={isReplicateWeekOpen} onClose={() => setIsReplicateWeekOpen(false)} onConfirm={confirmReplicateWeek} />
       <ReplicateMonthModal isActive={isReplicateMonthOpen} onClose={() => setIsReplicateMonthOpen(false)} onConfirm={confirmReplicateMonth} />

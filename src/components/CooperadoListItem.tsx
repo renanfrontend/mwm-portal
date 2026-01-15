@@ -43,7 +43,7 @@ export const CooperadoListItem: React.FC<Props> = ({
 }) => {
   
   // Lógica de Certificado (Cores)
-  const certificadoClass = item.certificado === 'Ativo' ? 'has-text-success' : 'has-text-grey';
+  const certificadoClass = item.certificado === 'Sim' ? 'has-text-success' : 'has-text-grey';
 
   // Lógica de Distância
   let displayDistance = '-';

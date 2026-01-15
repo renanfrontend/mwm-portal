@@ -3,9 +3,9 @@ import {
   MdAdd, MdSearch, MdFilterList, MdDelete, MdTimer, MdCheckCircle, 
   MdOutlineLocalGasStation, MdSave, MdFileDownload, 
   MdPictureAsPdf, MdChevronLeft, MdChevronRight, MdCheck, MdArrowUpward, MdArrowDownward, MdViewColumn,
-  MdArrowBack // Adicionado ícone de voltar
+  MdArrowBack 
 } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom'; // Adicionado hook de navegação
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 
@@ -261,7 +261,7 @@ const printReceipt = (item: AbastecimentoItem) => {
 };
 
 const Abastecimentos: React.FC = () => {
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   // Estados
   const [activeTab, setActiveTab] = useState('Abastecimento');
@@ -539,15 +539,22 @@ const Abastecimentos: React.FC = () => {
         </div>
       </div>
 
-      <section className="section py-0 pt-3" style={{ flexShrink: 0 }}>
-        <div className="tabs is-toggle is-medium is-centered is-fullwidth mb-0">
+      {/* --- TABS PADRONIZADAS (Boxed & Left Aligned - Igual Logística) --- */}
+      <div className="px-5 pt-4" style={{ backgroundColor: '#fff' }}>
+        <div className="tabs is-boxed mb-0">
           <ul>
-            <li className={activeTab === 'Abastecimento' ? 'is-active' : ''}><a onClick={() => setActiveTab('Abastecimento')} className={activeTab === 'Abastecimento' ? 'has-background-link has-text-white' : ''} style={{ borderColor: activeTab === 'Abastecimento' ? '#3273dc' : '' }}><span>Abastecimento</span></a></li>
-            <li className={activeTab === 'Relatórios' ? 'is-active' : ''}><a onClick={() => setActiveTab('Relatórios')} className={activeTab === 'Relatórios' ? 'has-background-link has-text-white' : ''} style={{ borderColor: activeTab === 'Relatórios' ? '#3273dc' : '' }}><span>Relatórios</span></a></li>
-            <li className={activeTab === 'Precificação' ? 'is-active' : ''}><a onClick={() => setActiveTab('Precificação')} className={activeTab === 'Precificação' ? 'has-background-link has-text-white' : ''} style={{ borderColor: activeTab === 'Precificação' ? '#3273dc' : '' }}><span>Precificação</span></a></li>
+            <li className={activeTab === 'Abastecimento' ? 'is-active' : ''}>
+              <a onClick={() => setActiveTab('Abastecimento')}><span>Abastecimento</span></a>
+            </li>
+            <li className={activeTab === 'Relatórios' ? 'is-active' : ''}>
+              <a onClick={() => setActiveTab('Relatórios')}><span>Relatórios</span></a>
+            </li>
+            <li className={activeTab === 'Precificação' ? 'is-active' : ''}>
+              <a onClick={() => setActiveTab('Precificação')}><span>Precificação</span></a>
+            </li>
           </ul>
         </div>
-      </section>
+      </div>
 
       <div className="screen-content p-5" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', backgroundColor: '#f9fafb' }}>
         {/* === ABA: PRECIFICAÇÃO === */}

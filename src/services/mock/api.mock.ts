@@ -1,5 +1,3 @@
-// src/services/mock/api.mock.ts
-
 // EXPORT all types for the app
 export type {
   AbastecimentoItem,
@@ -19,10 +17,10 @@ export type {
   StockItem,
   CalendarEvent,
   AgendaItem,
-  TransportadoraItem, // Novo
-  ContactInfo, // Novo
-  VeiculoInfo // Novo
-} from "../../types/models"; 
+  TransportadoraItem,
+  ContactInfo,
+  VeiculoInfo
+} from "../../types/models";
 
 // Import types locally
 import {
@@ -38,7 +36,7 @@ import {
   type FaturamentoItem,
   type PortariaItem,
   type QualidadeDejetosItem,
-  type TransportadoraItem
+  type TransportadoraItem,
 } from "../../types/models";
 
 // --- DADOS ORIGINAIS DO SEU DASHBOARD (MANTIDOS INTACTOS) ---
@@ -70,11 +68,8 @@ const faturamentoMockData: FaturamentoItem[] = [
 ];
 
 const abastecimentoMockData: AbastecimentoItem[] = [
-  { veiculo: "Veículo 1", m3: 2500 },
-  { veiculo: "Veículo 2", m3: 1500 },
-  { veiculo: "Veículo 3", m3: 800 },
-  { veiculo: "Veículo 4", m3: 4200 },
-  { veiculo: "Veículo 5", m3: 1000 },
+  { id: "1001", data: "2025-01-01", horaInicio: "08:00", tipoAbastecimento: "Bomba", tipoVeiculo: "Caminhão", produto: "Biometano", placa: "ABC-1234", transportadora: "Translog", odometro: "1000", pressaoInicial: "200", status: "Concluído", usuario: "sistema", veiculo: "Caminhão 01", m3: 50 },
+  { id: "1002", data: "2025-01-02", horaInicio: "09:00", tipoAbastecimento: "Bomba", tipoVeiculo: "Caminhão", produto: "Biometano", placa: "DEF-5678", transportadora: "Rapidão", odometro: "2000", pressaoInicial: "200", status: "Concluído", usuario: "sistema", veiculo: "Caminhão 02", m3: 60 },
 ];
 
 const mockData: DashboardData = {
@@ -91,36 +86,25 @@ const mockData: DashboardData = {
   ],
   cooperativeAnalysis: [
     { name: "Ademir E.", value: 2.5, color: "#334bff" },
-    { name: "Ademir M.", value: 2.5, color: "#334bff" },
-    { name: "Ademir R.", value: 3.5, color: "#334bff" },
-    { name: "André S.", value: -1.5, color: "#ef4444" },
-    { name: "Arsênio W.", value: 3.5, color: "#334bff" },
-    { name: "Carlos P.", value: 2.5, color: "#334bff" },
+    { name: "Renato K.", value: 1.5, color: "#334bff" },
+    { name: "Carlos P.", value: 3.5, color: "#334bff" },
     { name: "Clarindo M.", value: -0.5, color: "#ef4444" },
     { name: "Delcio R.", value: 2.5, color: "#334bff" },
-    { name: "Divino", value: 1.5, color: "#334bff" },
     { name: "Ederson D.", value: 3.5, color: "#334bff" },
     { name: "Egon P.", value: 1.5, color: "#334bff" },
-    { name: "Fazenda E.", value: 0.5, color: "#334bff" },
-    { name: "Francisco", value: -1.5, color: "#ef4444" },
-    { name: "Gelson R.", value: 3.5, color: "#334bff" },
-    { name: "Gilberto", value: 1.5, color: "#334bff" },
-    { name: "Gilmar P.", value: -0.5, color: "#ef4444" },
+    { name: "Gilberto H.", value: 1.5, color: "#334bff" },
     { name: "Guido D.", value: 1.5, color: "#334bff" },
     { name: "Jacir M.", value: 5.5, color: "#334bff" },
     { name: "Jose F.", value: 1.5, color: "#334bff" },
-    { name: "Ladir N.", value: 3.5, color: "#334bff" },
     { name: "Ladir R.", value: 3.5, color: "#334bff" },
     { name: "Laurindo M.", value: 3.5, color: "#334bff" },
-    { name: "Marcelo", value: 3.5, color: "#334bff" },
-    { name: "Marcos C.", value: 3.5, color: "#334bff" },
-    { name: "Marcos S.", value: 7.5, color: "#334bff" },
     { name: "Marina K.", value: 2.5, color: "#334bff" },
     { name: "Marines C.", value: 3.5, color: "#334bff" },
     { name: "Marlise K.", value: 2.5, color: "#334bff" },
     { name: "Nelson B.", value: 4.5, color: "#334bff" },
-    { name: "Oswaldo G.", value: 4.5, color: "#334bff" },
-    { name: "Renato I.", value: 1.5, color: "#334bff" },
+    { name: "Osvaldo G.", value: 4.5, color: "#334bff" },
+    { name: "Valdir K.", value: 1.5, color: "#334bff" },
+    { name: "Vilson S.", value: 2.0, color: "#334bff" }
   ],
   abastecimentos: [],
 };
@@ -131,90 +115,233 @@ let mockColetaData: ColetaItem[] = [
   { id: "3", cooperado: "Primato", motorista: "Ana Cássia", tipoVeiculo: "Caminhão de dejetos", placa: "GHI-7890", odometro: 345678, dataPrevisao: "2025-01-03", horaPrevisao: "11:30", status: "Atrasado" },
 ];
 
-// --- DADOS DOS COOPERADOS (COM NOVOS CAMPOS PARA LOGÍSTICA) ---
-let mockCooperadosData: CooperadoItem[] = [
-  { 
-    id: "1", matricula: 102646, filial: "Primato", motorista: "Renato Ivan", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Inativo", doamDejetos: "Não", fase: "Fase Term. Firmesa",
-    cabecasAlojadas: 1450, // Adicionado
-    latitude: '-24.7229319', longitude: '-53.8641137' // Adicionado
+// --- DADOS DOS COOPERADOS (IDs como NUMBER e DADOS REAIS) ---
+export const mockCooperadosData: CooperadoItem[] = [
+  { id: 1, matricula: 102646, motorista: "Renato Ivan Kunzler", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 1450, tipoVeiculo: "Caminhão", placa: "ABC-1234" },
+  { id: 2, matricula: 511224, motorista: "Ademir Jose Engelsing", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "XYZ-5678" },
+  { id: 3, matricula: 102284, motorista: "Ademir Marchioro", filial: "Toledo", fase: "GRSC", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2800, tipoVeiculo: "Caminhão", placa: "DEF-9012" },
+  { id: 4, matricula: 102686, motorista: "Arsenio Vicente Weschenfelder", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2180, tipoVeiculo: "Caminhão", placa: "GHI-3456" },
+  { id: 5, matricula: 103034, motorista: "Carlos Jaime Pauly", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 11000, tipoVeiculo: "Caminhão", placa: "JKL-7890" },
+  { id: 6, matricula: 100173, motorista: "Clarindo Mazzarollo", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 1474, tipoVeiculo: "Caminhão", placa: "MNO-1234" },
+  { id: 7, matricula: 200801, motorista: "Delcio Rossetto", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2650, tipoVeiculo: "Caminhão", placa: "PQR-5678" },
+  { id: 8, matricula: 534359, motorista: "Ederson Donassolo", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 1250, tipoVeiculo: "Caminhão", placa: "STU-9012" },
+  { id: 9, matricula: 107183, motorista: "Edmundo Afonso Klein", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 4200, tipoVeiculo: "Caminhão", placa: "VWX-3456" },
+  { id: 10, matricula: 101324, motorista: "Egon Portz", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 620, tipoVeiculo: "Caminhão", placa: "YZA-7890" },
+  { id: 11, matricula: 101835, motorista: "Gilberto Heinen", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 824, tipoVeiculo: "Caminhão", placa: "BCD-1234" },
+  { id: 12, matricula: 100690, motorista: "Gilmar Pigosso", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 590, tipoVeiculo: "Caminhão", placa: "EFG-5678" },
+  { id: 13, matricula: 272920, motorista: "Guido Dorigon", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2200, tipoVeiculo: "Caminhão", placa: "HIJ-9012" },
+  { id: 14, matricula: 529504, motorista: "Helio Jose Schneider", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 3000, tipoVeiculo: "Caminhão", placa: "KLM-3456" },
+  { id: 15, matricula: 102858, motorista: "Jacir Leopoldo Machado", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 4500, tipoVeiculo: "Caminhão", placa: "NOP-7890" },
+  { id: 16, matricula: 103247, motorista: "Jose Ademilson Fontana", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 560, tipoVeiculo: "Caminhão", placa: "QRS-1234" },
+  { id: 17, matricula: 101841, motorista: "Ladir Rossetto", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 1750, tipoVeiculo: "Caminhão", placa: "TUV-5678" },
+  { id: 18, matricula: 273017, motorista: "Laurindo Mauerwerk", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2050, tipoVeiculo: "Caminhão", placa: "WXY-9012" },
+  { id: 19, matricula: 100672, motorista: "Maria Josefa Angst", filial: "Toledo", fase: "Terminação Mercado", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 2500, tipoVeiculo: "Caminhão", placa: "ZAB-3456" },
+  { id: 20, matricula: 285806, motorista: "Marina Maria Kliemann", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 1500, tipoVeiculo: "Caminhão", placa: "CDE-7890" },
+  { id: 21, matricula: 546596, motorista: "Marines Biscoli Covatti", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 3000, tipoVeiculo: "Caminhão", placa: "FGH-1234" },
+  { id: 22, matricula: 100262, motorista: "Marli Sipp", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 480, tipoVeiculo: "Caminhão", placa: "IJK-5678" },
+  { id: 23, matricula: 100749, motorista: "Marlise De Lima Konzen", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2700, tipoVeiculo: "Caminhão", placa: "LMN-9012" },
+  { id: 24, matricula: 106693, motorista: "Nelson Bordignon", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 1400, tipoVeiculo: "Caminhão", placa: "OPQ-3456" },
+  { id: 25, matricula: 103640, motorista: "Obra Social N S Da Gloria Fazenda Da Esperanca", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 580, tipoVeiculo: "Caminhão", placa: "RST-7890" },
+  { id: 26, matricula: 103368, motorista: "Osvaldo Luiz Gozzi", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Sim", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "UVW-1234" },
+  { id: 27, matricula: 103088, motorista: "Valdir Jose Klein", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 1500, tipoVeiculo: "Caminhão", placa: "XYZ-5678" },
+  { id: 28, matricula: 104036, motorista: "Vilson Salvalaggio", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Sim", cabecasAlojadas: 2500, tipoVeiculo: "Caminhão", placa: "ABC-9012" },
+  { id: 29, matricula: 518621, motorista: "Adair Luiz Engelsing", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 620, tipoVeiculo: "Caminhão", placa: "DEF-3456" },
+  { id: 30, matricula: 102190, motorista: "Adelaide Loebens Hinterholz", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2000, tipoVeiculo: "Caminhão", placa: "GHI-7890" },
+  { id: 31, matricula: 103442, motorista: "Adelar Casagrande", filial: "Toledo", fase: "GRSC", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 5000, tipoVeiculo: "Caminhão", placa: "JKL-1234" },
+  { id: 32, matricula: 601310, motorista: "Ademar Fritzen", filial: "Nova Esperança do Sul", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 2000, tipoVeiculo: "Caminhão", placa: "MNO-5678" },
+  { id: 33, matricula: 102219, motorista: "Ademar Irineu Schneider", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 250, tipoVeiculo: "Caminhão", placa: "PQR-9012" },
+  { id: 34, matricula: 100517, motorista: "Ademar Pedro Roos", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "STU-3456" },
+  { id: 35, matricula: 611281, motorista: "Adiles Fiori", filial: "Tupassi", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1000, tipoVeiculo: "Caminhão", placa: "VWX-7890" },
+  { id: 36, matricula: 103161, motorista: "Adriano Vian", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 10000, tipoVeiculo: "Caminhão", placa: "YZA-1234" },
+  { id: 37, matricula: 105841, motorista: "Ailton Edson Jope", filial: "Tupassi", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "BCD-5678" },
+  { id: 38, matricula: 101132, motorista: "Aldimar Gundt", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Vazio", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "EFG-9012" },
+  { id: 39, matricula: 103167, motorista: "Alison Petermann", filial: "Nova Santa Rosa", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 840, tipoVeiculo: "Caminhão", placa: "HIJ-3456" },
+  { id: 40, matricula: 546292, motorista: "Almir Paulus", filial: "Quatro Pontes", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 500, tipoVeiculo: "Caminhão", placa: "KLM-7890" },
+  { id: 41, matricula: 107995, motorista: "Aloisio Lirio Finkler", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1000, tipoVeiculo: "Caminhão", placa: "NOP-1234" },
+  { id: 42, matricula: 103123, motorista: "Anderson Leo Sabadin", filial: "Céu Azul", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1424, tipoVeiculo: "Caminhão", placa: "QRS-5678" },
+  { id: 43, matricula: 525096, motorista: "Antidio Aleixo Lunelli", filial: "Vera Cruz do Oeste", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1800, tipoVeiculo: "Caminhão", placa: "TUV-9012" },
+  { id: 44, matricula: 102808, motorista: "Argeu Pedro Goethert", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1440, tipoVeiculo: "Caminhão", placa: "WXY-3456" },
+  { id: 45, matricula: 512706, motorista: "Arianni Regina De Oliveira Millnitz", filial: "Tupãssi", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 400, tipoVeiculo: "Caminhão", placa: "ZAB-7890" },
+  { id: 46, matricula: 103271, motorista: "Arlei Jose Fachin", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1000, tipoVeiculo: "Caminhão", placa: "CDE-1234" },
+  { id: 47, matricula: 100500, motorista: "Atilio Hilario Scain", filial: "São Pedro do Iguaçu", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 997, tipoVeiculo: "Caminhão", placa: "FGH-5678" },
+  { id: 48, matricula: 100789, motorista: "Carlos Alberto Lawich", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 10000, tipoVeiculo: "Caminhão", placa: "IJK-9012" },
+  { id: 49, matricula: 595856, motorista: "Claci Schumacher", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1350, tipoVeiculo: "Caminhão", placa: "LMN-3456" },
+  { id: 50, matricula: 100612, motorista: "Clarindo Viapiana", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 550, tipoVeiculo: "Caminhão", placa: "OPQ-7890" },
+  { id: 51, matricula: 107533, motorista: "Cledio Rafael Morgenstern", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1700, tipoVeiculo: "Caminhão", placa: "RST-1234" },
+  { id: 52, matricula: 103523, motorista: "Cleonice Vendramini Deresz", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 650, tipoVeiculo: "Caminhão", placa: "UVW-5678" },
+  { id: 53, matricula: 579194, motorista: "Cristiane Vorpagel", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "XYZ-9012" },
+  { id: 54, matricula: 103847, motorista: "Cristiano Rodrigo Vian", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 8500, tipoVeiculo: "Caminhão", placa: "ABC-3456" },
+  { id: 55, matricula: 601311, motorista: "Dalvo Koerich", filial: "Salto do Lontra", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1600, tipoVeiculo: "Caminhão", placa: "DEF-7890" },
+  { id: 56, matricula: 504523, motorista: "Dayane Dos Santos Mendes Nascimento", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "GHI-1234" },
+  { id: 57, matricula: 102751, motorista: "Delton Hoffmann", filial: "Nova Santa Rosa", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 6800, tipoVeiculo: "Caminhão", placa: "JKL-5678" },
+  { id: 58, matricula: 102376, motorista: "Dirceu Luiz Rockenbach Finkler", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "MNO-9012" },
+  { id: 59, matricula: 103612, motorista: "Dorival Paulo Da Silva", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 750, tipoVeiculo: "Caminhão", placa: "PQR-3456" },
+  { id: 60, matricula: 275001, motorista: "Edemar Otavio Horn", filial: "Marechal Cândido Rondon", fase: "UPD", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1400, tipoVeiculo: "Caminhão", placa: "STU-7890" },
+  { id: 61, matricula: 101482, motorista: "Edenilson Carlos Copini", filial: "São Pedro do Iguaçu", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1300, tipoVeiculo: "Caminhão", placa: "VWX-1234" },
+  { id: 62, matricula: 509507, motorista: "Eleandro Da Silva", filial: "Quatro Pontes", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 450, tipoVeiculo: "Caminhão", placa: "YZA-5678" },
+  { id: 63, matricula: 506738, motorista: "Eliane Margarete Kerber Kotowski", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1250, tipoVeiculo: "Caminhão", placa: "BCD-9012" },
+  { id: 64, matricula: 101923, motorista: "Elton Alceu Endler", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1178, tipoVeiculo: "Caminhão", placa: "EFG-3456" },
+  { id: 65, matricula: 103317, motorista: "Erno Schnorrenberger", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 600, tipoVeiculo: "Caminhão", placa: "HIJ-7890" },
+  { id: 66, matricula: 504115, motorista: "Ernst Makus", filial: "Tupassi", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2930, tipoVeiculo: "Caminhão", placa: "KLM-1234" },
+  { id: 67, matricula: 102828, motorista: "Euclides Luis Muller", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 750, tipoVeiculo: "Caminhão", placa: "NOP-5678" },
+  { id: 68, matricula: 607559, motorista: "Evandro Moreira", filial: "Mercedes", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 230, tipoVeiculo: "Caminhão", placa: "QRS-9012" },
+  { id: 69, matricula: 521160, motorista: "Everson Zotti", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1829, tipoVeiculo: "Caminhão", placa: "TUV-3456" },
+  { id: 70, matricula: 509778, motorista: "Everton Rodrigo Brotto", filial: "Ouro Verde do Oeste", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 550, tipoVeiculo: "Caminhão", placa: "WXY-7890" },
+  { id: 71, matricula: 109232, motorista: "Fabio Andre Theisen Gisch", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2050, tipoVeiculo: "Caminhão", placa: "ZAB-1234" },
+  { id: 72, matricula: 566825, motorista: "Fernando Antonio Pappen", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2350, tipoVeiculo: "Caminhão", placa: "CDE-5678" },
+  { id: 73, matricula: 286677, motorista: "Francisco Valdivio Dalpiaz", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3000, tipoVeiculo: "Caminhão", placa: "FGH-9012" },
+  { id: 74, matricula: 267473, motorista: "Geraldo Zimmermann", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3250, tipoVeiculo: "Caminhão", placa: "IJK-3456" },
+  { id: 75, matricula: 103448, motorista: "Germanio Lira", filial: "Toledo", fase: "Terminação Mercado", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 600, tipoVeiculo: "Caminhão", placa: "LMN-7890" },
+  { id: 76, matricula: 275004, motorista: "Gidio Luis Rieth", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1800, tipoVeiculo: "Caminhão", placa: "OPQ-1234" },
+  { id: 77, matricula: 107594, motorista: "Gilberto Inacio Binsfeld", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1600, tipoVeiculo: "Caminhão", placa: "RST-5678" },
+  { id: 78, matricula: 521877, motorista: "Gilmar Ercio Klein", filial: "Quatro Pontes", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 4600, tipoVeiculo: "Caminhão", placa: "UVW-9012" },
+  { id: 79, matricula: 590058, motorista: "Glaci Kaefer", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3200, tipoVeiculo: "Caminhão", placa: "XYZ-3456" },
+  { id: 80, matricula: 514396, motorista: "Hari Stach", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1050, tipoVeiculo: "Caminhão", placa: "ABC-7890" },
+  { id: 81, matricula: 101881, motorista: "Hirio Fulber", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 720, tipoVeiculo: "Caminhão", placa: "DEF-1234" },
+  { id: 82, matricula: 100516, motorista: "Ignacio Nuernberg", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 6000, tipoVeiculo: "Caminhão", placa: "GHI-5678" },
+  { id: 83, matricula: 100986, motorista: "Ireno Waldow", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1800, tipoVeiculo: "Caminhão", placa: "JKL-9012" },
+  { id: 84, matricula: 102364, motorista: "Irineu Eichlt", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1900, tipoVeiculo: "Caminhão", placa: "MNO-3456" },
+  { id: 85, matricula: 100786, motorista: "Ivo Bortoncello", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "PQR-7890" },
+  { id: 86, matricula: 105551, motorista: "Ivo Horn", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 500, tipoVeiculo: "Caminhão", placa: "STU-1234" },
+  { id: 87, matricula: 603928, motorista: "Jaqueline Jeane Francener", filial: "Quatro Pontes", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "VWX-5678" },
+  { id: 88, matricula: 103608, motorista: "Jauri Jose Pletsch", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1000, tipoVeiculo: "Caminhão", placa: "YZA-9012" },
+  { id: 89, matricula: 534370, motorista: "Jhonata Donasolo", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 550, tipoVeiculo: "Caminhão", placa: "BCD-3456" },
+  { id: 90, matricula: 108768, motorista: "Joao Lira", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1050, tipoVeiculo: "Caminhão", placa: "EFG-7890" },
+  { id: 91, matricula: 281173, motorista: "Joao Valdir Gregorio", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3200, tipoVeiculo: "Caminhão", placa: "HIJ-1234" },
+  { id: 92, matricula: 108418, motorista: "Jose Aloisio Dahmer", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1500, tipoVeiculo: "Caminhão", placa: "KLM-5678" },
+  { id: 93, matricula: 273120, motorista: "Juliana Cristine Pappen", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2950, tipoVeiculo: "Caminhão", placa: "NOP-9012" },
+  { id: 94, matricula: 580470, motorista: "Jurandir Jair Cotica", filial: "Marechal Cândido Rondon", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 350, tipoVeiculo: "Caminhão", placa: "QRS-3456" },
+  { id: 95, matricula: 551387, motorista: "Jussara Adriane Zimmermann", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3250, tipoVeiculo: "Caminhão", placa: "TUV-7890" },
+  { id: 96, matricula: 527293, motorista: "Katiely Aline Anschau Deimling", filial: "Quatro Pontes", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1360, tipoVeiculo: "Caminhão", placa: "WXY-1234" },
+  { id: 97, matricula: 538648, motorista: "Kelin Benincá", filial: "Marechal Cândido Rondon", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 450, tipoVeiculo: "Caminhão", placa: "ZAB-5678" },
+  { id: 98, matricula: 100898, motorista: "Ladia Ines Kohler Kliemann", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1030, tipoVeiculo: "Caminhão", placa: "CDE-9012" },
+  { id: 99, matricula: 270370, motorista: "Laodinei Roberto Mossmann", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 700, tipoVeiculo: "Caminhão", placa: "FGH-3456" },
+  { id: 100, matricula: 309383, motorista: "Leonardo Lorenzatto", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 4300, tipoVeiculo: "Caminhão", placa: "IJK-7890" },
+  { id: 101, matricula: 100887, motorista: "Lineu Busse", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1350, tipoVeiculo: "Caminhão", placa: "LMN-1234" },
+  { id: 102, matricula: 100753, motorista: "Lucio Canisio Steffens", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1000, tipoVeiculo: "Caminhão", placa: "OPQ-5678" },
+  { id: 103, matricula: 503541, motorista: "Luis Claudio Krebs", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 10000, tipoVeiculo: "Caminhão", placa: "RST-9012" },
+  { id: 104, matricula: 506611, motorista: "Marcelo Dolla", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 250, tipoVeiculo: "Caminhão", placa: "UVW-3456" },
+  { id: 105, matricula: 103189, motorista: "Marcelo Gozzi", filial: "Ouro Verde do Oeste", fase: "GRSC", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1900, tipoVeiculo: "Caminhão", placa: "XYZ-7890" },
+  { id: 106, matricula: 103552, motorista: "Maria Terezinha Neis", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 620, tipoVeiculo: "Caminhão", placa: "ABC-1234" },
+  { id: 107, matricula: 106750, motorista: "Mario Schons", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1600, tipoVeiculo: "Caminhão", placa: "DEF-5678" },
+  { id: 108, matricula: 105819, motorista: "Mauri Bender", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1120, tipoVeiculo: "Caminhão", placa: "GHI-9012" },
+  { id: 109, matricula: 106999, motorista: "Mauri Roque Sartoretto", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1500, tipoVeiculo: "Caminhão", placa: "JKL-3456" },
+  { id: 110, matricula: 605089, motorista: "Maurício Lauri Mauerwerk", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1190, tipoVeiculo: "Caminhão", placa: "MNO-7890" },
+  { id: 111, matricula: 511031, motorista: "Mayara Roberta Jacomini", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2200, tipoVeiculo: "Caminhão", placa: "PQR-1234" },
+  { id: 112, matricula: 535220, motorista: "Narciso Pedro Flach", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1050, tipoVeiculo: "Caminhão", placa: "STU-5678" },
+  { id: 113, matricula: 101614, motorista: "Nelsi Gund Liesenfeld", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 900, tipoVeiculo: "Caminhão", placa: "VWX-9012" },
+  { id: 114, matricula: 100294, motorista: "Normelio Roque Hanauer", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1150, tipoVeiculo: "Caminhão", placa: "YZA-3456" },
+  { id: 115, matricula: 264740, motorista: "Olvario Gengnagel", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1100, tipoVeiculo: "Caminhão", placa: "BCD-7890" },
+  { id: 116, matricula: 514589, motorista: "Oraci Antonio Pereira", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "EFG-1234" },
+  { id: 117, matricula: 100246, motorista: "Orildo Slongo", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1900, tipoVeiculo: "Caminhão", placa: "HIJ-5678" },
+  { id: 118, matricula: 100012, motorista: "Paulino Luiz Coeli", filial: "São Pedro do Iguaçu", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1162, tipoVeiculo: "Caminhão", placa: "KLM-9012" },
+  { id: 119, matricula: 108972, motorista: "Paulo Kappes", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1750, tipoVeiculo: "Caminhão", placa: "NOP-3456" },
+  { id: 120, matricula: 100213, motorista: "Pedro Alvicio Dries", filial: "Cascavel", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1900, tipoVeiculo: "Caminhão", placa: "QRS-7890" },
+  { id: 121, matricula: 8, motorista: "Primato Cooperativa Agroindustrial", filial: "Ouro Verde do Oeste", fase: "GRSC", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2767, tipoVeiculo: "Caminhão", placa: "TUV-1234" },
+  { id: 122, matricula: 550159, motorista: "Rafael Slongo", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1100, tipoVeiculo: "Caminhão", placa: "WXY-5678" },
+  { id: 123, matricula: 166938, motorista: "Renato Pasquali", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1416, tipoVeiculo: "Caminhão", placa: "ZAB-9012" },
+  { id: 124, matricula: 267495, motorista: "Renato Smaniotto", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1500, tipoVeiculo: "Caminhão", placa: "CDE-3456" },
+  { id: 125, matricula: 508846, motorista: "Rodrigo Da Silva", filial: "Tupassi", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 2600, tipoVeiculo: "Caminhão", placa: "FGH-7890" },
+  { id: 126, matricula: 103036, motorista: "Rodrigo Jose Heck", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1020, tipoVeiculo: "Caminhão", placa: "IJK-1234" },
+  { id: 127, matricula: 603148, motorista: "Rodrigo Manfredi", filial: "Espigão Alto do Iguaçu", fase: "UPD", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 670, tipoVeiculo: "Caminhão", placa: "LMN-5678" },
+  { id: 128, matricula: 103758, motorista: "Romeu Jaco Finkler", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 620, tipoVeiculo: "Caminhão", placa: "OPQ-9012" },
+  { id: 129, matricula: 103021, motorista: "Romeu Jose Bamberg", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 850, tipoVeiculo: "Caminhão", placa: "RST-3456" },
+  { id: 130, matricula: 271138, motorista: "Roque Lorenzoni", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 3600, tipoVeiculo: "Caminhão", placa: "UVW-7890" },
+  { id: 131, matricula: 166882, motorista: "Rubens Aparecido Braz", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 800, tipoVeiculo: "Caminhão", placa: "XYZ-1234" },
+  { id: 132, matricula: 101795, motorista: "Rudi Werle Welter", filial: "Toledo", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 923, tipoVeiculo: "Caminhão", placa: "ABC-5678" },
+  { id: 133, matricula: 591865, motorista: "Sandra Risse", filial: "Toledo", fase: "Crechário", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 7100, tipoVeiculo: "Caminhão", placa: "DEF-9012" },
+  { id: 134, matricula: 504900, motorista: "Sidnei Darci Lenz", filial: "Nova Santa Rosa", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "GHI-3456" },
+  { id: 135, matricula: 101467, motorista: "Silvino Foscarini", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 660, tipoVeiculo: "Caminhão", placa: "JKL-7890" },
+  { id: 136, matricula: 554044, motorista: "Soeli Ludwig", filial: "Assis Chateaubriand", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 2500, tipoVeiculo: "Caminhão", placa: "MNO-1234" },
+  { id: 137, matricula: 101939, motorista: "Terezinha Rosa Heinz", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 950, tipoVeiculo: "Caminhão", placa: "PQR-5678" },
+  { id: 138, matricula: 103155, motorista: "Valdeci Luiz Schneider", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 750, tipoVeiculo: "Caminhão", placa: "STU-9012" },
+  { id: 139, matricula: 103529, motorista: "Valdecir Jose Rauber", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2100, tipoVeiculo: "Caminhão", placa: "VWX-3456" },
+  { id: 140, matricula: 603883, motorista: "Valdemar Wachholz Schielvelbein", filial: "Marechal Cândido Rondon", fase: "UPD", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 350, tipoVeiculo: "Caminhão", placa: "YZA-7890" },
+  { id: 141, matricula: 103337, motorista: "Valdir Luis Seibert", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1100, tipoVeiculo: "Caminhão", placa: "BCD-1234" },
+  { id: 142, matricula: 104435, motorista: "Valdir Narciso Thielke", filial: "Toledo", fase: "Terminação Mercado", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 560, tipoVeiculo: "Caminhão", placa: "EFG-5678" },
+  { id: 143, matricula: 103361, motorista: "Valdir Rossetto", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 4000, tipoVeiculo: "Caminhão", placa: "HIJ-9012" },
+  { id: 144, matricula: 266339, motorista: "Valmir Gerhardt", filial: "Tupassi", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 950, tipoVeiculo: "Caminhão", placa: "KLM-3456" },
+  { id: 145, matricula: 103500, motorista: "Vanderlei Andre Strieder", filial: "Toledo", fase: "Terminação Mercado", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 750, tipoVeiculo: "Caminhão", placa: "NOP-7890" },
+  { id: 146, matricula: 108399, motorista: "Vanderlei Tiago Weiss", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 2050, tipoVeiculo: "Caminhão", placa: "QRS-1234" },
+  { id: 147, matricula: 102849, motorista: "Vitor Samoel Kievel", filial: "Marechal Cândido Rondon", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 350, tipoVeiculo: "Caminhão", placa: "TUV-5678" },
+  { id: 148, matricula: 515382, motorista: "Viviane Reuter", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1350, tipoVeiculo: "Caminhão", placa: "WXY-9012" },
+  { id: 149, matricula: 103190, motorista: "Walter Pohl", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Sim", doamDejetos: "Não", cabecasAlojadas: 1200, tipoVeiculo: "Caminhão", placa: "ZAB-3456" },
+  { id: 150, matricula: 520632, motorista: "Wilson Rodrigo Donassolo", filial: "Toledo", fase: "Terminação Frimesa", certificado: "Não", doamDejetos: "Não", cabecasAlojadas: 1400, tipoVeiculo: "Caminhão", placa: "CDE-7890" }
+];
+
+// --- MOCK DE TRANSPORTADORAS ---
+export const mockTransportadoras: TransportadoraItem[] = [
+  {
+    id: "t1",
+    nomeFantasia: "Expresso São Miguel",
+    razaoSocial: "Expresso São Miguel Ltda",
+    cnpj: "00.111.222/0001-33",
+    telefone: "(49) 3321-0000",
+    email: "contato@expressosaomiguel.com.br",
+    cidade: "Chapecó",
+    estado: "SC",
+    uf: "SC",
+    placa: "MIG-0000",
+    tags: ["Carga Seca", "Frigorífico"],
+    status: "Ativo",
+    veiculos: [
+      { tipo: 'Truck', capacidade: '14ton', placa: 'MIG-1234', tipoAbastecimento: 'Diesel' },
+      { tipo: 'Carreta', capacidade: '25ton', placa: 'EXP-5678', tipoAbastecimento: 'Diesel' }
+    ]
   },
-  { 
-    id: "2", matricula: 102284, filial: "Primato", motorista: "Ademir Machioro", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "GRSC",
-    cabecasAlojadas: 5000, // Adicionado
-    latitude: '-24.950000', longitude: '-53.450000' // Adicionado
+  {
+    id: "t2",
+    nomeFantasia: "Transportes Ouro Negro",
+    razaoSocial: "Transportes Ouro Negro Ltda",
+    cnpj: "44.555.666/0001-77",
+    telefone: "(48) 3431-0000",
+    email: "contato@ouronegro.com.br",
+    cidade: "Criciúma",
+    estado: "SC",
+    uf: "SC",
+    placa: "OUR-0000",
+    tags: ["Encomendas", "Varejo"],
+    status: "Ativo",
+    veiculos: [
+      { tipo: 'Vuc', capacidade: '3ton', placa: 'OUR-9012', tipoAbastecimento: 'Diesel' }
+    ]
   },
-  { 
-    id: "3", matricula: 103034, filial: "Primato", motorista: "Carlos Jaime Pauly", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "Fase Crechário",
-    cabecasAlojadas: 3000, // Adicionado
-    latitude: '-24.819445', longitude: '-53.483921' // Adicionado
-  },
-  { 
-    id: "4", matricula: 100173, filial: "Primato", motorista: "Clarindo Mazzarollo", tipoVeiculo: "Caminhão de dejetos", placa: "ABC-1D23", certificado: "Ativo", doamDejetos: "Sim", fase: "UPD",
-    cabecasAlojadas: 8500 // Adicionado
+  {
+    id: "t3",
+    nomeFantasia: "Rodonaves",
+    razaoSocial: "RTE Rodonaves Transportes Ltda",
+    cnpj: "88.999.000/0001-11",
+    telefone: "(16) 2101-0000",
+    email: "sac@rodonaves.com.br",
+    cidade: "Ribeirão Preto",
+    estado: "SP",
+    uf: "SP",
+    placa: "RTE-0000",
+    tags: ["Fracionado", "Geral"],
+    status: "Inativo",
+    veiculos: []
   },
 ];
 
-const newMockAgendaData: AgendaData[] = [
-    { id: 1, cooperado: "Ademir Engelsing", transportadora: "Primato", seg: 0, ter: 2, qua: 0, qui: 0, sex: 0, qtd: 2, km: 300, status: "Realizado" },
-    { id: 2, cooperado: "Ademir Marchioro", transportadora: "Primato", seg: 4, ter: 2, qua: 0, qui: 4, sex: 0, qtd: 10, km: 300, status: "Realizado" },
-    { id: 3, cooperado: "Arseno Weschendeider", transportadora: "Primato", seg: 10, ter: 4, qua: 4, qui: 6, sex: 0, qtd: 34, km: 300, status: "Realizado" },
-    { id: 4, cooperado: "Carlos Jaime Pauly", transportadora: "Primato", seg: 10, ter: 9, qua: 10, qui: 10, sex: 10, qtd: 49, km: 300, status: "Realizado" },
-    { id: 5, cooperado: "Delcio Rossetto", transportadora: "Agrocampo", seg: 10, ter: 10, qua: 10, qui: 10, sex: 10, qtd: 50, km: 300, status: "Planejado" },
-    { id: 6, cooperado: "Delcio Rossetto", transportadora: "Agrocampo", seg: 10, ter: 10, qua: 10, qui: 10, sex: 10, qtd: 50, km: 300, status: "Planejado" },
-    { id: 7, cooperado: "Delcio Rossetto", transportadora: "Agrocampo", seg: 10, ter: 10, qua: 10, qui: 10, sex: 10, qtd: 50, km: 300, status: "Planejado" },
+// --- MOCK DE AGENDA (LOGÍSTICA) ---
+export const mockAgenda: AgendaData[] = [
+  { id: 1, cooperado: "Ademir Jose Engelsing", seg: 150, ter: 0, qua: 200, qui: 0, sex: 180, sab: 0, dom: 0, qtd: 530, km: 45, transportadora: "Translog", status: "Planejado" },
+  { id: 2, cooperado: "Renato Ivan Kunzler", seg: 0, ter: 300, qua: 0, qui: 300, sex: 0, sab: 150, dom: 0, qtd: 750, km: 60, transportadora: "Rapidão", status: "Realizado" },
+  { id: 3, cooperado: "Marines Biscoli Covatti", seg: 200, ter: 100, qua: 0, qui: 0, sex: 200, sab: 0, dom: 0, qtd: 500, km: 50, transportadora: "Translog", status: "Planejado" },
+  { id: 4, cooperado: "Marlise De Lima Konzen", seg: 0, ter: 0, qua: 150, qui: 150, sex: 0, sab: 0, dom: 0, qtd: 300, km: 35, transportadora: "Expresso São Miguel", status: "Realizado" },
+  { id: 5, cooperado: "Jussara Adriane Zimmermann", seg: 300, ter: 300, qua: 300, qui: 0, sex: 0, sab: 0, dom: 0, qtd: 900, km: 80, transportadora: "Ouro Negro", status: "Planejado" },
+  { id: 6, cooperado: "Kelin Benincá", seg: 0, ter: 0, qua: 0, qui: 200, sex: 200, sab: 0, dom: 0, qtd: 400, km: 40, transportadora: "Rodonaves", status: "Realizado" },
+  { id: 7, cooperado: "Leonardo Lorenzatto", seg: 100, ter: 100, qua: 100, qui: 100, sex: 100, sab: 0, dom: 0, qtd: 500, km: 55, transportadora: "Translog", status: "Planejado" },
+  { id: 8, cooperado: "Luis Claudio Krebs", seg: 0, ter: 250, qua: 250, qui: 0, sex: 0, sab: 0, dom: 0, qtd: 500, km: 45, transportadora: "Rapidão", status: "Realizado" },
+  { id: 9, cooperado: "Marcelo Gozzi", seg: 150, ter: 150, qua: 0, qui: 0, sex: 150, sab: 0, dom: 0, qtd: 450, km: 30, transportadora: "Expresso São Miguel", status: "Planejado" },
+  { id: 10, cooperado: "Maria Terezinha Neis", seg: 0, ter: 0, qua: 0, qui: 300, sex: 300, sab: 0, dom: 0, qtd: 600, km: 70, transportadora: "Ouro Negro", status: "Realizado" }
 ];
 
-const mockPortariaData: PortariaItem[] = [
-  { id: 'ENT-001', categoria: 'Entregas', data: '01/01/2026', horario: '10:00H', empresa: 'Primato', motorista: 'Ademir Engelsing', tipoVeiculo: 'Caminhão de dejetos', placa: 'ABC-1D23', atividade: 'Entrega de dejetos', status: 'Concluído' },
-  { id: 'ABS-001', categoria: 'Abastecimentos', data: '02/01/2026', horario: '09:30H', empresa: 'Transportadora XYZ', motorista: 'Carlos Silva', tipoVeiculo: 'Caminhão Tanque', placa: 'DEF-4567', atividade: 'Abastecimento de Diesel', status: 'Concluído' },
-  { id: 'ENT-002', categoria: 'Entregas', data: '01/01/2026', horario: '13:00H', empresa: 'Mosaic', motorista: 'Renato Ivan', tipoVeiculo: 'Caminhão de entrega', placa: 'ABC-1D23', atividade: 'Entrega de materiais', status: 'Pendente' },
-];
+const mockPortariaData: PortariaItem[] = [];
 
 let mockQualidadeDejetosData: QualidadeDejetosItem[] = [
-  { id: 'DEJ-001', dataColeta: '13/10/2025', cooperado: 'Ademir Engelsing', placa: 'ABC-1D23', ph: 7.2, densidade: 1025, entregaReferencia: 'ENT-54321' },
-  { id: 'DEJ-002', dataColeta: '13/10/2025', cooperado: 'Ademir Marchioro', placa: 'DEF-4567', ph: 7.5, densidade: 'N/A', entregaReferencia: 'ENT-54322' },
-];
-
-// --- DADOS DAS TRANSPORTADORAS (NOVO) ---
-const mockVeiculos = [
-  { tipo: "Caminhão de dejetos: Vácuo", capacidade: "16.000L" },
-  { tipo: "Caminhão de dejetos: Hidrojato", capacidade: "20.000L" },
-  { tipo: "Caminhão de dejetos: Hidrovácuo", capacidade: "20.000L" },
-  { tipo: "Caminhão de insumos", capacidade: "16.000m³" },
-  { tipo: "Expedição: Truck", capacidade: "6x2" },
-  { tipo: "Expedição: Baú", capacidade: "6x4" },
-  { tipo: "Expedição: Container", capacidade: "6x2" },
-  { tipo: "Industrialização: VUC", capacidade: "3.000 kg" },
-  { tipo: "Industrialização: Toco", capacidade: "16.000 kg" }
-];
-
-const transportadoras: TransportadoraItem[] = [
-  { 
-    id: '1', nomeFantasia: 'Primato', razaoSocial: 'Primato Cooperativa Agroindustrial', cnpj: '07.456.789/0001-12', telefone: '(45) 3376-1170', email: 'contato@primato.com.br', cidade: 'Toledo', uf: 'PR',
-    endereco: 'Rua Brasil, 50 - Toledo Paraná', categoria: 'Entrega de dejetos',
-    contatoPrincipal: { nome: 'João Silva', telefone: '(45) 9 9999-1234', email: 'joao@primato.com.br' },
-    contatoComercial: { nome: 'Maria Souza', telefone: '(45) 9 8888-5678', email: 'comercial@primato.com.br' },
-    contatoFinanceiro: { nome: 'Pedro Santos', telefone: '(45) 9 7777-9012', email: 'financeiro@primato.com.br' },
-    veiculos: mockVeiculos
-  },
-  { 
-    id: '2', nomeFantasia: 'Agrocampo', razaoSocial: 'Agrocampo Transportes Ltda', cnpj: '12.345.678/0001-90', telefone: '(45) 3225-4455', email: 'logistica@agrocampo.com', cidade: 'Cascavel', uf: 'PR',
-    endereco: 'Av. Tancredo Neves, 1200 - Cascavel Paraná', categoria: 'Coleta de Ração',
-    contatoPrincipal: { nome: 'Carlos Oliveira', telefone: '(45) 9 9988-7766', email: 'carlos@agrocampo.com' },
-    veiculos: mockVeiculos.slice(0, 3)
-  },
-  { 
-    id: '3', nomeFantasia: 'MWM', razaoSocial: 'MWM Logística', cnpj: '98.765.432/0001-00', telefone: '(41) 3000-0000', email: 'contato@mwm.com', cidade: 'Curitiba', uf: 'PR',
-    endereco: 'Rod. BR-277, km 100 - Curitiba Paraná', categoria: 'Logística Geral',
-    contatoPrincipal: { nome: 'Ana Lima', telefone: '(41) 9 9123-4567', email: 'ana@mwm.com' },
-    veiculos: mockVeiculos
-  },
-  { 
-    id: '4', nomeFantasia: 'Tupy', razaoSocial: 'Tupy Transportes S.A.', cnpj: '11.222.333/0001-44', telefone: '(47) 3441-8000', email: 'contato@tupy.com.br', cidade: 'Joinville', uf: 'SC',
-    endereco: 'Rua Dona Francisca, 500 - Joinville Santa Catarina', categoria: 'Transporte Pesado',
-    contatoPrincipal: { nome: 'Marcos Tupy', telefone: '(47) 9 9999-0000', email: 'marcos@tupy.com' },
-    veiculos: mockVeiculos
-  }
+    { id: "DEJ-001", dataColeta: "2025-01-10", cooperado: "Ademir Jose Engelsing", placa: "XYZ-5678", ph: "7.2", densidade: "1014" },
+    { id: "DEJ-002", dataColeta: "2025-01-11", cooperado: "Renato Ivan Kunzler", placa: "ABC-1234", ph: "7.0", densidade: "1010" }
 ];
 
 // --- FUNÇÕES MOCK ---
@@ -227,10 +354,10 @@ export const mockFetchCooperadosData = (): Promise<CooperadoItem[]> => {
   });
 };
 
-export const mockFetchTransportadorasData = (): Promise<TransportadoraItem[]> => { // NOVO
+export const mockFetchTransportadorasData = (): Promise<TransportadoraItem[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(transportadoras);
+      resolve(mockTransportadoras);
     }, 500);
   });
 };
@@ -479,7 +606,7 @@ export const mockFetchPortariaData = (): Promise<PortariaItem[]> => {
 export const mockFetchNewAgendaData = (): Promise<AgendaData[]> => {
     return new Promise((resolve) => {
         setTimeout(() => {
-          resolve(newMockAgendaData);
+          resolve(mockAgenda);
         }, 500);
       });
 };

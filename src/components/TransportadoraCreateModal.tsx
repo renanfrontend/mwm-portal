@@ -68,6 +68,10 @@ const TransportadoraCreateModal: React.FC<Props> = ({ isActive, onClose, onCreat
         cidade,
         uf,
         endereco,
+        estado: uf, // Assumindo UF como estado para preencher o campo obrigatório
+        placa: '', // Valor padrão vazio
+        status: 'Ativo', // Valor padrão
+        tags: [], // Valor padrão vazio
         categoria,
         contatoPrincipal: { nome: contatoPrincipalNome, telefone: contatoPrincipalTel, email: contatoPrincipalEmail },
         contatoComercial: { nome: contatoComercialNome, telefone: contatoComercialTel, email: contatoComercialEmail },
