@@ -1,11 +1,22 @@
 /* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap');
+
+:root {
+  --primary-main: #0072C3;
+  --bg-grey: #F5F7FA;
+  --white: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Schibsted Grotesk', sans-serif !important;
+  background-color: var(--bg-grey);
+}
 
 /* --- FONTES E ESTILOS GLOBAIS --- */
 html,
-body {
-  font-family: 'Quicksand', sans-serif;
-  /* A linha "background-color: #f5f5f5;" foi REMOVIDA daqui para corrigir o fundo cinza. */
-}
+
 
 /* Garante que o tema escuro seja aplicado corretamente */
 html.dark,

@@ -1,48 +1,41 @@
-// src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// CORRIGIDO: Importações divididas
-import { decodeJwt } from '../services/auth';
-import type { MockUser } from '../types/models'; // Corrigido o caminho de importação do TIPO
 
-interface AuthContextType {
+const STORAGE_KEY = '@MWM:user';
+
+export interface AuthContextType {
   isAuthenticated: boolean;
-  user: Partial<MockUser> | null;
-  login: (token: string) => void;
-  logout: () => void;
+  user: any;
+  login: (userData: any) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<Partial<MockUser> | null>(null);
+  // Inicialização síncrona do localStorage para evitar flickering no refresh
+  const [user, setUser] = useState<any>(() => {
+    const savedUser = localStorage.getItem(STORAGE_KEY);
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!user);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      setToken(storedToken);
-      const decodedUser = decodeJwt(storedToken);
-      setUser(decodedUser);
-    }
-  }, []);
+    setIsAuthenticated(!!user);
+  }, [user]);
 
-  const handleLogin = (newToken: string) => {
-    localStorage.setItem('authToken', newToken);
-    setToken(newToken);
-    const decodedUser = decodeJwt(newToken);
-    setUser(decodedUser);
+  const login = (userData: any) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+    setUser(userData);
   };
 
-  const handleLogout = () => {
-    setToken(null);
+  const logout = async () => {
+    localStorage.removeItem(STORAGE_KEY);
     setUser(null);
-    localStorage.removeItem('authToken');
   };
-
-  const isAuthenticated = !!token;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login: handleLogin, logout: handleLogout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -50,8 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
+  if (!context) throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   return context;
 };

@@ -1,81 +1,118 @@
-// src/components/Header.tsx
-
 import React, { useState } from 'react';
-import { MdNotifications, MdAccountCircle, MdLogout } from 'react-icons/md'; 
-import { useAuth } from '../context/AuthContext'; 
+import { Box, IconButton, Stack, Typography, Menu, MenuItem, ListItemIcon } from '@mui/material';
+import { useNavigate, Link } from 'react-router-dom';
 
-interface HeaderProps {
-  onMenuClick: () => void;
-  children?: React.ReactNode;
-}
+// Ícones Oficiais MUI
+import MenuIcon from '@mui/icons-material/Menu';
+import PlaceIcon from '@mui/icons-material/Place';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ManageAccounts from '@mui/icons-material/ManageAccounts';
+import LogoutIcon from '@mui/icons-material/Logout';
 
-const NotificationButton: React.FC = () => {
-    const [notificationCount] = useState(3);
-    return (
-        <div style={{ position: 'relative' }}>
-            <button className="button is-light is-small is-rounded is-flex is-align-items-center" onClick={() => {}} aria-label="Notificações">
-                <span className="icon"><MdNotifications size={20} /></span>
-            </button>
-            {notificationCount > 0 && (
-                <span className="tag is-danger is-rounded is-small" style={{ position: 'absolute', top: '-5px', right: '-5px', height: '1rem', minWidth: '1rem', padding: '0 0.25rem', fontSize: '0.65rem' }}>
-                    {notificationCount}
-                </span>
-            )}
-        </div>
-    );
-};
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
-const Header: React.FC<HeaderProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
+  const { logout } = useAuth();
+  const { toggleTheme } = useTheme(); 
+  const navigate = useNavigate();
+  
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    handleClose();
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Erro ao realizar logout:", error);
+    }
+  };
 
   return (
-    // CORRIGIDO: position: relative (NÃO usar is-fixed-top)
-    <nav 
-      className="navbar" 
-      role="navigation" 
-      aria-label="main navigation"
-      style={{ 
-        borderBottom: '1px solid #dbdbdb', 
-        flexShrink: 0, 
-        position: 'relative', 
-        zIndex: 10 
-      }}
-    >
-      <div className="navbar-brand">
-        <div className="navbar-item">
-          {children}
-        </div>
-      </div>
+    <Box sx={{
+      height: 64, 
+      bgcolor: '#0072C3', 
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      px: 3,
+      justifyContent: 'space-between',
+      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.20)',
+      width: '100%',
+      zIndex: 1300
+    }}>
+      <Stack direction="row" alignItems="center">
+        <IconButton onClick={onMenuClick} sx={{ color: 'white' }}>
+          <MenuIcon sx={{ fontSize: 24 }} />
+        </IconButton>
+      </Stack>
 
-      <div className="navbar-menu" style={{ display: 'flex', flexGrow: 1, boxShadow: 'none', padding: 0 }}>
-        <div className="navbar-start"></div>
-        <div className="navbar-end">
-            <div className="navbar-item is-flex is-align-items-center">
-                <div className="mr-3"><NotificationButton /></div>
-                <div className="dropdown is-right is-hoverable">
-                    <div className="dropdown-trigger">
-                        <button className="button is-light is-small is-rounded" aria-haspopup="true" aria-controls="dropdown-menu-user">
-                            <span className="icon"><MdAccountCircle size={24} /></span>
-                            <span className="ml-2 is-hidden-mobile">{user?.username || 'Usuário'}</span>
-                        </button>
-                    </div>
-                    <div className="dropdown-menu" id="dropdown-menu-user" role="menu">
-                        <div className="dropdown-content">
-                            <div className="dropdown-item">
-                                <p className="has-text-weight-bold">{user?.username}</p>
-                                <p className="is-size-7 has-text-grey">{user?.email}</p>
-                            </div>
-                            <hr className="dropdown-divider" />
-                            <a href="/conta" className="dropdown-item">Minha Conta</a>
-                            <hr className="dropdown-divider" />
-                            <a onClick={logout} className="dropdown-item has-text-danger"><span className="icon mr-1"><MdLogout /></span>Sair</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
-    </nav>
+      <Stack direction="row" spacing={3} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
+          <PlaceIcon sx={{ fontSize: 20 }} />
+          <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Schibsted Grotesk' }}>
+            Toledo-PR
+          </Typography>
+        </Stack>
+        
+        {/* Ícone mantido visualmente, mas com função neutra agora */}
+        <IconButton onClick={toggleTheme} sx={{ color: 'white', p: 0, opacity: 0.8 }}>
+          <Brightness4Icon sx={{ fontSize: 22 }} />
+        </IconButton>
+        
+        <IconButton onClick={handleOpen} sx={{ color: 'white', p: 0 }}>
+          <AccountCircleIcon sx={{ fontSize: 32 }} />
+        </IconButton>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          disableScrollLock
+          PaperProps={{
+            elevation: 3,
+            sx: {
+              mt: '12px',
+              minWidth: '150px',
+              borderRadius: '4px',
+              padding: '4px 0',
+              '& .MuiList-root': { padding: 0 },
+            }
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem component={Link} to="/conta" onClick={handleClose} sx={{ py: '12px', px: '16px', gap: '12px' }}>
+            <ListItemIcon sx={{ minWidth: 'auto !important', color: 'rgba(0,0,0,0.54)' }}>
+              <ManageAccounts sx={{ fontSize: 20 }} />
+            </ListItemIcon>
+            <Typography sx={{ fontSize: '16px', fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
+              Perfil
+            </Typography>
+          </MenuItem>
+
+          <MenuItem onClick={handleLogout} sx={{ py: '12px', px: '16px', gap: '12px' }}>
+            <ListItemIcon sx={{ minWidth: 'auto !important', color: 'rgba(0,0,0,0.54)' }}>
+              <LogoutIcon sx={{ fontSize: 20 }} />
+            </ListItemIcon>
+            <Typography sx={{ fontSize: '16px', fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
+              Sair
+            </Typography>
+          </MenuItem>
+        </Menu>
+      </Stack>
+    </Box>
   );
 };
 

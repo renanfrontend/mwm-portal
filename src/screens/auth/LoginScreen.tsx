@@ -1,4 +1,3 @@
-// src/screens/auth/LoginScreen.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login as authLogin } from '../../services/auth';
@@ -9,7 +8,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login } = useAuth(); // Agora 'login' não será undefined
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -17,11 +16,16 @@ const LoginScreen = () => {
     setLoading(true);
     setError('');
     try {
+      // 1. Chama o serviço de API
       const user = await authLogin(username, password);
+      
+      // 2. Atualiza o contexto global (O erro acontecia aqui!)
       login(user);
+      
+      // 3. Navega para o Dashboard
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Erro ao realizar login');
     } finally {
       setLoading(false);
     }
@@ -38,7 +42,7 @@ const LoginScreen = () => {
               <input
                 className="input"
                 type="text"
-                placeholder="Seu usuário"
+                placeholder="admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -51,14 +55,14 @@ const LoginScreen = () => {
               <input
                 className="input"
                 type="password"
-                placeholder="Sua senha"
+                placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
           </div>
-          {error && <p className="has-text-danger has-text-centered">{error}</p>}
+          {error && <p className="has-text-danger has-text-centered mb-3">{error}</p>}
           <div className="field">
             <div className="control has-text-centered">
               <button
