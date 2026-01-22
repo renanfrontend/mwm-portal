@@ -2,14 +2,14 @@ import React from 'react';
 import { List, ListItem, ListItemIcon, ListItemText, Box, Tooltip, ListItemButton } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
+// Ícones e Logo
 import DashboardSharp from '@mui/icons-material/DashboardSharp';
 import Business from '@mui/icons-material/Business';
 import Assignment from '@mui/icons-material/Assignment';
 import WorkspacePremium from '@mui/icons-material/WorkspacePremium';
 import LocalGasStation from '@mui/icons-material/LocalGasStation';
 import AttachMoney from '@mui/icons-material/AttachMoney';
-
-import logoMwm from '../../logo.png'; 
+import logoMwm from '../../logo.png';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,8 +27,24 @@ const menuItems = [
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#FFF' }}>
-      <Box sx={{ p: isOpen ? '24px' : '12px', display: 'flex', justifyContent: 'center', minHeight: '80px' }}>
-        <img src={logoMwm} alt="Logo" style={{ width: isOpen ? '140px' : '40px', transition: 'width 0.3s ease' }} />
+      {/* Container do Logo */}
+      <Box sx={{
+        p: isOpen ? '24px' : '12px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center', // Centraliza verticalmente o logo pequeno
+        minHeight: '80px' // Mantém a altura do cabeçalho da sidebar
+      }}>
+        <img
+          src={logoMwm}
+          alt="Logo MWM"
+          style={{
+            width: isOpen ? '140px' : '40px', // Largura dinâmica
+            height: 'auto', // CORREÇÃO: Mantém a proporção da imagem
+            transition: 'width 0.3s ease', // Animação suave apenas na largura
+            display: 'block' // Remove espaços extras abaixo da imagem
+          }}
+        />
       </Box>
 
       <List disablePadding>
