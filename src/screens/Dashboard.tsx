@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ width: '100%', minWidth: 0 }}>
-      <Typography sx={{ fontSize: { xs: '22px', md: '26px', lg: '32px' }, mb: 3, fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
+      <Typography sx={{ fontSize: { xs: '22px', md: '26px', lg: '48px' }, mb: 3, fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
         Operação diária
       </Typography>
 

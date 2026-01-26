@@ -38,7 +38,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, mainValue, secondaryValu
             {icon}
           </Box>
           <Typography sx={{ 
-            fontSize: { md: '15px', lg: '18px' }, 
+            fontSize: { md: '15px', lg: '24px' }, 
             fontWeight: 500, 
             fontFamily: 'Schibsted Grotesk' 
           }}>
@@ -50,13 +50,13 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, mainValue, secondaryValu
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Stack direction="row" spacing={0.5} alignItems="center">
             <Typography sx={{ 
-              fontSize: { xs: '32px', md: '36px', lg: '42px' }, 
+              fontSize: { xs: '32px', md: '36px', lg: '64px' }, 
               fontWeight: 500, 
               fontFamily: 'Schibsted Grotesk' 
             }}>
               {mainValue}
             </Typography>
-            <CheckIcon sx={{ color: '#70BF54', fontSize: { md: 20, lg: 24 } }} />
+            <CheckIcon sx={{ color: '#70BF54', fontSize: { md: 20, lg: 32 } }} />
           </Stack>
 
           {secondaryValue && (
@@ -68,7 +68,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, mainValue, secondaryValu
               }}>
                 {secondaryValue}
               </Typography>
-              <MovingIcon sx={{ color: '#003052', fontSize: { md: 16, lg: 20 } }} />
+              <MovingIcon sx={{ color: '#003052', fontSize: { md: 16, lg: 30 } }} />
             </Stack>
           )}
         </Box>
@@ -80,10 +80,10 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, mainValue, secondaryValu
         <Stack spacing={0.5}>
           {details.map((d, i) => (
             <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: '12px', color: '#333', fontFamily: 'Schibsted Grotesk' }}>
+              <Typography sx={{ fontSize: '20px', color: '#333', fontFamily: 'Schibsted Grotesk' }}>
                 {d.label}
               </Typography>
-              <Typography sx={{ fontSize: '12px', fontWeight: 500, fontFamily: 'Schibsted Grotesk' }}>
+              <Typography sx={{ fontSize: '20px', fontWeight: 500, fontFamily: 'Schibsted Grotesk' }}>
                 {d.value}
               </Typography>
             </Box>

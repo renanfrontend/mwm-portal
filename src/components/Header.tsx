@@ -1,114 +1,67 @@
 import React, { useState } from 'react';
 import { Box, IconButton, Stack, Typography, Menu, MenuItem, ListItemIcon } from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
-
-// Ícones Oficiais MUI
 import MenuIcon from '@mui/icons-material/Menu';
 import PlaceIcon from '@mui/icons-material/Place';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
 import LogoutIcon from '@mui/icons-material/Logout';
-
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
+interface HeaderProps {
+  onMenuClick: () => void;
+  isSidebarOpen: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ onMenuClick, isSidebarOpen }) => {
   const { logout } = useAuth();
-  const { toggleTheme } = useTheme(); 
+  const { toggleTheme } = useTheme();
   const navigate = useNavigate();
-  
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleLogout = async () => {
-    handleClose();
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error("Erro ao realizar logout:", error);
-    }
+    setAnchorEl(null);
+    await logout();
+    navigate('/login');
   };
 
   return (
-    <Box sx={{
-      height: 64, 
-      bgcolor: '#0072C3', 
-      color: 'white',
-      display: 'flex',
-      alignItems: 'center',
-      px: 3,
-      justifyContent: 'space-between',
-      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.20)',
-      width: '100%',
-      zIndex: 1300
+    <Box sx={{ 
+      height: 64, bgcolor: '#0072C3', color: 'white', display: 'flex', 
+      alignItems: 'center', pr: 3, justifyContent: 'space-between', zIndex: 1300 
     }}>
-      <Stack direction="row" alignItems="center">
-        <IconButton onClick={onMenuClick} sx={{ color: 'white' }}>
-          <MenuIcon sx={{ fontSize: 24 }} />
-        </IconButton>
+      <Stack direction="row" alignItems="center" sx={{ height: '100%' }}>
+        <Box sx={{ 
+          width: isSidebarOpen ? '260px' : '64px', 
+          display: 'flex', 
+          justifyContent: isSidebarOpen ? 'flex-start' : 'center',
+          pl: isSidebarOpen ? 2.5 : 0, 
+          transition: 'all 0.3s ease' 
+        }}>
+          <IconButton onClick={onMenuClick} sx={{ color: 'white' }}>
+            <MenuIcon />
+          </IconButton>
+        </Box>
       </Stack>
 
       <Stack direction="row" spacing={3} alignItems="center">
         <Stack direction="row" spacing={1} alignItems="center">
           <PlaceIcon sx={{ fontSize: 20 }} />
-          <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Schibsted Grotesk' }}>
-            Toledo-PR
-          </Typography>
+          <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Schibsted Grotesk' }}>Toledo-PR</Typography>
         </Stack>
-        
-        {/* Ícone mantido visualmente, mas com função neutra agora */}
-        <IconButton onClick={toggleTheme} sx={{ color: 'white', p: 0, opacity: 0.8 }}>
-          <Brightness4Icon sx={{ fontSize: 22 }} />
-        </IconButton>
-        
-        <IconButton onClick={handleOpen} sx={{ color: 'white', p: 0 }}>
-          <AccountCircleIcon sx={{ fontSize: 32 }} />
-        </IconButton>
+        <IconButton onClick={toggleTheme} sx={{ color: 'white' }}><Brightness4Icon /></IconButton>
+        <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: 'white' }}><AccountCircleIcon sx={{ fontSize: 32 }} /></IconButton>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          disableScrollLock
-          PaperProps={{
-            elevation: 3,
-            sx: {
-              mt: '12px',
-              minWidth: '150px',
-              borderRadius: '4px',
-              padding: '4px 0',
-              '& .MuiList-root': { padding: 0 },
-            }
-          }}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
-          <MenuItem component={Link} to="/conta" onClick={handleClose} sx={{ py: '12px', px: '16px', gap: '12px' }}>
-            <ListItemIcon sx={{ minWidth: 'auto !important', color: 'rgba(0,0,0,0.54)' }}>
-              <ManageAccounts sx={{ fontSize: 20 }} />
-            </ListItemIcon>
-            <Typography sx={{ fontSize: '16px', fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
-              Perfil
-            </Typography>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} PaperProps={{ sx: { mt: '12px', minWidth: '150px' } }}>
+          <MenuItem component={Link} to="/conta" onClick={() => setAnchorEl(null)}>
+            <ListItemIcon><ManageAccounts fontSize="small" /></ListItemIcon>
+            <Typography>Perfil</Typography>
           </MenuItem>
-
-          <MenuItem onClick={handleLogout} sx={{ py: '12px', px: '16px', gap: '12px' }}>
-            <ListItemIcon sx={{ minWidth: 'auto !important', color: 'rgba(0,0,0,0.54)' }}>
-              <LogoutIcon sx={{ fontSize: 20 }} />
-            </ListItemIcon>
-            <Typography sx={{ fontSize: '16px', fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
-              Sair
-            </Typography>
+          <MenuItem onClick={handleLogout}>
+            <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+            <Typography>Sair</Typography>
           </MenuItem>
         </Menu>
       </Stack>

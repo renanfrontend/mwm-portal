@@ -26,7 +26,9 @@ import { ThemeProvider } from './context/ThemeContext';
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // ALTERAÇÃO: Inicia sempre colapsado (false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -42,7 +44,7 @@ const AppContent = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
-      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
 
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Box component="aside" sx={{ 
@@ -55,7 +57,6 @@ const AppContent = () => {
           <Sidebar isOpen={isSidebarOpen} />
         </Box>
 
-        {/* CONTAINER COM PADDING AJUSTADO POR VOCÊ: lg: 2 e xl: 3 */}
         <Box component="main" sx={{ 
           flexGrow: 1, 
           p: { xs: 2, md: 2, lg: 2, xl: 3 }, 
