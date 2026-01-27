@@ -1,6 +1,8 @@
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import MetricCard from '../components/MetricCard';
 
+// Ícones conforme sua preferência de layout
 import Thunderstorm from '@mui/icons-material/Thunderstorm';
 import Speed from '@mui/icons-material/Speed';
 import ChecklistSharp from '@mui/icons-material/ChecklistSharp';
@@ -20,13 +22,31 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ width: '100%', minWidth: 0 }}>
-      <Typography sx={{ fontSize: { xs: '22px', md: '26px', lg: '48px' }, mb: 3, fontFamily: 'Schibsted Grotesk', fontWeight: 400 }}>
+      {/* Título: Blindado contra o bug do Mac */}
+      <Typography 
+        sx={{ 
+          fontSize: { xs: '22px', md: '26px', lg: '48px' }, 
+          mb: 3, 
+          fontFamily: 'Schibsted Grotesk', 
+          fontWeight: 400,
+          // FIX: Força a renderização completa da string no Chrome/Mac
+          display: 'block',
+          overflow: 'visible',
+          whiteSpace: 'nowrap',
+          minWidth: 'fit-content'
+        }}
+      >
         Operação diária
       </Typography>
 
+      {/* Grid: Mantendo sua estrutura de layout preferida */}
       <Box sx={{ 
         display: 'grid',
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+        gridTemplateColumns: { 
+          xs: '1fr', 
+          sm: 'repeat(2, 1fr)', 
+          md: 'repeat(3, 1fr)' 
+        },
         gap: { xs: '12px', md: '16px', lg: '24px' }, 
         width: '100%'
       }}>
