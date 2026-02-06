@@ -1,349 +1,310 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  MdSearch, MdFilterList, MdArrowBack, MdDelete, MdAdd, 
-  MdContentCopy, MdDateRange, MdChevronLeft, MdChevronRight, MdFileDownload 
-} from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+  Box, Typography, Tabs, Tab, TextField, IconButton, 
+  Button, Link, Stack, Chip, Paper, Collapse, CircularProgress, TablePagination
+} from '@mui/material';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Close as CloseIcon, CheckCircle, Home as HomeIcon, MoreHoriz as MoreHorizIcon, Add as AddIcon, Visibility as VisibilityIcon, Edit as EditIcon, Error as ErrorIcon, FilterList as FilterListIcon, FileDownload as FileDownloadIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-import { AgendaTable } from '../components/AgendaTable';
-import { CooperadoListItem } from '../components/CooperadoListItem';
-import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
+import ProdutorDrawer from '../components/ProdutorDrawer';
+import { useCooperadoMutation } from '../hooks/useCooperadoMutation';
+import type { ProdutorFormInput, ProdutorListItem, CooperadoResponse } from '../types/cooperado';
+import { ProdutorService } from '../services/produtorService';
 import { TransportadoraList } from '../components/TransportadoraList';
-
-// Modais
-import CooperadoContactModal from '../components/CooperadoContactModal';
-import CooperadoLocationModal from '../components/CooperadoLocationModal';
-import CooperadoInfoModal from '../components/CooperadoInfoModal';
-import CooperadoEditModal from '../components/CooperadoEditModal';
-import CooperadoCalendarModal from '../components/CooperadoCalendarModal';
-import CooperadoCreateModal from '../components/CooperadoCreateModal';
-import ReplicateWeekModal from '../components/ReplicateWeekModal';
-import ReplicateMonthModal from '../components/ReplicateMonthModal';
+import { AgendaList } from '../components/AgendaList';
 
 const Logistica: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('cadastro');
-  const navigate = useNavigate();
-
-  const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
-  const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Data (Semana)
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [producers, setProducers] = useState<ProdutorListItem[]>([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'view' | 'edit'>('create');
+  const [selectedProducer, setSelectedProducer] = useState<ProdutorListItem | null>(null);
+  const [selectedProducerFullData, setSelectedProducerFullData] = useState<ProdutorFormInput | null>(null); // Novo estado para dados completos
+  const [showToast, setShowToast] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalItems, setTotalItems] = useState(0);
 
-  // Seleção e Modais
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Modais de Replicação
-  const [isReplicateWeekOpen, setIsReplicateWeekOpen] = useState(false);
-  const [isReplicateMonthOpen, setIsReplicateMonthOpen] = useState(false);
+  // Hook de Mutação (SOLID: Lógica de escrita separada)
+  const { createCooperado, updateCooperado, isLoading, error } = useCooperadoMutation();
 
-  // Modais Gerais
-  const [selectedCooperado, setSelectedCooperado] = useState<CooperadoItem | null>(null);
-  const [isContactModalActive, setIsContactModalActive] = useState(false);
-  const [isLocationModalActive, setIsLocationModalActive] = useState(false);
-  const [isInfoModalActive, setIsInfoModalActive] = useState(false);
-  const [isEditModalActive, setIsEditModalActive] = useState(false);
-  const [isCalendarModalActive, setIsCalendarModalActive] = useState(false);
-  const [isCreateModalActive, setIsCreateModalActive] = useState(false);
-
-  // Datas
-  const startDate = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
-  const endDate = useMemo(() => endOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
-  const formattedPeriod = useMemo(() => {
-    const startStr = format(startDate, 'dd/MM/yyyy', { locale: ptBR });
-    const endStr = format(endDate, 'dd/MM/yyyy', { locale: ptBR });
-    return `de ${startStr} à ${endStr}`;
-  }, [startDate, endDate]);
-
-  const handlePrevWeek = () => setCurrentDate(prev => subWeeks(prev, 1));
-  const handleNextWeek = () => setCurrentDate(prev => addWeeks(prev, 1));
-  const handleToday = () => setCurrentDate(new Date());
-
-  const handleExport = (dataToExport: AgendaData[], fileNamePrefix: string) => {
-    if (!dataToExport || dataToExport.length === 0) {
-      toast.warning("Não há dados para exportar.");
-      return;
-    }
-    const headers = ["Cooperado", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom", "Qtd Total", "KM Total", "Transportadora", "Status"];
-    const rows = dataToExport.map(item => [
-      `"${item.cooperado}"`, item.seg||0, item.ter||0, item.qua||0, item.qui||0, item.sex||0, item.sab||0, item.dom||0, item.qtd||0, item.km||0, `"${item.transportadora}"`, item.status
-    ]);
-    const csvContent = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${fileNamePrefix}_${format(startDate, 'yyyy-MM-dd')}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadProducers = useCallback(async () => {
+    console.log('🔄 Iniciando carregamento de produtores...');
     try {
-      if (activeTab === 'agenda') {
-        const data = await fetchNewAgendaData();
-        setAgendaData(data || []);
-      } else if (activeTab === 'cadastro') {
-        const data = await fetchCooperadosData();
-        setCooperadosData(data || []);
-      }
+      const response = await ProdutorService.list(1, 1, 1, 9999);
+      console.log('✅ Produtores carregados:', response);
+      setProducers(response.items || []);
+      setTotalItems(response.total || 0);
     } catch (err) {
-      toast.error("Falha ao carregar dados.");
-    } finally {
-      setLoading(false);
+      console.error('Erro ao carregar produtores:', err);
     }
-  }, [activeTab]);
+  }, []);
+
+  useEffect(() => { loadProducers(); }, [loadProducers]);
 
   useEffect(() => {
-    loadData();
-    setSearchTerm(''); setSelectedItems([]); setIsDeleteMode(false);
-  }, [activeTab, loadData]);
-  
-  const filteredCooperadosData = useMemo(() => (cooperadosData || []).filter(item => (item.motorista && item.motorista.toLowerCase().includes(searchTerm.toLowerCase()))), [searchTerm, cooperadosData]);
-  
-  const agendaBase = useMemo(() => (agendaData || []).filter(item => item.cooperado.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm, agendaData]);
-  const plannedAgenda = agendaBase.filter(item => item.status === 'Planejado');
-  const realizedAgenda = agendaBase.filter(item => item.status === 'Realizado');
+    if (producers.length > 0 && page * rowsPerPage >= producers.length) {
+      setPage(0);
+    }
+  }, [producers.length, page, rowsPerPage]);
 
-  const handleSelectItem = (id: string | number) => { setSelectedItems(prev => prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]) };
-  
-  const handleConfirmDelete = () => {
+  const currentTab = location.pathname.includes('transportadora') ? 1 : location.pathname.includes('agenda') ? 2 : 0;
+  const tabLabel = currentTab === 0 ? 'Produtores' : currentTab === 1 ? 'Transportadoras' : 'Agenda';
+
+  const toFormInput = (producer: ProdutorListItem): ProdutorFormInput => ({
+    cpfCnpj: '', // TODO: Idealmente, buscar detalhes via API se não estiver no grid
+    nome: producer.nomeProdutor || '',
+    numEstabelecimento: producer.numEstabelecimento || '',
+    nPropriedade: '',
+    matricula: String(producer.id || ''),
+    filiada: producer.filiada || 'Toledo-PR',
+    faseDejeto: producer.modalidade || '',
+    cabecas: String(producer.cabecasAlojadas || ''),
+    certificado: producer.certificado || 'Não',
+    doamDejetos: 'Sim',
+    qtdLagoas: String(producer.qtdLagoas || '1'),
+    volLagoas: producer.volLagoas || '',
+    restricoes: producer.restricoesOperacionais || 'Nenhuma',
+    responsavel: '',
+    tecnico: '',
+    municipio: '',
+    lat: '',
+    long: '',
+    distancia: producer.distancia || '',
+    localizacao: ''
+  });
+
+  const apiResponseToForm = (data: CooperadoResponse): ProdutorFormInput => ({
+    cpfCnpj: data.bioProdutor?.cpfCnpj || '',
+    nome: data.bioProdutor?.nome || data.nome || '',
+    numEstabelecimento: data.numeroEstabelecimento || '',
+    nPropriedade: data.numeroPropriedade || '',
+    matricula: String(data.matricula || ''),
+    filiada: 'Toledo-PR', // TODO: Mapear ID para Nome se necessário
+    faseDejeto: data.fase || 'GRSC',
+    cabecas: String(data.cabecas || ''),
+    certificado: data.certificado || 'Não',
+    doamDejetos: data.doamDejetos || 'Sim',
+    qtdLagoas: String(data.qtdLagoas || '1'),
+    volLagoas: data.volLagoas || '',
+    restricoes: data.restricoes || 'Nenhuma',
+    responsavel: data.responsavel || '',
+    tecnico: data.tecnico || '',
+    municipio: data.municipio || '',
+    lat: String(data.latitude || ''),
+    long: String(data.longitude || ''),
+    distancia: data.distancia || '',
+    localizacao: data.localizacao || ''
+  });
+
+  const openDrawer = async (mode: 'create' | 'view' | 'edit', producer?: ProdutorListItem) => {
+    setDrawerMode(mode);
+    setSelectedProducer(producer || null);
+    setSelectedProducerFullData(null); // Reseta dados completos anteriores
+
+    if ((mode === 'view' || mode === 'edit') && producer?.id) {
+       console.log(`👁️ Buscando detalhes do produtor ID: ${producer.id}...`);
+       try {
+         const details = await ProdutorService.getById(producer.id);
+         console.log('✅ Detalhes carregados:', details);
+         const formData = apiResponseToForm(details);
+         setSelectedProducerFullData(formData);
+       } catch (err) {
+         console.error('Erro ao buscar detalhes:', err);
+         // Fallback: usa os dados parciais do grid se a API falhar
+         setSelectedProducerFullData(toFormInput(producer));
+       }
+    }
+    
+    setIsDrawerOpen(true);
+  };
+
+  // --- LÓGICA: SALVAR NA API ---
+  const handleSave = async (formData: ProdutorFormInput) => {
     try {
-      if (activeTab === 'agenda') setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      else setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      toast.success("Itens excluídos.");
-      setSelectedItems([]); setIsModalOpen(false); setIsDeleteMode(false);
-    } catch {
-      toast.error("Erro ao excluir.");
-      setIsModalOpen(false);
+      if (drawerMode === 'edit' && selectedProducer?.id) {
+        // MODO EDIÇÃO (PUT)
+        await updateCooperado(selectedProducer.id, formData);
+      } else {
+        // MODO CRIAÇÃO (POST)
+        await createCooperado(formData);
+      }
+
+      // Recarrega a lista após criar/editar
+      await loadProducers();
+
+      // Sucesso
+      setIsDrawerOpen(false);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 6000);
+    } catch (e: any) {
+      console.error("❌ Falha ao salvar/editar cooperado:", {
+        erro: e,
+        mensagem: e.message,
+        resposta: e.response?.data,
+        status: e.response?.status
+      });
     }
   };
 
-  const handleUpdateAgendaItem = (id: number, field: string, value: number) => {
-      setAgendaData(prev => prev.map(item => {
-          if (item.id === id) {
-              const updated = { ...item, [field]: value };
-              updated.qtd = (updated.seg||0) + (updated.ter||0) + (updated.qua||0) + (updated.qui||0) + (updated.sex||0) + (updated.sab||0) + (updated.dom||0);
-              return updated;
-          }
-          return item;
-      }));
-  };
-
-  const confirmReplicateWeek = (date: string) => { toast.success(`Planejamento replicado: ${date}`); setIsReplicateWeekOpen(false); };
-  const confirmReplicateMonth = (month: string) => { toast.success(`Planejamento replicado: ${month}`); setIsReplicateMonthOpen(false); };
-  
-  const handleOpenAgendaAdd = () => {
-      const dummy: CooperadoItem = { id: 0, matricula: 0, filial: '', motorista: 'Novo Agendamento', tipoVeiculo: '', placa: '', certificado: 'Sim', doamDejetos: 'Sim', fase: '' };
-      setSelectedCooperado(dummy); setIsCalendarModalActive(true);
-  };
-  const handleSaveCalendar = () => { setIsCalendarModalActive(false); toast.success("Agendamento realizado!"); };
-  const closeAllModals = () => {
-    setIsContactModalActive(false); setIsLocationModalActive(false); setIsInfoModalActive(false); 
-    setIsEditModalActive(false); setIsCalendarModalActive(false); setIsCreateModalActive(false); 
-    setIsReplicateWeekOpen(false); setIsReplicateMonthOpen(false);
-    setTimeout(() => setSelectedCooperado(null), 200);
-  };
-  const handleOpenContactModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsContactModalActive(true); };
-  const handleOpenLocationModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsLocationModalActive(true); };
-  const handleOpenViewModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsInfoModalActive(true); };
-  const handleOpenEditModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsEditModalActive(true); };
-  const handleOpenCalendarModal = (item: CooperadoItem) => { setSelectedCooperado(item); setIsCalendarModalActive(true); };
-  const handleOpenCreateModal = () => { setIsCreateModalActive(true); };
-  const handleSaveNewCooperado = (newItem: CooperadoItem) => { setCooperadosData(prev => [newItem, ...prev]); toast.success("Adicionado!"); setIsCreateModalActive(false); };
-  const handleSaveCooperado = (editedItem: CooperadoItem) => { setCooperadosData(prev => prev.map(item => item.id === editedItem.id ? editedItem : item)); toast.success("Atualizado!"); setIsEditModalActive(false); setSelectedCooperado(null); };
-  const handleOpenMapFromInfo = (item: CooperadoItem) => { setIsInfoModalActive(false); setTimeout(() => { setSelectedCooperado(item); setIsLocationModalActive(true); }, 100); };
+  const tableGrid = "240px 180px 120px 130px 180px 100px 110px 160px 170px 150px 200px 100px";
+  const commonFont = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
   return (
-    <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      
-      {/* Header Padronizado */}
-      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem', flexShrink: 0 }}>
-        <div className="level is-mobile">
-          <div className="level-left">
-            <div className="buttons">
-              <button className="button is-white border mr-2" onClick={() => navigate(-1)}>
-                <span className="icon"><MdArrowBack size={24} /></span>
-              </button>
-              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Logística</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: '24px', bgcolor: '#F5F5F5', overflow: 'hidden' }}>
+      <Box sx={{ alignSelf: 'stretch', mb: '12px', flexDirection: 'column', display: 'flex', gap: '8px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link component={NavLink} to="/" sx={{ display: 'flex', color: 'rgba(0, 0, 0, 0.54)' }}><HomeIcon sx={{ fontSize: '18px' }} /></Link>
+          <Typography sx={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: '16px' }}>/</Typography>
+          <Box sx={{ bgcolor: '#F3F4F5', px: '6px', py: '2px', borderRadius: '2px', display: 'flex', alignItems: 'center' }}><MoreHorizIcon sx={{ fontSize: '16px', color: 'rgba(0,0,0,0.54)' }} /></Box>
+          <Typography sx={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: '16px' }}>/</Typography>
+          <Typography sx={{ color: 'black', fontSize: '16px', ...commonFont }}>Logística / {tabLabel}</Typography>
+        </Box>
+        <Typography sx={{ fontSize: '48px', fontWeight: 400, color: 'black', ...commonFont }}>Logística</Typography>
+      </Box>
 
-      {/* Tabs Estilo Boxed e Alinhado à Esquerda */}
-      <div className="px-5 pt-4" style={{ backgroundColor: '#fff' }}>
-        <div className="tabs is-boxed mb-0">
-          <ul>
-            <li className={activeTab === 'cadastro' ? 'is-active' : ''}>
-              <a onClick={() => setActiveTab('cadastro')}><span>Cooperados</span></a>
-            </li>
-            <li className={activeTab === 'transportadora' ? 'is-active' : ''}>
-              <a onClick={() => setActiveTab('transportadora')}><span>Transportadoras</span></a>
-            </li>
-            <li className={activeTab === 'agenda' ? 'is-active' : ''}>
-              <a onClick={() => setActiveTab('agenda')}><span>Agenda</span></a>
-            </li>
-          </ul>
-        </div>
-      </div>
+      {/* TOAST SUCESSO */}
+      <Collapse in={showToast}>
+        <Box sx={{ bgcolor: '#F1F9EE', borderRadius: '4px', p: '8px 16px', display: 'flex', alignItems: 'flex-start', gap: 2, border: '1px solid rgba(112, 191, 84, 0.2)', mb: 3 }}>
+            <CheckCircle sx={{ color: '#70BF54', mt: 0.5 }} />
+            <Box sx={{ flex: 1 }}>
+                <Typography sx={{ color: '#2F5023', fontSize: 16, ...commonFont, fontWeight: 500 }}>Registro atualizado com sucesso</Typography>
+                <Typography sx={{ color: '#2F5023', fontSize: 14, ...commonFont, opacity: 0.8 }}>As alterações foram salvas e já estão disponíveis no sistema.</Typography>
+            </Box>
+            <IconButton onClick={() => setShowToast(false)} size="small"><CloseIcon fontSize="small" /></IconButton>
+        </Box>
+      </Collapse>
 
-      <div className="screen-content p-5" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        
-        {/* TAB COOPERADOS (Tabela) */}
-        {activeTab === 'cadastro' && (
-          <div className="container is-fluid px-0">
-            <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
-                <div className="control has-icons-right">
-                    <input className="input" type="text" placeholder="Buscar cooperado..." style={{ width: '300px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                    <span className="icon is-right"><MdSearch /></span>
-                </div>
-                <div className="buttons">
-                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}><span className="icon"><MdDelete /></span></button>
-                    <button className="button is-white border"><span className="icon"><MdFilterList /></span><span>Filtrar</span></button>
-                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenCreateModal}>
-                        <span className="icon"><MdAdd /></span><span>Adicionar</span>
-                    </button>
-                </div>
-            </div>
-            
-            {/* BARRA DE EXCLUSÃO (NOVO FORMATO) */}
-            {isDeleteMode && selectedItems.length > 0 && (
-                <div className="is-flex is-justify-content-space-between is-align-items-center mb-4 py-2 px-1">
-                    <span className="has-text-weight-medium has-text-danger">{selectedItems.length} item(s) selecionado(s)</span>
-                    <button className="button is-small is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button>
-                </div>
-            )}
-            
-            {/* Tabela de Cooperados */}
-            <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
-                <div className="table-container">
-                    <table className="table is-fullwidth is-hoverable is-striped is-size-7">
-                        <thead>
-                            <tr className="has-background-light">
-                                {isDeleteMode && <th style={{ width: '40px' }}></th>}
-                                <th>Nome do produtor</th>
-                                <th>Filiado</th>
-                                <th>Modalidade</th>
-                                <th>Quantidade cabeças</th>
-                                <th>Distância</th>
-                                <th className="has-text-centered">Certificado</th>
-                                <th className="has-text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {!loading && filteredCooperadosData.map(item => (
-                                <CooperadoListItem 
-                                    key={item.id} 
-                                    item={item} 
-                                    isDeleteMode={isDeleteMode} 
-                                    isSelected={selectedItems.includes(item.id)} 
-                                    onSelectItem={handleSelectItem}
-                                    onContactItem={handleOpenContactModal} 
-                                    onLocationItem={handleOpenLocationModal} 
-                                    onViewItem={handleOpenViewModal} 
-                                    onEditItem={handleOpenEditModal} 
-                                    onCalendarItem={handleOpenCalendarModal}
-                                />
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-          </div>
+      {/* TOAST ERRO (Exibido se o hook retornar erro) */}
+      <Collapse in={!!error}>
+        <Box sx={{ bgcolor: '#FDEDED', borderRadius: '4px', p: '8px 16px', display: 'flex', alignItems: 'flex-start', gap: 2, border: '1px solid #FFA1A1', mb: 3 }}>
+            <ErrorIcon sx={{ color: '#D32F2F', mt: 0.5 }} />
+            <Box sx={{ flex: 1 }}>
+                <Typography sx={{ color: '#5F2120', fontSize: 16, ...commonFont, fontWeight: 500 }}>Erro ao salvar</Typography>
+                <Typography sx={{ color: '#5F2120', fontSize: 14, ...commonFont, opacity: 0.8 }}>{error}</Typography>
+            </Box>
+        </Box>
+      </Collapse>
+
+      <Paper elevation={0} sx={{ flex: 1, border: '1px solid rgba(0,0,0,0.12)', borderRadius: '4px', bgcolor: '#FFFFFF', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <Box sx={{ pt: 4, px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+          <Tabs value={currentTab} sx={{ '& .MuiTab-root': { fontSize: '14px', fontWeight: 500, ...commonFont } }}>
+            <Tab label="PRODUTORES" component={NavLink} to="/logistica" />
+            <Tab label="TRANSPORTADORAS" component={NavLink} to="/transportadoras" />
+            <Tab label="AGENDA" component={NavLink} to="/agenda" />
+          </Tabs>
+        </Box>
+
+        {currentTab === 0 && (
+          <>
+            {/* 🛡️ NOVO LAYOUT DA TOOLBAR PADRONIZADO (Produtores) */}
+            <Box sx={{ p: '16px', display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                    <TextField 
+                        fullWidth 
+                        label="Buscar" 
+                        placeholder="Nome, email, etc..." 
+                        size="small" 
+                        value={searchTerm} 
+                        onChange={(e) => setSearchTerm(e.target.value)} 
+                        sx={{ '& .MuiOutlinedInput-root': { ...commonFont }, '& .MuiInputLabel-root': { ...commonFont } }}
+                    />
+                </Box>
+                
+                <Stack direction="row" spacing={1} alignItems="center">
+                   <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
+                     <FilterListIcon />
+                   </IconButton>
+                   <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
+                     <FileDownloadIcon />
+                   </IconButton>
+                   <Button 
+                       variant="contained" 
+                       startIcon={<AddIcon />} 
+                       onClick={() => openDrawer('create')} 
+                       sx={{ bgcolor: '#0072C3', height: 40, px: 3, ...commonFont }}
+                   >
+                       ADICIONAR
+                   </Button>
+                </Stack>
+            </Box>
+
+            {isLoading && <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>}
+
+            <Box sx={{ flex: 1, overflowX: 'auto', p: '0 16px' }}>
+              <Box sx={{ width: 'max-content' }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: tableGrid, height: 56, alignItems: 'center', bgcolor: 'rgba(0, 0, 0, 0.04)', px: 2 }}>
+                  {['Nome do produtor', 'N° do estabelecimento', 'Filiada', 'Modalidade', 'Quantidade de cabeças', 'Distancia', 'Certificado', 'Participa do projeto', 'Quantidades de lagoas', 'Volume das lagoas', 'Restrições operacionais', 'Ações'].map(c => <Typography key={c} sx={{ fontSize: 12, fontWeight: 600, ...commonFont }}>{c}</Typography>)}
+                </Box>
+                {producers
+                  .filter(p => (p.nomeProdutor || '').toLowerCase().includes(searchTerm.toLowerCase()))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map(p => (
+                  <Box key={p.id} sx={{ display: 'grid', gridTemplateColumns: tableGrid, minHeight: 52, alignItems: 'center', px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+                    <Typography sx={{ fontSize: 14 }}>{p.nomeProdutor}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.numEstabelecimento}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.filiada}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.modalidade}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.cabecasAlojadas || 0}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.distancia || '-'}</Typography>
+                    <Box><Chip label={p.certificado} size="small" sx={{ bgcolor: p.certificado === 'Sim' || p.certificado === 'Ativo' ? '#F1F9EE' : '#FFEDEE', color: p.certificado === 'Sim' || p.certificado === 'Ativo' ? '#70BF54' : '#E4464E', borderRadius: '4px' }} /></Box>
+                    <Box><Chip label={p.participaProjeto} size="small" sx={{ bgcolor: '#F1F9EE', color: '#70BF54', borderRadius: '4px' }} /></Box>
+                    <Typography sx={{ fontSize: 14 }}>{p.qtdLagoas || '-'}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.volLagoas || '-'}</Typography>
+                    <Typography sx={{ fontSize: 14 }}>{p.restricoesOperacionais || 'Nenhuma'}</Typography>
+                    <Stack direction="row">
+                      <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => openDrawer('view', p)}>
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => openDrawer('edit', p)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+            <TablePagination
+              component="div"
+              count={totalItems}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(event) => {
+                const value = Number.parseInt(event.target.value, 10);
+                setRowsPerPage(value);
+                setPage(0);
+              }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Linhas por página"
+            />
+          </>
         )}
 
-        {/* TAB TRANSPORTADORAS */}
-        {activeTab === 'transportadora' && <div className="container is-fluid px-0"><TransportadoraList /></div>}
+          {currentTab === 1 && (
+              <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
+                  <TransportadoraList />
+              </Box>
+          )}
 
-        {/* TAB AGENDA */}
-        {activeTab === 'agenda' && (
-          <div className="container is-fluid px-0">
-              <div className="is-flex is-justify-content-space-between is-align-items-center mb-5 flex-wrap" style={{ gap: '10px' }}>
-                <div className="is-flex is-align-items-center gap-2">
-                    <div className="control has-icons-right">
-                        <input className="input" type="text" placeholder="Buscar na agenda..." style={{ width: '250px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                        <span className="icon is-right"><MdSearch /></span>
-                    </div>
-                    <div className="field has-addons mb-0 ml-4">
-                        <div className="control"><button className="button is-white border" onClick={handlePrevWeek} title="Semana Anterior"><span className="icon"><MdChevronLeft /></span></button></div>
-                        <div className="control"><button className="button is-white border" onClick={handleToday} title="Semana Atual"><span className="has-text-weight-medium">Hoje</span></button></div>
-                        <div className="control"><button className="button is-white border" onClick={handleNextWeek} title="Próxima Semana"><span className="icon"><MdChevronRight /></span></button></div>
-                    </div>
-                    <span className="is-size-7 has-text-grey ml-2 is-hidden-mobile">Semana {format(startDate, 'w', { locale: ptBR })}</span>
-                </div>
-                <div className="buttons">
-                    <button className="button is-white border" onClick={() => handleExport([...plannedAgenda, ...realizedAgenda], 'Export_Agenda')} title="Exportar para Excel (CSV)">
-                        <span className="icon has-text-grey-dark"><MdFileDownload /></span><span>Exportar</span>
-                    </button>
-                    <button className="button is-white border" onClick={() => setIsReplicateWeekOpen(true)} title="Replicar semana">
-                        <span className="icon has-text-grey"><MdContentCopy /></span><span>Semana</span>
-                    </button>
-                    <button className="button is-white border" onClick={() => setIsReplicateMonthOpen(true)} title="Replicar mês">
-                        <span className="icon has-text-grey"><MdDateRange /></span><span>Mês</span>
-                    </button>
-                    <button className={`button is-white border ${isDeleteMode ? 'is-danger' : ''}`} onClick={() => setIsDeleteMode(!isDeleteMode)}>
-                        <span className="icon"><MdDelete /></span>
-                    </button>
-                    <button className="button is-primary border-0" style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} onClick={handleOpenAgendaAdd}>
-                        <span className="icon"><MdAdd /></span><span>Adicionar</span>
-                    </button>
-                </div>
-            </div>
-            
-            {/* BARRA DE EXCLUSÃO AGENDA (NOVO FORMATO) */}
-            {isDeleteMode && selectedItems.length > 0 && (
-                <div className="is-flex is-justify-content-space-between is-align-items-center mb-4 py-2 px-1">
-                    <span className="has-text-weight-medium has-text-danger">{selectedItems.length} item(s) selecionado(s)</span>
-                    <button className="button is-small is-danger" onClick={() => setIsModalOpen(true)}>Excluir</button>
-                </div>
-            )}
+          {/* ABA 2: AGENDA */}
+          {currentTab === 2 && (
+              <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
+                  <AgendaList />
+              </Box>
+          )}
 
-            <div className="mb-6">
-                <p className="is-size-6 mb-2 has-text-grey">Planejado no período: <strong>{formattedPeriod}</strong></p>
-                <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
-                   {!loading && <AgendaTable data={plannedAgenda} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={handleConfirmDelete} onUpdateItem={handleUpdateAgendaItem} showActions={false} referenceDate={startDate} />}
-                </div>
-            </div>
-
-            <div className="mb-6">
-                <p className="is-size-6 mb-2 has-text-grey">Realizado no período: <strong>{formattedPeriod}</strong></p>
-                <div className="box p-0 shadow-none border" style={{ boxShadow: 'none', border: '1px solid #dbdbdb' }}>
-                   {!loading && <AgendaTable data={realizedAgenda} isDeleteMode={isDeleteMode} selectedItems={selectedItems} onSelectItem={handleSelectItem} onConfirmDelete={handleConfirmDelete} readOnly={true} showActions={false} referenceDate={startDate} />}
-                </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modais */}
-      <div className={`modal ${isModalOpen ? 'is-active' : ''}`}>
-        <div className="modal-background" onClick={() => setIsModalOpen(false)}></div>
-        <div className="modal-card">
-          <header className="modal-card-head"><p className="modal-card-title">Confirmar Exclusão</p></header>
-          <section className="modal-card-body"><p>Você tem certeza?</p></section>
-          <footer className="modal-card-foot"><button className="button" onClick={() => setIsModalOpen(false)}>Cancelar</button><button className="button is-danger" onClick={handleConfirmDelete}>Excluir</button></footer>
-        </div>
-      </div>
-
-      <CooperadoContactModal isActive={isContactModalActive} onClose={closeAllModals} data={selectedCooperado} />
-      <CooperadoLocationModal isActive={isLocationModalActive} onClose={closeAllModals} data={selectedCooperado} />
-      <CooperadoInfoModal isActive={isInfoModalActive} onClose={closeAllModals} data={selectedCooperado} onOpenMap={handleOpenMapFromInfo} />
-      <CooperadoEditModal isActive={isEditModalActive} onClose={closeAllModals} data={selectedCooperado} onSave={handleSaveCooperado} />
-      <CooperadoCalendarModal isActive={isCalendarModalActive} onClose={closeAllModals} onSave={handleSaveCalendar} data={selectedCooperado} title={selectedCooperado?.id === null ? "Novo Agendamento Geral" : undefined} />
-      <CooperadoCreateModal isActive={isCreateModalActive} onClose={closeAllModals} onSave={handleSaveNewCooperado} />
-      <ReplicateWeekModal isActive={isReplicateWeekOpen} onClose={() => setIsReplicateWeekOpen(false)} onConfirm={confirmReplicateWeek} />
-      <ReplicateMonthModal isActive={isReplicateMonthOpen} onClose={() => setIsReplicateMonthOpen(false)} onConfirm={confirmReplicateMonth} />
-    </div>
+      </Paper>
+      <ProdutorDrawer
+        key={isDrawerOpen ? 'open' : 'closed'}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSave}
+        mode={drawerMode}
+        initialData={selectedProducerFullData || (selectedProducer ? toFormInput(selectedProducer) : null)}
+      />
+    </Box>
   );
 };
 

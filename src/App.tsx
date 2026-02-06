@@ -22,12 +22,12 @@ import NewPasswordScreen from './screens/auth/NewPasswordScreen';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext'; // Mantendo sua importação original
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
   
-  // ALTERAÇÃO: Inicia sempre colapsado (false)
+  // Sidebar inicia sempre colapsado (false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (!isAuthenticated) {
@@ -67,7 +67,12 @@ const AppContent = () => {
         }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            
+            {/* ROTAS DE LOGÍSTICA: Agora mapeadas para não redirecionar para a Home */}
             <Route path="/logistica" element={<Logistica />} />
+            <Route path="/transportadoras" element={<Logistica />} />
+            <Route path="/agenda" element={<Logistica />} />
+
             <Route path="/portaria" element={<Portaria />} />
             <Route path="/abastecimentos" element={<Abastecimentos />} />
             <Route path="/abastecimento-report" element={<AbastecimentoReport />} />

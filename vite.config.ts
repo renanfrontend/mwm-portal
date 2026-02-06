@@ -13,6 +13,6 @@ export default defineConfig({
     css: true,
   },
   server: {
-    // No 'deps' property here; remove invalid configuration
+    // Proxy removed to use direct CORS connection
   },
 });
