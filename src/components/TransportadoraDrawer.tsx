@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, TextField, IconButton, Button, 
-  Stack, Drawer, MenuItem, Chip 
+  Stack, Drawer, MenuItem, Chip, CircularProgress, Alert 
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon } from '@mui/icons-material';
+import { useTransportadoraMutation } from '../hooks/useTransportadoraMutation';
+import type { TransportadoraFormInput } from '../types/transportadora';
+import { FUEL_TYPE_OPTIONS, VEHICLE_TYPE_OPTIONS } from '../constants/transportadoraOptions';
 
 const COMMON_FONT_STYLE = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
 const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClose, onSave, initialData }) => {
+  const { createTransportadora, updateTransportadora, isLoading, error } = useTransportadoraMutation();
+  
   // 🛡️ ESTADO COMPLETO: Inicializado com strings vazias para garantir que todos os campos apareçam e a label não flutue sozinha
   const [form, setForm] = useState<any>({ 
     cnpj: '', nomeFantasia: '', razaoSocial: '', categoria: '', 
@@ -16,7 +21,12 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
   });
   
   const [showVehicleFields, setShowVehicleFields] = useState(false);
-  const [currentVehicle, setCurrentVehicle] = useState({ tipo: '', placa: '', abastecimento: '', capacidade: '' });
+  const [currentVehicle, setCurrentVehicle] = useState({ 
+    tipo: '', 
+    placa: '', 
+    abastecimento: '', 
+    capacidade: '' 
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -25,6 +35,12 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
         { cnpj: '', nomeFantasia: '', razaoSocial: '', categoria: '', enderecoCompleto: '', cidade: '', uf: '', nomeContato: '', telefone: '', email: '', veiculos: [] }
       );
       setShowVehicleFields(false);
+      setCurrentVehicle({ 
+        tipo: '', 
+        placa: '', 
+        abastecimento: '', 
+        capacidade: '' 
+      });
     }
   }, [isOpen, initialData]);
 
@@ -40,10 +56,47 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
   };
 
   const handleAddVehicle = () => {
-    if (!showVehicleFields) { setShowVehicleFields(true); return; }
+    if (!showVehicleFields) { 
+      setShowVehicleFields(true); 
+      return; 
+    }
     if (!currentVehicle.tipo || !currentVehicle.placa) return;
     setForm((prev: any) => ({ ...prev, veiculos: [...(prev.veiculos || []), { ...currentVehicle, id: Math.random() }] }));
-    setCurrentVehicle({ tipo: '', placa: '', abastecimento: '', capacidade: '' });
+    setCurrentVehicle({ 
+      tipo: '', 
+      placa: '', 
+      abastecimento: '', 
+      capacidade: '' 
+    });
+  };
+
+  const handleSave = async () => {
+    // Mapeia form para formato da API
+    const payload: TransportadoraFormInput = {
+      nomeFantasia: form.nomeFantasia,
+      razaoSocial: form.razaoSocial,
+      cnpj: form.cnpj,
+      categoria: form.categoria,
+      endereco: form.enderecoCompleto,
+      cidade: form.cidade,
+      uf: form.uf,
+      telefoneComercial: form.telefone,
+      emailComercial: form.email,
+      veiculos: form.veiculos || []
+    };
+
+    let result;
+    if (initialData?.id) {
+      // UPDATE
+      result = await updateTransportadora(initialData.id, payload);
+    } else {
+      // CREATE
+      result = await createTransportadora(payload);
+    }
+
+    if (result) {
+      onSave(); // Fecha drawer e recarrega lista
+    }
   };
 
   return (
@@ -65,6 +118,13 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
 
       {/* BODY SCROLLABLE: Renderiza sempre, independente de ser visualização ou edição */}
       <Box sx={{ flex: 1, p: '20px', overflowY: 'auto', pb: '100px' }}>
+        {/* Exibe erro se houver */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <Stack spacing={3}>
           <Typography sx={{ fontSize: 24, fontWeight: 600, ...COMMON_FONT_STYLE }}>Identificação</Typography>
           <Stack direction="row" spacing={2}>
@@ -103,14 +163,19 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
             <Stack spacing={2}>
                 <Stack direction="row" spacing={2}>
                     <TextField fullWidth select label="Tipo de veículo" variant="outlined" value={currentVehicle.tipo} onChange={e => setCurrentVehicle({...currentVehicle, tipo: e.target.value})} sx={fieldStyle}>
-                        <MenuItem value="Caminhão Truck">Caminhão Truck</MenuItem>
-                        <MenuItem value="Carreta">Carreta</MenuItem>
+                        <MenuItem value="">Selecione</MenuItem>
+                        {VEHICLE_TYPE_OPTIONS.map(option => (
+                          <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        ))}
                     </TextField>
                     <TextField fullWidth label="Placa" variant="outlined" value={currentVehicle.placa} onChange={e => setCurrentVehicle({...currentVehicle, placa: e.target.value.toUpperCase()})} sx={fieldStyle} />
                 </Stack>
                 <Stack direction="row" spacing={2}>
                     <TextField fullWidth select label="Tipo de abastecimento" variant="outlined" value={currentVehicle.abastecimento} onChange={e => setCurrentVehicle({...currentVehicle, abastecimento: e.target.value})} sx={fieldStyle}>
-                        <MenuItem value="Diesel">Diesel</MenuItem>
+                        <MenuItem value="">Selecione</MenuItem>
+                        {FUEL_TYPE_OPTIONS.map(option => (
+                          <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        ))}
                     </TextField>
                     <TextField fullWidth label="Capacidade máxima(L)" variant="outlined" type="number" value={currentVehicle.capacidade} onChange={e => setCurrentVehicle({...currentVehicle, capacidade: e.target.value})} sx={fieldStyle} />
                 </Stack>
@@ -124,8 +189,24 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
       {/* 🛡️ FOOTER BLINDADO: Removido apenas os botões se isReadOnly for true */}
       {!isReadOnly && (
         <Box sx={{ position: 'absolute', bottom: 0, width: '100%', p: '24px 20px', bgcolor: 'white', display: 'flex', gap: 2, borderTop: '1px solid rgba(0,0,0,0.12)' }}>
-          <Button fullWidth variant="outlined" onClick={onClose} sx={{ height: 48, color: 'rgba(0,0,0,0.6)', ...COMMON_FONT_STYLE }}>CANCELAR</Button>
-          <Button fullWidth variant="contained" onClick={() => onSave(form)} sx={{ height: 48, bgcolor: '#0072C3', ...COMMON_FONT_STYLE }}>SALVAR</Button>
+          <Button 
+            fullWidth 
+            variant="outlined" 
+            onClick={onClose} 
+            disabled={isLoading}
+            sx={{ height: 48, color: 'rgba(0,0,0,0.6)', ...COMMON_FONT_STYLE }}
+          >
+            CANCELAR
+          </Button>
+          <Button 
+            fullWidth 
+            variant="contained" 
+            onClick={handleSave} 
+            disabled={isLoading}
+            sx={{ height: 48, bgcolor: '#0072C3', ...COMMON_FONT_STYLE }}
+          >
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'SALVAR'}
+          </Button>
         </Box>
       )}
     </Drawer>

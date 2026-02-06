@@ -129,8 +129,6 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
             {data?.veiculos && data.veiculos.length > 0 ? (
               data.veiculos.map((vehicle, idx) => {
                 const isSelected = selectedIdx === idx;
-                const v = vehicle as any;
-                
                 const cardStyle = {
                   cursor: 'pointer',
                   border: isSelected ? '2px solid #4f46e5' : '1px solid #ededed',
@@ -151,28 +149,28 @@ const TransportadoraVehiclesModal: React.FC<Props> = ({
                     <div className="columns is-mobile is-variable is-1 mb-2">
                       <div className="column is-8 pb-0">
                         <p style={labelStyle}>Tipo de veículo</p>
-                        <p style={valueStyleMain(isSelected)}>{v.tipo}</p>
+                        <p style={valueStyleMain(isSelected)}>{vehicle.tipo}</p>
                       </div>
                       <div className="column is-4 has-text-right pb-0">
                         <p style={{...labelStyle, justifyContent: 'flex-end'}}>Capacidade</p>
-                        <p style={valueStyleMain(isSelected)}>{v.capacidade}</p>
+                        <p style={valueStyleMain(isSelected)}>{vehicle.capacidade}</p>
                       </div>
                     </div>
 
                     <div className="columns is-mobile is-variable is-1 mb-0 mt-2 pt-2" style={{ borderTop: '1px dashed #f0f0f0' }}>
                       <div className="column is-4 pt-0">
                         <p style={labelStyle}><MdDirectionsCar className="mr-1" size={14}/> Placa</p>
-                        <p style={valueStyleSecondary(isSelected)}>{v.placa || '-'}</p>
+                        <p style={valueStyleSecondary(isSelected)}>{vehicle.placa || '-'}</p>
                       </div>
                       <div className="column is-4 has-text-centered pt-0">
                         <p style={{...labelStyle, justifyContent: 'center'}}><MdLocalGasStation className="mr-1" size={14}/> Combustível</p>
-                        <p style={valueStyleSecondary(isSelected)}>{v.tipoAbastecimento || 'Diesel'}</p>
+                        <p style={valueStyleSecondary(isSelected)}>{vehicle.tipoAbastecimento || 'Diesel'}</p>
                       </div>
                       <div className="column is-4 has-text-right pt-0">
-                        {v.tipoAbastecimento === 'Biometano' ? (
+                        {vehicle.tipoAbastecimento === 'Biometano' ? (
                           <>
                             <p style={{...labelStyle, justifyContent: 'flex-end'}}><MdConfirmationNumber className="mr-1" size={14}/> TAG</p>
-                            <p style={valueStyleSecondary(isSelected)}>{v.tag || 'N/A'}</p>
+                            <p style={valueStyleSecondary(isSelected)}>{vehicle.tag || 'N/A'}</p>
                           </>
                         ) : (
                           <div style={{ height: '100%' }}></div>
