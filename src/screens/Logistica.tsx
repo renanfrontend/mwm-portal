@@ -4,7 +4,7 @@ import {
   Button, Link, Stack, Chip, Paper, Collapse, CircularProgress, TablePagination
 } from '@mui/material';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Close as CloseIcon, CheckCircle, Home as HomeIcon, MoreHoriz as MoreHorizIcon, Add as AddIcon, Visibility as VisibilityIcon, Edit as EditIcon, Error as ErrorIcon, FilterList as FilterListIcon, FileDownload as FileDownloadIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { CloseIcon, CheckCircle, HomeIcon, MoreHorizIcon, AddIcon, VisibilityIcon, EditIcon, ErrorIcon, FilterAlt, FileDownloadIcon, Delete } from '../constants/muiIcons';
 
 import ProdutorDrawer from '../components/ProdutorDrawer';
 import { useCooperadoMutation } from '../hooks/useCooperadoMutation';
@@ -50,7 +50,7 @@ const Logistica: React.FC = () => {
   }, [producers.length, page, rowsPerPage]);
 
   const currentTab = location.pathname.includes('transportadora') ? 1 : location.pathname.includes('agenda') ? 2 : 0;
-  const tabLabel = currentTab === 0 ? 'Produtores' : currentTab === 1 ? 'Transportadoras' : 'Agenda';
+  const tabLabel = currentTab === 0 ? 'Produtor' : currentTab === 1 ? 'Transportadora' : 'Agenda';
 
   const toFormInput = (producer: ProdutorListItem): ProdutorFormInput => ({
     cpfCnpj: '', // TODO: Idealmente, buscar detalhes via API se não estiver no grid
@@ -138,12 +138,15 @@ const Logistica: React.FC = () => {
       setIsDrawerOpen(false);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 6000);
-    } catch (e: any) {
+    } catch (err) {
+      const unknownErr = err as unknown;
+      const error = unknownErr instanceof Error ? unknownErr : new Error('Erro desconhecido');
+      const errorWithResponse = error as unknown as Record<string, unknown>;
       console.error("❌ Falha ao salvar/editar cooperado:", {
-        erro: e,
-        mensagem: e.message,
-        resposta: e.response?.data,
-        status: e.response?.status
+        erro: error,
+        mensagem: error.message,
+        resposta: (errorWithResponse.response as Record<string, unknown>)?.data || 'N/A',
+        status: (errorWithResponse.response as Record<string, unknown>)?.status || 'N/A'
       });
     }
   };
@@ -190,15 +193,15 @@ const Logistica: React.FC = () => {
       <Paper elevation={0} sx={{ flex: 1, border: '1px solid rgba(0,0,0,0.12)', borderRadius: '4px', bgcolor: '#FFFFFF', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Box sx={{ pt: 4, px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
           <Tabs value={currentTab} sx={{ '& .MuiTab-root': { fontSize: '14px', fontWeight: 500, ...commonFont } }}>
-            <Tab label="PRODUTORES" component={NavLink} to="/logistica" />
-            <Tab label="TRANSPORTADORAS" component={NavLink} to="/transportadoras" />
+            <Tab label="PRODUTOR" component={NavLink} to="/logistica" />
+            <Tab label="TRANSPORTADORA" component={NavLink} to="/transportadoras" />
             <Tab label="AGENDA" component={NavLink} to="/agenda" />
           </Tabs>
         </Box>
 
         {currentTab === 0 && (
           <>
-            {/* 🛡️ NOVO LAYOUT DA TOOLBAR PADRONIZADO (Produtores) */}
+            {/* 🛡️ NOVO LAYOUT DA TOOLBAR PADRONIZADO (Produtor) */}
             <Box sx={{ p: '16px', display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
                     <TextField 
@@ -214,10 +217,13 @@ const Logistica: React.FC = () => {
                 
                 <Stack direction="row" spacing={1} alignItems="center">
                    <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
-                     <FilterListIcon />
+                     <Delete />
                    </IconButton>
                    <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
                      <FileDownloadIcon />
+                   </IconButton>
+                   <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
+                     <FilterAlt />
                    </IconButton>
                    <Button 
                        variant="contained" 

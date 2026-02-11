@@ -1,21 +1,36 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Box, Typography, IconButton, Stack, CircularProgress, TextField, Button } from '@mui/material';
-import { Visibility, Edit, Add, FilterList, FileDownload, Delete } from '@mui/icons-material';
-import { fetchTransportadorasData } from '../services/api';
+import { Visibility, Edit, Add, FilterAlt, FileDownload, Delete } from '../constants/muiIcons';
+import { TransportadoraService } from '../services/transportadoraService';
+import type { TransportadoraListItem } from '../types/transportadora';
 import TransportadoraDrawer from './TransportadoraDrawer';
 
 const COMMON_FONT_STYLE = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
 export const TransportadoraList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<TransportadoraListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [drawerState, setDrawerState] = useState<{ open: boolean; item: any; readOnly: boolean }>({ open: false, item: null, readOnly: false });
 
-  useEffect(() => {
+  const loadTransportadoras = useCallback(async () => {
     setLoading(true);
-    fetchTransportadorasData().then(res => { setData(res || []); setLoading(false); }).catch(() => setLoading(false));
+    try {
+      console.log('🚀 Carregando transportadoras da API...');
+      const response = await TransportadoraService.list(1, 9999); // Carrega todas
+      console.log('✅ Transportadoras carregadas:', response);
+      setData(response.items || []);
+    } catch (err) {
+      console.error('❌ Erro ao carregar transportadoras:', err);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadTransportadoras();
+  }, [loadTransportadoras]);
 
   const handleAdd = () => setDrawerState({ open: true, item: null, readOnly: false });
 
@@ -38,25 +53,25 @@ export const TransportadoraList: React.FC = () => {
               />
           </Box>
           
-          <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
             <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
-                <Delete />
+              <Delete />
             </IconButton>
             <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
-                <FileDownload />
+              <FileDownload />
             </IconButton>
             <IconButton disabled sx={{ color: 'rgba(0, 0, 0, 0.26)', padding: '8px' }}>
-                <FilterList />
+              <FilterAlt />
             </IconButton>
             <Button 
-                variant="contained" 
-                startIcon={<Add />} 
-                onClick={handleAdd} 
-                sx={{ bgcolor: '#0072C3', height: 40, px: 3, ...COMMON_FONT_STYLE }}
+              variant="contained" 
+              startIcon={<Add />} 
+              onClick={handleAdd} 
+              sx={{ bgcolor: '#0072C3', height: 40, px: 3, ...COMMON_FONT_STYLE }}
             >
-                ADICIONAR
+              ADICIONAR
             </Button>
-          </Stack>
+            </Stack>
       </Box>
 
       <Box sx={{ flex: 1, overflowX: 'auto', px: '16px' }}>
@@ -68,10 +83,10 @@ export const TransportadoraList: React.FC = () => {
             <Box key={item.id} sx={{ display: 'grid', gridTemplateColumns: grid, minHeight: '52px', alignItems: 'center', px: '16px', borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
               <Typography sx={{ fontSize: 14, ...COMMON_FONT_STYLE }}>{item.nomeFantasia}</Typography>
               <Typography sx={{ fontSize: 14, ...COMMON_FONT_STYLE }}>{item.cnpj}</Typography>
-              <Typography sx={{ fontSize: 14, ...COMMON_FONT_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.logradouro}</Typography>
+              <Typography sx={{ fontSize: 14, ...COMMON_FONT_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.endereco}</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                 <Box sx={{ height: 32, minWidth: 32, px: 1, bgcolor: '#00518A', borderRadius: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Typography sx={{ color: 'white', fontSize: 13, ...COMMON_FONT_STYLE }}>{item.veiculos?.length || 0}</Typography>
+                  <Typography sx={{ color: 'white', fontSize: 13, ...COMMON_FONT_STYLE }}>{item.quantidadeVeiculos ?? item.veiculos?.length ?? 0}</Typography>
                 </Box>
               </Box>
               <Stack direction="row" spacing={0.5}>
@@ -82,7 +97,17 @@ export const TransportadoraList: React.FC = () => {
           ))}
         </Box>
       </Box>
-      <TransportadoraDrawer key={drawerState.open ? (drawerState.item?.id || 'new') : 'closed'} isOpen={drawerState.open} isReadOnly={drawerState.readOnly} onClose={() => setDrawerState({ open: false, item: null, readOnly: false })} onSave={() => setDrawerState({ open: false, item: null, readOnly: false })} initialData={drawerState.item} />
+      <TransportadoraDrawer 
+        key={drawerState.open ? (drawerState.item?.id || 'new') : 'closed'} 
+        isOpen={drawerState.open} 
+        isReadOnly={drawerState.readOnly} 
+        onClose={() => setDrawerState({ open: false, item: null, readOnly: false })} 
+        onSave={() => {
+          setDrawerState({ open: false, item: null, readOnly: false });
+          loadTransportadoras(); // Recarrega após salvar
+        }} 
+        initialData={drawerState.item} 
+      />
     </Box>
   );
 };

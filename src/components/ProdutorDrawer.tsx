@@ -3,7 +3,7 @@ import {
   Box, Typography, TextField, IconButton, Button, 
   Stack, Drawer, MenuItem, Autocomplete 
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { CloseIcon } from '../constants/muiIcons';
 import type { ProdutorFormInput } from '../types/cooperado';
 
 const initialState: ProdutorFormInput = {

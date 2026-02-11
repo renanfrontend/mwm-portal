@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdSave, MdDirectionsCar, MdLocalGasStation, MdConfirmationNumber } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import type { VeiculoInfo } from '../types/models';
+import { FUEL_TYPE_OPTIONS, VEHICLE_TYPE_OPTIONS } from '../constants/transportadoraOptions';
 
 interface Props {
   isActive: boolean;
@@ -9,36 +10,22 @@ interface Props {
   onSave: (veiculo: VeiculoInfo) => void;
 }
 
-const vehicleTypes = [
-  "Caminhão Truck",
-  "Carreta",
-  "Bitrem",
-  "Vuc",
-  "Utilitário",
-  "Empilhadeira"
-];
-
-const fuelTypes = [
-  "Diesel",
-  "Biometano"
-];
-
 const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    tipo: 'Caminhão Truck',
+    tipo: '',
     capacidade: '',
     placa: '',
-    tipoAbastecimento: 'Diesel',
+    tipoAbastecimento: '',
     tag: ''
   });
 
   useEffect(() => {
     if (isActive) {
       setFormData({
-        tipo: 'Caminhão Truck',
+        tipo: '',
         capacidade: '',
         placa: '',
-        tipoAbastecimento: 'Diesel',
+        tipoAbastecimento: '',
         tag: ''
       });
     }
@@ -98,7 +85,10 @@ const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onS
             <div className="control">
               <div className="select is-fullwidth">
                 <select name="tipo" value={formData.tipo} onChange={handleChange}>
-                  {vehicleTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                  <option value="">Selecione</option>
+                  {VEHICLE_TYPE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -143,7 +133,10 @@ const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onS
             <div className="control has-icons-left">
               <div className="select is-fullwidth">
                 <select name="tipoAbastecimento" value={formData.tipoAbastecimento} onChange={handleChange}>
-                  {fuelTypes.map(f => <option key={f} value={f}>{f}</option>)}
+                  <option value="">Selecione</option>
+                  {FUEL_TYPE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </div>
               <span className="icon is-small is-left"><MdLocalGasStation /></span>
