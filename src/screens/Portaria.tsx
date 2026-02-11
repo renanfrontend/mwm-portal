@@ -1,149 +1,70 @@
-// src/screens/Portaria.tsx
-
 import React, { useState } from 'react';
-import { MdSearch, MdFilterList, MdDelete, MdAdd, MdCalendarToday, MdArrowBack } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { Box, Typography, Link, Collapse, IconButton, Paper } from '@mui/material';
+import { NavLink } from 'react-router-dom';
+import { 
+  Close as CloseIcon, CheckCircle, Home as HomeIcon, 
+  MoreHoriz as MoreHorizIcon 
+} from '@mui/icons-material';
+import { PortariaList } from '../components/PortariaList';
 
-import { type PortariaItem } from '../types/models';
-import { PortariaTable } from '../components/PortariaTable';
-import PortariaRegisterModal from '../components/PortariaRegisterModal';
-import PortariaCheckInModal from '../components/PortariaCheckInModal';
+const commonFont = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
 const Portaria: React.FC = () => {
-  const navigate = useNavigate(); // Hook para navegação
-  const [data, setData] = useState<PortariaItem[]>([]);
-  
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [isCheckInOpen, setIsCheckInOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<PortariaItem | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState({ title: '', message: '' });
 
-  const handleOpenRegister = () => setIsRegisterOpen(true);
-
-  const handleSaveRegister = (newItem: PortariaItem) => {
-    setData(prev => [...prev, newItem]);
-    toast.success("Registro de entrada criado com sucesso!");
-  };
-
-  const handleOpenCheckIn = (item: PortariaItem) => {
-    setSelectedItem(item);
-    setIsCheckInOpen(true);
-  };
-
-  const handleConfirmCheckIn = (entrada: string, saida: string) => {
-    if (!selectedItem) return;
-
-    const novoStatus = (entrada && saida) ? 'Concluído' : 'Pesagem';
-
-    setData(prev => prev.map(item => 
-      item.id === selectedItem.id 
-        ? { 
-            ...item, 
-            balancaEntrada: entrada, 
-            balancaSaida: saida, 
-            status: novoStatus 
-          } 
-        : item
-    ));
-
-    toast.success(`Pesagem registrada para ${selectedItem.placa}`);
-    setIsCheckInOpen(false);
-    setSelectedItem(null);
+  const handleTriggerSuccess = (title: string, message: string) => {
+    setToastConfig({ title, message });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 8000);
   };
 
   return (
-    // Container Principal ajustado para Flex Column (Padrão das outras telas)
-    <div className="screen-container" style={{ backgroundColor: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', p: '24px', bgcolor: '#F5F5F5', overflow: 'hidden' }}>
       
-      {/* CABEÇALHO PADRÃO */}
-      <div className="box is-radiusless mb-0" style={{ borderBottom: '1px solid #dbdbdb', padding: '0.75rem 1rem', flexShrink: 0 }}>
-        <div className="level is-mobile">
-          <div className="level-left">
-            <div className="buttons">
-              <button className="button is-white border mr-2" onClick={() => navigate(-1)}>
-                <span className="icon"><MdArrowBack size={24} /></span>
-              </button>
-              <span className="title is-4 mb-0" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>Portaria</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 🛡️ HEADER E BREADCRUMB NO PADRÃO LOGÍSTICA */}
+      <Box sx={{ alignSelf: 'stretch', mb: '12px', flexDirection: 'column', display: 'flex', gap: '8px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link component={NavLink} to="/" sx={{ display: 'flex', color: 'rgba(0, 0, 0, 0.54)' }}>
+            <HomeIcon sx={{ fontSize: '18px' }} />
+          </Link>
+          <Typography sx={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: '16px' }}>/</Typography>
+          <Box sx={{ bgcolor: '#F3F4F5', px: '6px', py: '2px', borderRadius: '2px', display: 'flex', alignItems: 'center' }}>
+            <MoreHorizIcon sx={{ fontSize: '16px', color: 'rgba(0,0,0,0.54)' }} />
+          </Box>
+          <Typography sx={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: '16px' }}>/</Typography>
+          <Typography sx={{ color: 'black', fontSize: '16px', ...commonFont }}>Logística / Portaria</Typography>
+        </Box>
+        <Typography sx={{ fontSize: '48px', fontWeight: 400, color: 'black', ...commonFont }}>
+          Portaria
+        </Typography>
+      </Box>
 
-      {/* ÁREA DE CONTEÚDO COM SCROLL */}
-      <div className="screen-content p-5" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        
-        {/* Barra de Ferramentas (Search, Filter, Add) */}
-        <div className="is-flex is-justify-content-space-between is-align-items-center mb-5">
-          <div className="field has-addons mb-0">
-            <div className="control has-icons-right">
-              <input 
-                className="input" 
-                type="text" 
-                placeholder="Digite nome, empresa, veiculo..." 
-                style={{ width: '300px' }}
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-              <span className="icon is-right"><MdSearch /></span>
-            </div>
-          </div>
+      {/* 🛡️ MENSAGEM DE SUCESSO INLINE (FORA DO CONTAINER) */}
+      <Collapse in={showToast}>
+        <Box sx={{ 
+          bgcolor: '#F1F9EE', borderRadius: '4px', p: '12px 16px', mb: 3,
+          display: 'flex', alignItems: 'flex-start', gap: 2, border: '1px solid rgba(112, 191, 84, 0.2)' 
+        }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={{ color: '#2F5023', fontSize: 16, fontWeight: 500, ...commonFont }}>{toastConfig.title}</Typography>
+            <Typography sx={{ color: '#2F5023', fontSize: 14, ...commonFont, opacity: 0.8 }}>{toastConfig.message}</Typography>
+          </Box>
+          <IconButton onClick={() => setShowToast(false)} size="small" sx={{ color: '#2F5023' }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Collapse>
 
-          <div className="buttons">
-            <button className="button is-white border"><MdDelete /></button>
-            <button className="button is-white border">
-              <span className="icon"><MdFilterList /></span>
-              <span>Filtrar</span>
-            </button>
-            <button 
-              className="button is-primary border-0" 
-              style={{ backgroundColor: '#4f46e5', color: '#ffffff' }} 
-              onClick={handleOpenRegister}
-            >
-              <span className="icon"><MdAdd /></span>
-              <span>Adicionar</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Data ou Filtros */}
-        <div className="mb-5">
-          <p className="has-text-grey">Data: de 01/01/2026</p>
-        </div>
-
-        {/* Lista ou Estado Vazio */}
-        {data.length === 0 ? (
-          <div className="has-text-centered py-6">
-            <div className="icon is-large has-text-grey-light mb-3">
-               <MdCalendarToday size={48} />
-            </div>
-            <h3 className="title is-5 has-text-grey">Não há registros lançados</h3>
-            <p className="subtitle is-6 has-text-grey-light mb-4">
-              Você pode incluir manualmente o registro de entrada.
-            </p>
-          </div>
-        ) : (
-          <PortariaTable 
-            data={data}
-            onCheckInClick={handleOpenCheckIn}
-          />
-        )}
-      </div>
-
-      {/* Modais */}
-      <PortariaRegisterModal 
-        isActive={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
-        onSave={handleSaveRegister}
-      />
-
-      <PortariaCheckInModal 
-        isActive={isCheckInOpen}
-        data={selectedItem}
-        onClose={() => setIsCheckInOpen(false)}
-        onConfirm={handleConfirmCheckIn}
-      />
-    </div>
+      {/* 🛡️ CONTAINER BRANCO (Paper elevation 1) */}
+      <Paper elevation={0} sx={{ 
+        flex: 1, border: '1px solid rgba(0,0,0,0.12)', borderRadius: '4px', 
+        bgcolor: '#FFFFFF', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0px 2px 1px -1px rgba(0, 0, 0, 0.20), 0px 1px 1px rgba(0, 0, 0, 0.14), 0px 1px 3px rgba(0, 0, 0, 0.12)'
+      }}>
+        <PortariaList onSuccess={handleTriggerSuccess} />
+      </Paper>
+    </Box>
   );
 };
 
