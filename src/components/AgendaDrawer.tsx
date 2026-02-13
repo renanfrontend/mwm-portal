@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { 
-  Box, Typography, TextField, IconButton, Button, 
-  Stack, Drawer
-} from '@mui/material';
-import { CloseIcon } from '../constants/muiIcons';
-=======
 import { Box, Typography, TextField, IconButton, Button, Stack, Drawer } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
->>>>>>> feature/142-frontend-logistica-agenda
 
 const COMMON_FONT = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 

@@ -1,10 +1,12 @@
 // src/components/TransportadoraCreateModal.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
 import { MdSave } from 'react-icons/md';
 import { v4 as uuidv4 } from 'uuid'; // Import para gerar ID fictício
+import { fetchCategorias, type CategoriaOption } from '../services/api';
+import { UF_OPTIONS } from '../constants/transportadoraOptions';
 
 interface Props {
   isActive: boolean;
@@ -15,6 +17,20 @@ interface Props {
 const TransportadoraCreateModal: React.FC<Props> = ({ isActive, onClose, onCreate }) => {
   const { theme } = useTheme();
   const textColor = theme === 'dark' ? '#a0aec0' : '#363636';
+  const [categorias, setCategorias] = useState<CategoriaOption[]>([]);
+
+  // Carregar categorias ao montar
+  useEffect(() => {
+    const loadCategorias = async () => {
+      try {
+        const data = await fetchCategorias();
+        setCategorias(data);
+      } catch (err) {
+        console.error('Erro ao carregar categorias:', err);
+      }
+    };
+    loadCategorias();
+  }, []);
 
   // Estados dos Campos (Iniciam vazios)
   const [nomeFantasia, setNomeFantasia] = useState('');
@@ -105,9 +121,21 @@ const TransportadoraCreateModal: React.FC<Props> = ({ isActive, onClose, onCreat
               <div className="column is-half">
                   <div className="field"><label className="label is-small">CNPJ</label><div className="control"><input className="input" value={cnpj} onChange={e => setCnpj(e.target.value)} /></div></div>
               </div>
-               <div className="column is-half">
-                  <div className="field"><label className="label is-small">Categoria</label><div className="control"><input className="input" value={categoria} onChange={e => setCategoria(e.target.value)} placeholder="Ex: Logística Geral" /></div></div>
-              </div>
+                             <div className="column is-half">
+                                    <div className="field">
+                                        <label className="label is-small">Categoria</label>
+                                        <div className="control">
+                                            <div className="select is-fullwidth">
+                                                <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+                                                    <option value="">-- Selecione --</option>
+                                                    {categorias && categorias.map((option) => (
+                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
           </div>
 
           <h6 className="title is-6 mb-3 mt-4">Endereço e Contato Comercial</h6>
@@ -119,7 +147,19 @@ const TransportadoraCreateModal: React.FC<Props> = ({ isActive, onClose, onCreat
                   <div className="field"><label className="label is-small">Cidade</label><div className="control"><input className="input" value={cidade} onChange={e => setCidade(e.target.value)} /></div></div>
               </div>
               <div className="column is-half">
-                  <div className="field"><label className="label is-small">UF</label><div className="control"><input className="input" value={uf} onChange={e => setUf(e.target.value)} maxLength={2} /></div></div>
+                  <div className="field">
+                      <label className="label is-small">UF</label>
+                      <div className="control">
+                          <div className="select is-fullwidth">
+                              <select value={uf} onChange={e => setUf(e.target.value)}>
+                                  <option value="">-- Selecione --</option>
+                                  {UF_OPTIONS && UF_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                  ))}
+                              </select>
+                          </div>
+                      </div>
+                  </div>
               </div>
               <div className="column is-half">
                   <div className="field"><label className="label is-small">Telefone Comercial</label><div className="control"><input className="input" value={telefoneComercial} onChange={e => setTelefoneComercial(e.target.value)} /></div></div>

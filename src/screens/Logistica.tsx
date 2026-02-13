@@ -4,7 +4,7 @@ import {
   Button, Link, Stack, Chip, Paper, Collapse, CircularProgress, TablePagination
 } from '@mui/material';
 import { NavLink, useLocation } from 'react-router-dom';
-import { CloseIcon, CheckCircle, HomeIcon, MoreHorizIcon, AddIcon, VisibilityIcon, EditIcon, ErrorIcon, FilterAlt, FileDownloadIcon, Delete } from '../constants/muiIcons';
+import { CloseIcon, CheckCircleOutlined, HomeIcon, MoreHorizIcon, AddIcon, VisibilityIcon, EditIcon, ErrorIcon, FilterAlt, FileDownloadIcon, Delete } from '../constants/muiIcons';
 
 import ProdutorDrawer from '../components/ProdutorDrawer';
 import { useCooperadoMutation } from '../hooks/useCooperadoMutation';
@@ -21,7 +21,7 @@ const Logistica: React.FC = () => {
   const [drawerMode, setDrawerMode] = useState<'create' | 'view' | 'edit'>('create');
   const [selectedProducer, setSelectedProducer] = useState<ProdutorListItem | null>(null);
   const [selectedProducerFullData, setSelectedProducerFullData] = useState<ProdutorFormInput | null>(null); // Novo estado para dados completos
-  const [showToast, setShowToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState({ open: false, title: '', message: '' });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalItems, setTotalItems] = useState(0);
@@ -81,7 +81,7 @@ const Logistica: React.FC = () => {
     numEstabelecimento: data.numeroEstabelecimento || '',
     nPropriedade: data.numeroPropriedade || '',
     matricula: String(data.matricula || ''),
-    filiada: 'Toledo-PR', // TODO: Mapear ID para Nome se necessário
+    filiada: data.bioProdutor?.filiadaId ? String(data.bioProdutor.filiadaId) : '',
     faseDejeto: data.fase || 'GRSC',
     cabecas: String(data.cabecas || ''),
     certificado: data.certificado || 'Não',
@@ -120,6 +120,11 @@ const Logistica: React.FC = () => {
     setIsDrawerOpen(true);
   };
 
+  const handleShowToast = (title: string, message: string) => {
+    setToastConfig({ open: true, title, message });
+    setTimeout(() => setToastConfig(prev => ({ ...prev, open: false })), 6000);
+  };
+
   // --- LÓGICA: SALVAR NA API ---
   const handleSave = async (formData: ProdutorFormInput) => {
     try {
@@ -136,8 +141,7 @@ const Logistica: React.FC = () => {
 
       // Sucesso
       setIsDrawerOpen(false);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 6000);
+      handleShowToast('Registro atualizado com sucesso', 'As alterações foram salvas e já estão disponíveis no sistema.');
     } catch (err) {
       const unknownErr = err as unknown;
       const error = unknownErr instanceof Error ? unknownErr : new Error('Erro desconhecido');
@@ -151,7 +155,7 @@ const Logistica: React.FC = () => {
     }
   };
 
-  const tableGrid = "240px 180px 120px 130px 180px 100px 110px 160px 170px 150px 200px 100px";
+  const tableGrid = "minmax(200px, 2fr) minmax(140px, 1fr) minmax(120px, 1fr) 130px 150px 100px 110px 160px 100px";
   const commonFont = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
   return (
@@ -168,14 +172,14 @@ const Logistica: React.FC = () => {
       </Box>
 
       {/* TOAST SUCESSO */}
-      <Collapse in={showToast}>
+      <Collapse in={toastConfig.open}>
         <Box sx={{ bgcolor: '#F1F9EE', borderRadius: '4px', p: '8px 16px', display: 'flex', alignItems: 'flex-start', gap: 2, border: '1px solid rgba(112, 191, 84, 0.2)', mb: 3 }}>
-            <CheckCircle sx={{ color: '#70BF54', mt: 0.5 }} />
+            <CheckCircleOutlined sx={{ color: '#70BF54', mt: 0.5 }} />
             <Box sx={{ flex: 1 }}>
-                <Typography sx={{ color: '#2F5023', fontSize: 16, ...commonFont, fontWeight: 500 }}>Registro atualizado com sucesso</Typography>
-                <Typography sx={{ color: '#2F5023', fontSize: 14, ...commonFont, opacity: 0.8 }}>As alterações foram salvas e já estão disponíveis no sistema.</Typography>
+                <Typography sx={{ color: '#2F5023', fontSize: 16, ...commonFont, fontWeight: 500 }}>{toastConfig.title}</Typography>
+                <Typography sx={{ color: '#2F5023', fontSize: 14, ...commonFont, opacity: 0.8 }}>{toastConfig.message}</Typography>
             </Box>
-            <IconButton onClick={() => setShowToast(false)} size="small"><CloseIcon fontSize="small" /></IconButton>
+            <IconButton onClick={() => setToastConfig(prev => ({ ...prev, open: false }))} size="small"><CloseIcon fontSize="small" /></IconButton>
         </Box>
       </Collapse>
 
@@ -191,7 +195,7 @@ const Logistica: React.FC = () => {
       </Collapse>
 
       <Paper elevation={0} sx={{ flex: 1, border: '1px solid rgba(0,0,0,0.12)', borderRadius: '4px', bgcolor: '#FFFFFF', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Box sx={{ pt: 4, px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+        <Box sx={{ pt: 4, px: 2 }}>
           <Tabs value={currentTab} sx={{ '& .MuiTab-root': { fontSize: '14px', fontWeight: 500, ...commonFont } }}>
             <Tab label="PRODUTOR" component={NavLink} to="/logistica" />
             <Tab label="TRANSPORTADORA" component={NavLink} to="/transportadoras" />
@@ -239,15 +243,24 @@ const Logistica: React.FC = () => {
             {isLoading && <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>}
 
             <Box sx={{ flex: 1, overflowX: 'auto', p: '0 16px' }}>
-              <Box sx={{ width: 'max-content' }}>
+              <Box sx={{ width: '100%' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: tableGrid, height: 56, alignItems: 'center', bgcolor: 'rgba(0, 0, 0, 0.04)', px: 2 }}>
-                  {['Nome do produtor', 'N° do estabelecimento', 'Filiada', 'Modalidade', 'Quantidade de cabeças', 'Distancia', 'Certificado', 'Participa do projeto', 'Quantidades de lagoas', 'Volume das lagoas', 'Restrições operacionais', 'Ações'].map(c => <Typography key={c} sx={{ fontSize: 12, fontWeight: 600, ...commonFont }}>{c}</Typography>)}
+                  {['Nome do produtor', 'N° do estabelecimento', 'Filiada', 'Modalidade', 'Quantidade de cabeças', 'Distancia', 'Certificado', 'Participa do projeto', 'Ações'].map(c => <Typography key={c} sx={{ fontSize: 12, fontWeight: 600, ...commonFont }}>{c}</Typography>)}
                 </Box>
+                
+                {/* LISTA VAZIA? */}
+                {producers.length === 0 && !isLoading && (
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <Typography sx={{ color: 'rgba(0,0,0,0.6)' }}>Nenhum produtor encontrado.</Typography>
+                    </Box>
+                )}
+
                 {producers
                   .filter(p => (p.nomeProdutor || '').toLowerCase().includes(searchTerm.toLowerCase()))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map(p => (
                   <Box key={p.id} sx={{ display: 'grid', gridTemplateColumns: tableGrid, minHeight: 52, alignItems: 'center', px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+
                     <Typography sx={{ fontSize: 14 }}>{p.nomeProdutor}</Typography>
                     <Typography sx={{ fontSize: 14 }}>{p.numEstabelecimento}</Typography>
                     <Typography sx={{ fontSize: 14 }}>{p.filiada}</Typography>
@@ -256,9 +269,7 @@ const Logistica: React.FC = () => {
                     <Typography sx={{ fontSize: 14 }}>{p.distancia || '-'}</Typography>
                     <Box><Chip label={p.certificado} size="small" sx={{ bgcolor: p.certificado === 'Sim' || p.certificado === 'Ativo' ? '#F1F9EE' : '#FFEDEE', color: p.certificado === 'Sim' || p.certificado === 'Ativo' ? '#70BF54' : '#E4464E', borderRadius: '4px' }} /></Box>
                     <Box><Chip label={p.participaProjeto} size="small" sx={{ bgcolor: '#F1F9EE', color: '#70BF54', borderRadius: '4px' }} /></Box>
-                    <Typography sx={{ fontSize: 14 }}>{p.qtdLagoas || '-'}</Typography>
-                    <Typography sx={{ fontSize: 14 }}>{p.volLagoas || '-'}</Typography>
-                    <Typography sx={{ fontSize: 14 }}>{p.restricoesOperacionais || 'Nenhuma'}</Typography>
+                    
                     <Stack direction="row">
                       <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => openDrawer('view', p)}>
                         <VisibilityIcon fontSize="small" />
@@ -290,14 +301,14 @@ const Logistica: React.FC = () => {
 
           {currentTab === 1 && (
               <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
-                  <TransportadoraList />
+                  <TransportadoraList onShowSuccess={handleShowToast} />
               </Box>
           )}
 
           {/* ABA 2: AGENDA */}
           {currentTab === 2 && (
               <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
-                  <AgendaList />
+                  <AgendaList onShowSuccess={handleShowToast} />
               </Box>
           )}
 

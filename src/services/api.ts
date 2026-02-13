@@ -29,7 +29,9 @@ import {
   mockFetchPortariaData, 
   mockFetchNewAgendaData, 
   mockFetchQualidadeDejetosData, 
-  mockCreateAnaliseQualidade
+  mockCreateAnaliseQualidade,
+  mockFetchVeiculoTipos,
+  mockFetchVeiculoCombustiveis
 } from './mock/api.mock';
 
 import type {
@@ -37,6 +39,11 @@ import type {
   AbastecimentoVolumePorDiaItem, AgendaData, ColetaItem, DashboardData,
   FaturamentoItem, PortariaItem, QualidadeDejetosItem
 } from './mock/api.mock';
+
+import { CategoriaService, type CategoriaOption } from './categoriaService';
+import { VeiculoService, type VeiculoTipoOption, type VeiculoCombustivelOption } from './veiculoService';
+import { FiliadaService, type FiliadaOption } from './filiadaService';
+export type { CategoriaOption, VeiculoTipoOption, VeiculoCombustivelOption, FiliadaOption };
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
@@ -152,4 +159,22 @@ export const createAnaliseQualidade = (item: any): Promise<QualidadeDejetosItem>
 export const fetchAbastecimentoAggregatedVolumeData = (p: any): Promise<AbastecimentoVolumeItem[]> => {
   if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchAbastecimentoAggregatedVolumeData(p);
   return api.get('/abastecimentos/agg').then(res => res.data);
+};
+
+export const fetchCategorias = (): Promise<CategoriaOption[]> => {
+  return CategoriaService.list();
+};
+
+export const fetchVeiculoTipos = (): Promise<VeiculoTipoOption[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchVeiculoTipos();
+  return VeiculoService.listTipos();
+};
+
+export const fetchVeiculoCombustiveis = (): Promise<VeiculoCombustivelOption[]> => {
+  if (import.meta.env.VITE_USE_MOCK_API === 'true') return mockFetchVeiculoCombustiveis();
+  return VeiculoService.listCombustiveis();
+};
+
+export const fetchFiliadas = (): Promise<FiliadaOption[]> => {
+  return FiliadaService.list();
 };

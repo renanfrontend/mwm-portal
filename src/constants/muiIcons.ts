@@ -17,6 +17,7 @@ export {
 export {
   Close as CloseIcon,
   CheckCircle,
+  CheckCircleOutlined,
   Home as HomeIcon,
   MoreHoriz as MoreHorizIcon,
   Add as AddIcon,

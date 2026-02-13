@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
 import { MdSave } from 'react-icons/md';
+import { fetchCategorias, type CategoriaOption } from '../services/api';
 
 interface Props {
   isActive: boolean;
@@ -15,11 +16,26 @@ interface Props {
 const TransportadoraEditModal: React.FC<Props> = ({ isActive, onClose, onSave, data }) => {
   const { theme } = useTheme();
   const textColor = theme === 'dark' ? '#a0aec0' : '#363636';
+  const [categorias, setCategorias] = useState<CategoriaOption[]>([]);
+
+  // Carregar categorias ao montar
+  useEffect(() => {
+    const loadCategorias = async () => {
+      try {
+        const data = await fetchCategorias();
+        setCategorias(data);
+      } catch (err) {
+        console.error('Erro ao carregar categorias:', err);
+      }
+    };
+    loadCategorias();
+  }, []);
 
   // --- ESTADOS DA EMPRESA ---
   const [nomeFantasia, setNomeFantasia] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [categoria, setCategoria] = useState('');
   
   // --- ESTADOS DOS CONTATOS ---
   // Contato Principal
@@ -48,6 +64,7 @@ const TransportadoraEditModal: React.FC<Props> = ({ isActive, onClose, onSave, d
       setNomeFantasia(data.nomeFantasia);
       setCnpj(data.cnpj);
       setEndereco(data.endereco || '');
+      setCategoria(data.categoria || '');
       
       // Carregar Principal
       setContatoPrincipalNome(data.contatoPrincipal?.nome || '');
@@ -75,14 +92,15 @@ const TransportadoraEditModal: React.FC<Props> = ({ isActive, onClose, onSave, d
 
   const handleSubmit = () => {
     const updated: TransportadoraItem = {
-        ...data,
-        nomeFantasia,
-        cnpj,
-        endereco,
-        contatoPrincipal: { nome: contatoPrincipalNome, telefone: contatoPrincipalTel, email: contatoPrincipalEmail },
-        contatoComercial: { nome: contatoComercialNome, telefone: contatoComercialTel, email: contatoComercialEmail },
-        contatoFinanceiro: { nome: contatoFinanceiroNome, telefone: contatoFinanceiroTel, email: contatoFinanceiroEmail },
-        contatoJuridico: { nome: contatoJuridicoNome, telefone: contatoJuridicoTel, email: contatoJuridicoEmail }
+      ...data,
+      nomeFantasia,
+      cnpj,
+      endereco,
+      categoria,
+      contatoPrincipal: { nome: contatoPrincipalNome, telefone: contatoPrincipalTel, email: contatoPrincipalEmail },
+      contatoComercial: { nome: contatoComercialNome, telefone: contatoComercialTel, email: contatoComercialEmail },
+      contatoFinanceiro: { nome: contatoFinanceiroNome, telefone: contatoFinanceiroTel, email: contatoFinanceiroEmail },
+      contatoJuridico: { nome: contatoJuridicoNome, telefone: contatoJuridicoTel, email: contatoJuridicoEmail }
     };
     onSave(updated);
   };
@@ -112,6 +130,21 @@ const TransportadoraEditModal: React.FC<Props> = ({ isActive, onClose, onSave, d
                   <div className="field">
                     <label className="label is-small">CNPJ</label>
                     <div className="control"><input className="input" value={cnpj} onChange={e => setCnpj(e.target.value)} /></div>
+                  </div>
+              </div>
+              <div className="column is-half">
+                  <div className="field">
+                    <label className="label is-small">Categoria</label>
+                    <div className="control">
+                      <div className="select is-fullwidth">
+                        <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+                          <option value="">-- Selecione --</option>
+                          {categorias && categorias.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
               </div>
               <div className="column is-half">

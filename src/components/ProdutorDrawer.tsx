@@ -5,10 +5,11 @@ import {
 } from '@mui/material';
 import { CloseIcon } from '../constants/muiIcons';
 import type { ProdutorFormInput } from '../types/cooperado';
+import { fetchFiliadas, type FiliadaOption } from '../services/api';
 
 const initialState: ProdutorFormInput = {
   cpfCnpj: '', nome: '', numEstabelecimento: '', nPropriedade: '', matricula: '', 
-  filiada: 'Toledo-PR', faseDejeto: 'GRSC', cabecas: '', certificado: 'Não', doamDejetos: 'Não',
+  filiada: '', faseDejeto: 'GRSC', cabecas: '', certificado: 'Não', doamDejetos: 'Não',
   qtdLagoas: '1', volLagoas: '', restricoes: 'Nenhuma', responsavel: '', tecnico: '', 
   municipio: 'Toledo-PR', lat: '', long: '', distancia: '', localizacao: ''
 };
@@ -23,6 +24,22 @@ const ProdutorDrawer: React.FC<{
   initialData?: ProdutorFormInput | null;
 }> = ({ isOpen, onClose, onSave, mode = 'create', initialData = null }) => {
   const [form, setForm] = useState<ProdutorFormInput>(initialState);
+  const [filiadas, setFiliadas] = useState<FiliadaOption[]>([]);
+
+  // Carregar filiadas ao montar
+  useEffect(() => {
+    const loadFiliadas = async () => {
+      try {
+        console.log('🚀 Carregando filiadas...');
+        const data = await fetchFiliadas();
+        console.log('✅ Filiadas carregadas:', data);
+        setFiliadas(data);
+      } catch (err) {
+        console.error('❌ Erro ao carregar filiadas:', err);
+      }
+    };
+    loadFiliadas();
+  }, []);
 
   // Blinda o estado: inicializa ao abrir
   useEffect(() => {
@@ -84,11 +101,21 @@ const ProdutorDrawer: React.FC<{
           
           <Stack direction="row" spacing={2}>
             <TextField fullWidth label="Matrícula" value={form.matricula} onChange={(e) => handleChange('matricula', e.target.value)} InputLabelProps={{ shrink: true }} disabled={isReadOnly} />
-            <TextField fullWidth select label="Filiada" value={form.filiada} onChange={(e) => handleChange('filiada', e.target.value)} InputLabelProps={{ shrink: true }} disabled={isReadOnly}>
-              <MenuItem value="Toledo-PR">Toledo-PR</MenuItem>
-              <MenuItem value="Cascavel-PR">Cascavel-PR</MenuItem>
-              <MenuItem value="Marechal Cândido Rondon-PR">Marechal Cândido Rondon-PR</MenuItem>
-              <MenuItem value="Palotina-PR">Palotina-PR</MenuItem>
+            <TextField 
+              fullWidth 
+              select 
+              label="Filiada" 
+              value={form.filiada} 
+              onChange={(e) => handleChange('filiada', e.target.value)} 
+              InputLabelProps={{ shrink: true }} 
+              disabled={isReadOnly}
+            >
+              <MenuItem value="">Selecione</MenuItem>
+              {filiadas.map((filiada) => (
+                <MenuItem key={filiada.id} value={filiada.id}>
+                  {filiada.nome}
+                </MenuItem>
+              ))}
             </TextField>
           </Stack>
 

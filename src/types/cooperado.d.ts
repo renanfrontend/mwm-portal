@@ -32,6 +32,8 @@ export interface CooperadoResponse {
     nome: string;
     cpfCnpj: string;
     telefonePrincipal: string;
+    filiadaId?: number;
+    filiadaNome?: string;
   };
   codigoEstabelecimento?: string;
   numeroEstabelecimento?: string;

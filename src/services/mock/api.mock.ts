@@ -39,6 +39,12 @@ import {
   type TransportadoraItem,
 } from "../../types/models";
 
+export interface CategoriaOption {
+  id: number;
+  label: string;
+  value: string;
+}
+
 // --- DADOS ORIGINAIS DO SEU DASHBOARD (MANTIDOS INTACTOS) ---
 
 let abastecimentoReportMockData: AbastecimentoReportItem[] = [
@@ -664,5 +670,62 @@ export const mockCreateAnaliseQualidade = (analise: Partial<QualidadeDejetosItem
             mockQualidadeDejetosData.unshift(newItem);
             resolve(newItem);
         }, 500);
+    });
+};
+
+export interface CategoriaOption {
+  id: number;
+  label: string;
+  value: string;
+}
+
+export const mockFetchCategorias = (): Promise<CategoriaOption[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve([
+                { id: 1, label: "Logística", value: "Logística" },
+                { id: 2, label: "Agrícola", value: "Agrícola" },
+                { id: 3, label: "Geral", value: "Geral" },
+                { id: 4, label: "Especializada", value: "Especializada" }
+            ]);
+        }, 300);
+    });
+};
+
+export interface VeiculoTipoOption {
+  id: number;
+  label: string;
+  value: "truck" | "carreta" | "bitrem" | "vuc" | "utilitario" | "empilhadeira";
+}
+
+export interface VeiculoCombustivelOption {
+  id: number;
+  label: string;
+  value: "diesel" | "biomethane";
+}
+
+export const mockFetchVeiculoTipos = (): Promise<VeiculoTipoOption[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve([
+                { id: 1, label: "Truck", value: "truck" },
+                { id: 2, label: "Carreta", value: "carreta" },
+                { id: 3, label: "Bitrem", value: "bitrem" },
+                { id: 4, label: "VUC", value: "vuc" },
+                { id: 5, label: "Utilitário", value: "utilitario" },
+                { id: 6, label: "Empilhadeira", value: "empilhadeira" }
+            ]);
+        }, 300);
+    });
+};
+
+export const mockFetchVeiculoCombustiveis = (): Promise<VeiculoCombustivelOption[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve([
+                { id: 1, label: "Diesel", value: "diesel" },
+                { id: 2, label: "Biomethane", value: "biomethane" }
+            ]);
+        }, 300);
     });
 };

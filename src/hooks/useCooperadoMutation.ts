@@ -8,15 +8,6 @@ export const useCooperadoMutation = () => {
 
   // ADAPTER: Converte Input do Form (Strings soltas) -> Input da API (Tipado)
   const toApiPayload = (form: ProdutorFormInput): CooperadoAPIInput => {
-    // Mapeamento de Filiada String -> ID (Exemplo simples)
-    // No futuro, isso deveria vir de uma lista carregada do backend
-    const filiadaMap: Record<string, number> = {
-      'Toledo-PR': 1,
-      'Cascavel-PR': 2,
-      'Marechal Cândido Rondon-PR': 3,
-      'Palotina-PR': 4
-    };
-
     return {
       matricula: Number.parseInt(form.matricula) || 0,
       transportadoraId: 1, // Default Hardcoded (Falta no form)
@@ -33,8 +24,8 @@ export const useCooperadoMutation = () => {
       numPropriedade: form.nPropriedade,
       numEstabelecimento: form.numEstabelecimento,
       municipio: form.municipio,
-      latitude: Number.parseFloat(form.lat) || 0,
-      longitude: Number.parseFloat(form.long) || 0,
+      latitude: Number.parseFloat(form.lat.replace(',', '.')) || 0,
+      longitude: Number.parseFloat(form.long.replace(',', '.')) || 0,
       
       // Campos extras suportados agora:
       qtdLagoas: Number.parseInt(form.qtdLagoas) || 0,
@@ -43,7 +34,7 @@ export const useCooperadoMutation = () => {
       responsavel: form.responsavel,
       localizacao: form.localizacao,
       distancia: form.distancia,
-      filiadaId: filiadaMap[form.filiada] || 1
+      filiadaId: Number(form.filiada) || 1
     };
   };
 

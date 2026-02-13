@@ -1,10 +1,10 @@
-import type { CooperadoAPIInput, CooperadoResponse, ProdutorListResponse } from '../../types/cooperado';
+import type { CooperadoAPIInput, CooperadoResponse, ProdutorListResponse, ProdutorListItem } from '../../types/cooperado';
 
 // Simulação de banco de dados em memória
-let mockProdutores: CooperadoResponse[] = [
+let mockProdutores: any[] = [
   {
     id: 1,
-    matricula: 101,
+    matricula: '101',
     transportadoraId: 1,
     tipoVeiculoId: 1,
     nomeCooperado: 'João Silva',
@@ -27,14 +27,22 @@ let mockProdutores: CooperadoResponse[] = [
     responsavel: 'João Silva',
     localizacao: 'Rural',
     distancia: '10km',
-    filiadaId: 1
+    filiadaId: 1,
+    // Campos adicionais para compatibilidade
+    bioProdutor: {
+        nome: 'João Silva',
+        cpfCnpj: '123.456.789-00',
+        codigoProdutor: 'PROD-001'
+    },
+    nome: 'João Silva',
+    status: 'Ativo'
   }
 ];
 
 let nextId = 2;
 
 export const mockListProdutores = (
-  plantaId: number,
+  _plantaId: number,
   filiadaId: number,
   page: number = 1,
   pageSize: number = 9999
@@ -44,12 +52,28 @@ export const mockListProdutores = (
       // Filtrar por filiadaId se necessário
       const filtered = mockProdutores.filter(p => p.filiadaId === filiadaId);
       
+      // Mapear para ProdutorListItem
+      const items: ProdutorListItem[] = filtered.map(p => ({
+        id: p.id,
+        nomeProdutor: p.nomeCooperado,
+        numEstabelecimento: p.numEstabelecimento,
+        filiada: 'Toledo-PR',
+        modalidade: p.fase,
+        cabecasAlojadas: p.cabecas,
+        distancia: p.distancia,
+        certificado: p.certificado,
+        participaProjeto: 'Sim',
+        qtdLagoas: p.qtdLagoas,
+        volLagoas: p.volLagoas,
+        restricoesOperacionais: p.restricoes
+      }));
+
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
-      const paginatedData = filtered.slice(start, end);
+      const paginatedData = items.slice(start, end);
 
       resolve({
-        data: paginatedData,
+        items: paginatedData,
         total: filtered.length,
         page,
         pageSize
@@ -61,15 +85,22 @@ export const mockListProdutores = (
 export const mockCreateProdutor = (payload: CooperadoAPIInput): Promise<CooperadoResponse> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const newProdutor: CooperadoResponse = {
+      const newProdutor: any = {
         id: nextId++,
-        ...payload
+        ...payload,
+        bioProdutor: {
+            nome: payload.nomeCooperado,
+            cpfCnpj: payload.cpfCnpj,
+            codigoProdutor: `PROD-${nextId}`
+        },
+        nome: payload.nomeCooperado,
+        status: 'Ativo'
       };
       
       mockProdutores.push(newProdutor);
       
       console.log('✅ Mock: Produtor criado com sucesso', newProdutor);
-      resolve(newProdutor);
+      resolve(newProdutor as CooperadoResponse);
     }, 500); // Simula delay de rede
   });
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdSave, MdDirectionsCar, MdLocalGasStation, MdConfirmationNumber } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import type { VeiculoInfo } from '../types/models';
-import { FUEL_TYPE_OPTIONS, VEHICLE_TYPE_OPTIONS } from '../constants/transportadoraOptions';
+import { fetchVeiculoTipos, fetchVeiculoCombustiveis, type VeiculoTipoOption, type VeiculoCombustivelOption } from '../services/api';
 
 interface Props {
   isActive: boolean;
@@ -18,6 +18,27 @@ const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onS
     tipoAbastecimento: '',
     tag: ''
   });
+
+  const [vehicleTypes, setVehicleTypes] = useState<VeiculoTipoOption[]>([]);
+  const [fuelTypes, setFuelTypes] = useState<VeiculoCombustivelOption[]>([]);
+
+  // Carregar tipos de veículo e combustível ao montar
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [veiculos, combustiveis] = await Promise.all([
+          fetchVeiculoTipos(),
+          fetchVeiculoCombustiveis()
+        ]);
+        setVehicleTypes(veiculos);
+        setFuelTypes(combustiveis);
+      } catch (err) {
+        console.error('Erro ao carregar opções de veículo/combustível:', err);
+        toast.error('Erro ao carregar opções de veículo/combustível');
+      }
+    };
+    loadOptions();
+  }, []);
 
   useEffect(() => {
     if (isActive) {
@@ -86,7 +107,7 @@ const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onS
               <div className="select is-fullwidth">
                 <select name="tipo" value={formData.tipo} onChange={handleChange}>
                   <option value="">Selecione</option>
-                  {VEHICLE_TYPE_OPTIONS.map(option => (
+                  {vehicleTypes.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
@@ -134,7 +155,7 @@ const TransportadoraAddVehicleModal: React.FC<Props> = ({ isActive, onClose, onS
               <div className="select is-fullwidth">
                 <select name="tipoAbastecimento" value={formData.tipoAbastecimento} onChange={handleChange}>
                   <option value="">Selecione</option>
-                  {FUEL_TYPE_OPTIONS.map(option => (
+                  {fuelTypes.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>

@@ -1,0 +1,5 @@
+// JSON Response for Fuel Types Endpoint
+[
+  { "id": 1, "label": "Diesel", "value": "diesel" },
+  { "id": 2, "label": "Biomethane", "value": "biomethane" }
+]

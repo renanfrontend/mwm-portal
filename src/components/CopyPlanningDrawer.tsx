@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Drawer, Box, Typography, IconButton, Button } from '@mui/material';
 import { Close as CloseIcon, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { 
@@ -22,8 +22,8 @@ const CopyPlanningDrawer: React.FC<any> = ({ open, onClose, onApply }) => {
 
   // Função para gerar o grid baseado no mês recebido
   const getCalendarGrid = (month: Date) => {
-    const start = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
-    const end = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
+    const start = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
+    const end = endOfWeek(endOfMonth(month), { weekStartsOn: 0 });
     const allDays = eachDayOfInterval({ start, end });
     const rows = [];
     for (let i = 0; i < allDays.length; i += 7) rows.push(allDays.slice(i, i + 7));
@@ -45,14 +45,14 @@ const CopyPlanningDrawer: React.FC<any> = ({ open, onClose, onApply }) => {
           </Box>
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', mb: 1 }}>
-          {['#', 'S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-            <Typography key={d} sx={{ textAlign: 'center', fontSize: 13, color: 'rgba(0,0,0,0.6)', fontWeight: 600 }}>{d}</Typography>
+          {['#', 'D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
+            <Typography key={i} sx={{ textAlign: 'center', fontSize: 13, color: 'rgba(0,0,0,0.6)', fontWeight: 600 }}>{d}</Typography>
           ))}
         </Box>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '2px' }}>
           {grid.map((weekDays, idx) => {
-            const weekNum = getWeek(weekDays[0], { weekStartsOn: 1 });
-            const weekStart = startOfWeek(weekDays[0], { weekStartsOn: 1 });
+            const weekNum = getWeek(weekDays[0], { weekStartsOn: 0 });
+            const weekStart = startOfWeek(weekDays[0], { weekStartsOn: 0 });
             const isWeekSelected = selectedWeekStart && isSameDay(selectedWeekStart, weekStart);
 
             return (
@@ -64,7 +64,7 @@ const CopyPlanningDrawer: React.FC<any> = ({ open, onClose, onApply }) => {
                   <Typography sx={{ fontSize: 13, ...COMMON_FONT }}>{weekNum}</Typography>
                 </Box>
                 {weekDays.map((day, dIdx) => {
-                  const isDayInSelectedWeek = selectedWeekStart && isSameDay(startOfWeek(day, { weekStartsOn: 1 }), selectedWeekStart);
+                  const isDayInSelectedWeek = selectedWeekStart && isSameDay(startOfWeek(day, { weekStartsOn: 0 }), selectedWeekStart);
                   const isToday = isSameDay(day, today);
                   return (
                     <Box key={dIdx} sx={{ 

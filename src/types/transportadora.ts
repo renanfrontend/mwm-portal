@@ -7,9 +7,9 @@ export interface ContactInfo {
 }
 
 export interface VeiculoInfo {
-  id?: string; // Opcional no create, obrigatório no response
+  id?: number; // Backend vai gerar automaticamente
   tipo: string;
-  capacidade: string;
+  capacidade: number;
   placa: string;
   tipoAbastecimento: 'Diesel' | 'Biometano';
   tag?: string; // Obrigatório quando tipoAbastecimento === 'Biometano'
@@ -28,9 +28,6 @@ export interface TransportadoraFormInput {
   emailComercial: string;
   
   contatoPrincipal?: ContactInfo;
-  contatoComercial?: ContactInfo;
-  contatoFinanceiro?: ContactInfo;
-  contatoJuridico?: ContactInfo;
   
   veiculos?: VeiculoInfo[];
 }
@@ -47,8 +44,6 @@ export interface TransportadoraListItem {
   nomeFantasia: string;
   razaoSocial: string;
   cnpj: string;
-  telefoneComercial?: string;
-  emailComercial?: string;
   telefone?: string;
   email?: string;
   cidade: string;
@@ -62,9 +57,6 @@ export interface TransportadoraListItem {
   placa?: string;
   categoria?: string;
   contatoPrincipal?: ContactInfo;
-  contatoComercial?: ContactInfo;
-  contatoFinanceiro?: ContactInfo;
-  contatoJuridico?: ContactInfo;
 }
 
 export interface TransportadoraListResponse {
@@ -77,7 +69,7 @@ export interface TransportadoraListResponse {
 // Tipos para API de veículos (sub-recurso)
 export interface AddVeiculoRequest {
   tipo: string;
-  capacidade: string;
+  capacidade: number;
   placa: string;
   tipoAbastecimento: 'Diesel' | 'Biometano';
   tag?: string;

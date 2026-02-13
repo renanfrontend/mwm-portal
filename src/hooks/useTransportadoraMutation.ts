@@ -13,18 +13,22 @@ export const useTransportadoraMutation = () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log('🚀 Criando transportadora:', data);
+      console.log('🚀 Criando transportadora - Payload:', JSON.stringify(data, null, 2));
       const response = await TransportadoraService.create(data);
-      console.log('✅ Transportadora criada com sucesso:', response);
+      console.log('✅ Status da resposta:', response.status);
+      console.log('✅ Transportadora criada com sucesso:', JSON.stringify(response, null, 2));
       return response;
     } catch (err) {
-      const axiosError = err as AxiosError<{ message?: string }>;
-      const errorMsg = axiosError.response?.data?.message || 'Erro ao criar transportadora';
-      console.error('❌ Erro ao criar transportadora:', errorMsg);
-      setError(errorMsg);
+      const axiosError = err as AxiosError<any>;
+      console.error('❌ Erro completo:', axiosError);
+      console.error('❌ Status:', axiosError.response?.status);
+      console.error('❌ Status Text:', axiosError.response?.statusText);
+      console.error('❌ Response Data:', JSON.stringify(axiosError.response?.data, null, 2));
+      console.error('❌ Headers:', axiosError.response?.headers);
+      
+      const errorMsg = axiosError.response?.data?.message || axiosError.response?.data || 'Erro ao criar transportadora';
+      setError(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
       return null;
-    } finally {
-      setIsLoading(false);
     }
   };
 

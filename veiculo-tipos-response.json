@@ -1,0 +1,9 @@
+// JSON Response for Vehicle Types Endpoint
+[
+  { "id": 1, "label": "Truck", "value": "truck" },
+  { "id": 2, "label": "Carreta", "value": "carreta" },
+  { "id": 3, "label": "Bitrem", "value": "bitrem" },
+  { "id": 4, "label": "VUC", "value": "vuc" },
+  { "id": 5, "label": "Utilitário", "value": "utilitario" },
+  { "id": 6, "label": "Empilhadeira", "value": "empilhadeira" }
+]

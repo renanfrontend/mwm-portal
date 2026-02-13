@@ -7,10 +7,15 @@ import TransportadoraDrawer from './TransportadoraDrawer';
 
 const COMMON_FONT_STYLE = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
 
-export const TransportadoraList: React.FC = () => {
+interface TransportadoraListProps {
+  onShowSuccess?: (title: string, message: string) => void;
+}
+
+export const TransportadoraList: React.FC<TransportadoraListProps> = ({ onShowSuccess }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [data, setData] = useState<TransportadoraListItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openingId, setOpeningId] = useState<string | null>(null);
   const [drawerState, setDrawerState] = useState<{ open: boolean; item: any; readOnly: boolean }>({ open: false, item: null, readOnly: false });
 
   const loadTransportadoras = useCallback(async () => {
@@ -27,6 +32,19 @@ export const TransportadoraList: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleOpenDrawer = async (item: TransportadoraListItem, readOnly: boolean) => {
+    setOpeningId(item.id);
+    try {
+      const fullData = await TransportadoraService.getById(item.id);
+      setDrawerState({ open: true, item: fullData, readOnly });
+    } catch (error) {
+      console.error('❌ Erro ao buscar detalhes:', error);
+      setDrawerState({ open: true, item, readOnly });
+    } finally {
+      setOpeningId(null);
+    }
+  };
 
   useEffect(() => {
     loadTransportadoras();
@@ -90,8 +108,12 @@ export const TransportadoraList: React.FC = () => {
                 </Box>
               </Box>
               <Stack direction="row" spacing={0.5}>
-                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => setDrawerState({ open: true, item, readOnly: true })}><Visibility fontSize="small" /></IconButton>
-                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => setDrawerState({ open: true, item, readOnly: false })}><Edit fontSize="small" /></IconButton>
+                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => handleOpenDrawer(item, true)} disabled={openingId === item.id}>
+                  {openingId === item.id ? <CircularProgress size={20} /> : <Visibility fontSize="small" />}
+                </IconButton>
+                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => handleOpenDrawer(item, false)} disabled={openingId === item.id}>
+                  {openingId === item.id ? <CircularProgress size={20} /> : <Edit fontSize="small" />}
+                </IconButton>
               </Stack>
             </Box>
           ))}
@@ -105,6 +127,7 @@ export const TransportadoraList: React.FC = () => {
         onSave={() => {
           setDrawerState({ open: false, item: null, readOnly: false });
           loadTransportadoras(); // Recarrega após salvar
+          if (onShowSuccess) onShowSuccess("Registro atualizado com sucesso", "As alterações foram salvas e já estão disponíveis no sistema.");
         }} 
         initialData={drawerState.item} 
       />
