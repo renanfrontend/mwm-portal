@@ -4,6 +4,8 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ptBR } from 'date-fns/locale';
+// 🛡️ IMPORTAÇÕES PARA VALIDAÇÃO DE DATA E HORA
+import { isToday, addMinutes } from 'date-fns';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 const INTER = 'Inter, sans-serif';
@@ -28,6 +30,8 @@ const PortariaDrawer: React.FC<any> = ({ open, onClose, onSave, mode = 'add', in
   const isView = mode === 'view';
   const isEdit = mode === 'edit';
   const isLocked = isView || isEdit;
+  // 🛡️ IDENTIFICA SE ESTÁ NO MODO DE CADASTRO
+  const isAdd = mode === 'add';
 
   const handleTransportadoraChange = (val: string) => {
     if (isView) return;
@@ -47,8 +51,11 @@ const PortariaDrawer: React.FC<any> = ({ open, onClose, onSave, mode = 'add', in
 
         <Box sx={{ px: '20px', pt: 4, flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '28px', pb: '120px' }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '20px' }}>
-            <Box sx={{ flex: 1 }}><DatePicker label="Data" format="dd/MM/yyyy" value={formData.data} disabled={isLocked} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true, placeholder: 'DD/MM/AAAA' } }} onChange={(v)=>setFormData({...formData, data:v})}/></Box>
-            <Box sx={{ flex: 1 }}><TimePicker label="Horário" ampm={false} disabled={isLocked} value={formData.horario} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true } }} onChange={(v)=>setFormData({...formData, horario:v})}/></Box>
+            {/* 🛡️ DATA: BLOQUEIO DE DATAS FUTURAS NO CADASTRO */}
+            <Box sx={{ flex: 1 }}><DatePicker label="Data" format="dd/MM/yyyy" value={formData.data} disabled={isLocked} disableFuture={isAdd} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true, placeholder: 'DD/MM/AAAA' } }} onChange={(v)=>setFormData({...formData, data:v})}/></Box>
+            
+            {/* 🛡️ HORA: BLOQUEIO DE HORA +10 MINUTOS CASO SEJA HOJE */}
+            <Box sx={{ flex: 1 }}><TimePicker label="Horário" ampm={false} disabled={isLocked} value={formData.horario} maxTime={isAdd && formData.data && isToday(formData.data) ? addMinutes(new Date(), 10) : undefined} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true } }} onChange={(v)=>setFormData({...formData, horario:v})}/></Box>
           </Box>
           
           <Box sx={{ width: '100%' }}><FormControl fullWidth disabled={isLocked}><InputLabel>Atividades a realizar</InputLabel>
@@ -59,10 +66,8 @@ const PortariaDrawer: React.FC<any> = ({ open, onClose, onSave, mode = 'add', in
           {formData.atividade && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
               <Divider />
-              {/* 🛡️ AJUSTE FIGMA: Fonte INTER e texto "Informações" */}
               <Typography sx={{ fontSize: 20, fontWeight: 600, fontFamily: INTER }}>Informações</Typography>
 
-              {/* ABASTECIMENTO, DEJETOS, INSUMO, EXPEDIÇÃO */}
               {formData.atividade !== 'Visita' && (
                 <>
                   <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '20px' }}>
@@ -87,8 +92,11 @@ const PortariaDrawer: React.FC<any> = ({ open, onClose, onSave, mode = 'add', in
                     <TextField sx={{ flex: 1 }} label="Peso Final" disabled={isView} value={formData.pesoFinal} onChange={(e)=>setFormData({...formData, pesoFinal:e.target.value})} />
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '20px', pt: 2 }}>
-                    <Box sx={{ flex: 1 }}><DatePicker label="Data de saída" format="dd/MM/yyyy" value={formData.dataSaida} disabled={isView} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true, placeholder: 'DD/MM/AAAA' } }} onChange={(v)=>setFormData({...formData, dataSaida:v})}/></Box>
-                    <Box sx={{ flex: 1 }}><TimePicker label="Horário de saída" ampm={false} value={formData.horarioSaida} disabled={isView} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true } }} onChange={(v)=>setFormData({...formData, horarioSaida:v})}/></Box>
+                    {/* 🛡️ DATA SAÍDA: RESTRIÇÃO APLICADA */}
+                    <Box sx={{ flex: 1 }}><DatePicker label="Data de saída" format="dd/MM/yyyy" value={formData.dataSaida} disabled={isView} disableFuture={isAdd} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true, placeholder: 'DD/MM/AAAA' } }} onChange={(v)=>setFormData({...formData, dataSaida:v})}/></Box>
+                    
+                    {/* 🛡️ HORA SAÍDA: RESTRIÇÃO APLICADA */}
+                    <Box sx={{ flex: 1 }}><TimePicker label="Horário de saída" ampm={false} value={formData.horarioSaida} disabled={isView} maxTime={isAdd && formData.dataSaida && isToday(formData.dataSaida) ? addMinutes(new Date(), 10) : undefined} slotProps={{ popper: { sx: { zIndex: 10000 } }, textField: { fullWidth: true } }} onChange={(v)=>setFormData({...formData, horarioSaida:v})}/></Box>
                   </Box>
                 </>
               )}
