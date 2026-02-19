@@ -8,6 +8,8 @@ import Assignment from '@mui/icons-material/Assignment';
 import WorkspacePremium from '@mui/icons-material/WorkspacePremium';
 import LocalGasStation from '@mui/icons-material/LocalGasStation';
 import AttachMoney from '@mui/icons-material/AttachMoney';
+// 🛡️ ADIÇÃO DO ÍCONE DE MONITORAMENTO
+import InsertChartOutlined from '@mui/icons-material/InsertChartOutlined';
 
 import logoMwm from '../../logo.png'; 
 
@@ -22,6 +24,8 @@ const menuItems = [
   { text: 'Qualidade', icon: <WorkspacePremium />, path: '/qualidade' },
   { text: 'Abastecimento', icon: <LocalGasStation />, path: '/abastecimentos' },
   { text: 'Faturamento', icon: <AttachMoney />, path: '/faturamentos' },
+  // 🛡️ NOVA CATEGORIA INSERIDA NA POSIÇÃO CORRETA
+  { text: 'Monitoramento', icon: <InsertChartOutlined />, path: '/monitoramento' },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {

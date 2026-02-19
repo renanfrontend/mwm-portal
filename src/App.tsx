@@ -17,6 +17,7 @@ import Conta from './screens/Conta';
 import LoginScreen from './screens/auth/LoginScreen';
 import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
 import NewPasswordScreen from './screens/auth/NewPasswordScreen';
+import Monitoramento from './screens/Monitoramento';
 
 // Componentes e Contextos
 import Header from './components/Header';
@@ -77,6 +78,7 @@ const AppContent = () => {
             <Route path="/abastecimentos" element={<Abastecimentos />} />
             <Route path="/abastecimento-report" element={<AbastecimentoReport />} />
             <Route path="/faturamentos" element={<Faturamentos />} />
+            <Route path="/monitoramento" element={<Monitoramento />} />
             <Route path="/coleta" element={<Coleta />} />
             <Route path="/qualidade" element={<Qualidade />} />
             <Route path="/conta" element={<Conta />} />
