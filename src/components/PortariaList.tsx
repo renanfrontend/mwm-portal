@@ -18,6 +18,7 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
   // 🛡️ DADOS INICIAIS (Limpos para testar o Empty State)
   const [data, setData] = useState<any[]>([
     { id: '1', data: '18/02/2026', hora: '08:00', atividade: 'Abastecimento', nome: 'Renan Augusto', placa: 'ABC-1234', status: 'Em andamento', responsavel: 'Gilson Alves' },
+    { id: '3', data: '18/02/2026', hora: '09:15', atividade: 'Entrega de dejetos', nome: 'José da Silva', placa: 'ABC-5678', status: 'Concluído', responsavel: 'Renan' },
     { id: '2', data: '18/02/2026', hora: '09:00', atividade: 'Visita', nome: 'Mariana Silva', placa: 'GHI-9012', status: 'Em andamento', responsavel: 'Gilson Alves' }
   ]);
 
