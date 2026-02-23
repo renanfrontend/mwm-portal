@@ -47,14 +47,16 @@ export const CooperadoListItem: React.FC<Props> = ({
 
   // Lógica de Distância
   let displayDistance = '-';
-  if (item.distancia && item.distancia.trim() !== '') {
-      displayDistance = item.distancia;
+  if (typeof (item as any).distanciaKm === 'number') {
+    displayDistance = `${(item as any).distanciaKm.toFixed(2)} km`;
+  } else if (item.distancia && item.distancia.trim() !== '') {
+    displayDistance = item.distancia;
   } else if (item.latitude && item.longitude) {
-      const lat = parseFloat(String(item.latitude).replace(',', '.'));
-      const lng = parseFloat(String(item.longitude).replace(',', '.'));
-      if (!isNaN(lat) && !isNaN(lng)) {
-          displayDistance = calculateDistance(BASE_LAT, BASE_LNG, lat, lng);
-      }
+    const lat = parseFloat(String(item.latitude).replace(',', '.'));
+    const lng = parseFloat(String(item.longitude).replace(',', '.'));
+    if (!isNaN(lat) && !isNaN(lng)) {
+      displayDistance = calculateDistance(BASE_LAT, BASE_LNG, lat, lng);
+    }
   }
 
   // Dados antigos mapeados

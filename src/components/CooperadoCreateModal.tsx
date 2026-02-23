@@ -74,35 +74,39 @@ const CooperadoCreateModal: React.FC<Props> = ({ isActive, onClose, onSave }) =>
 
   const handleSave = () => {
     if (!matricula || !nomeProdutor) {
-        alert("Preencha os campos obrigatórios (Matrícula e Nome).");
-        return;
+      alert("Preencha os campos obrigatórios (Matrícula e Nome).");
+      return;
     }
 
-    const newItem: CooperadoItem = {
-      id: 5,
+    // Converter distancia para decimal (caso exista)
+    let distanciaKm: number | undefined = undefined;
+    if (distancia && !isNaN(Number(distancia))) {
+      distanciaKm = parseFloat(distancia.replace(',', '.'));
+    }
+
+    // Montar payload para API (CooperadoAPIInput)
+    const payload: any = {
       matricula: Number(matricula),
-      motorista: nomeProdutor,
-      filial: filiada, 
+      nomeCooperado: nomeProdutor,
       cpfCnpj,
       fase,
-      cabecasAlojadas: cabecas,
-      certificado: certificado as "Sim" | "Não",
-      doamDejetos: doamDejetos as "Sim" | "Não",
-      telefone: responsavel,
+      cabecas: Number(cabecas) || 0,
+      certificado,
+      doamDejetos,
+      responsavel,
       tecnico,
       numPropriedade,
       numEstabelecimento,
       municipio,
-      latitude,
-      longitude,
-      // Passando a distância calculada (se a interface suportar, senão é apenas visual)
-      // distancia: distancia, 
-      tipoVeiculo: '', 
-      placa: ''
+      latitude: latitude ? parseFloat(latitude.replace(',', '.')) : undefined,
+      longitude: longitude ? parseFloat(longitude.replace(',', '.')) : undefined,
+      distanciaKm,
+      // Adicione outros campos obrigatórios conforme necessário
     };
-    
-    onSave(newItem);
-    handleClose(); 
+
+    // Chamar onSave passando o payload (ajuste conforme integração real)
+    onSave(payload);
+    handleClose();
   };
 
   const handleClose = () => {

@@ -701,7 +701,7 @@ export interface VeiculoTipoOption {
 export interface VeiculoCombustivelOption {
   id: number;
   label: string;
-  value: "diesel" | "biomethane";
+  value: "diesel" | "biometano";
 }
 
 export const mockFetchVeiculoTipos = (): Promise<VeiculoTipoOption[]> => {
@@ -724,7 +724,7 @@ export const mockFetchVeiculoCombustiveis = (): Promise<VeiculoCombustivelOption
         setTimeout(() => {
             resolve([
                 { id: 1, label: "Diesel", value: "diesel" },
-                { id: 2, label: "Biomethane", value: "biomethane" }
+                { id: 2, label: "Biometano", value: "biometano" }
             ]);
         }, 300);
     });

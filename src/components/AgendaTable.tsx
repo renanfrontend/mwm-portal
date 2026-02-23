@@ -90,9 +90,8 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
             {showCopy && isPlanejado && (
               <IconButton 
                 onClick={() => onCopyClick(selectedIds)} 
-                disabled={locked}
-                sx={{ color: locked ? 'rgba(0,0,0,0.26)' : '#0072C3' }}
-                title={locked ? 'Não é possível copiar para semanas passadas ou atuais' : 'Copiar planejamento'}
+                sx={{ color: '#0072C3' }}
+                title={'Copiar planejamento'}
               >
                 <ContentCopy sx={{ fontSize: 20 }} />
               </IconButton>
@@ -102,7 +101,7 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
                 onClick={() => hasSelection && !locked && setIsDrawerOpen(true)} 
                 disabled={!hasSelection || locked}
                 sx={{ color: (hasSelection && !locked) ? '#0072C3' : 'rgba(0,0,0,0.26)' }}
-                title={(!hasSelection || locked) ? 'Não é possível limpar registros de semanas passadas ou atuais' : 'Limpar registros selecionados'}
+                title={locked ? 'Não é possível limpar registros de semanas passadas ou atuais' : (!hasSelection ? 'Selecione um registro para limpar' : 'Limpar registros selecionados')}
               >
                 <Delete sx={{ fontSize: 20 }} />
               </IconButton>

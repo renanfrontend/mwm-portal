@@ -37,7 +37,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
   const [planejadoDate, setPlanejadoDate] = useState(new Date());
   const [isCopyDrawerOpen, setIsCopyDrawerOpen] = useState(false);
   const [selectedIdsToCopy, setSelectedIdsToCopy] = useState<number[]>([]);
-  const [disableNext, setDisableNext] = useState(false);
 
   const [planejadoRows, setPlanejadoRows] = useState<RowData[]>([]);
 
@@ -87,20 +86,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
       );
 
       setPlanejadoRows(mapResponseToRows(response));
-
-      // 2. Lógica de Trava de Navegação (Baseada na Data Atual)
-      const nextWeekStart = addWeeks(start, 1);
-      const nextWeekEnd = addDays(nextWeekStart, 6);
-
-      // Se a próxima semana tiver dados, libera; se não tiver, bloqueia a navegação
-      const hasDataNextWeek = await AgendaService.verificarDadosSemana(
-        bioplantaId,
-        filiadaId,
-        format(nextWeekStart, 'yyyy-MM-dd'),
-        format(nextWeekEnd, 'yyyy-MM-dd')
-      );
-      setDisableNext(!hasDataNextWeek);
-
     } catch (err) {
       console.error('Erro ao carregar agenda planejada:', err);
       toast.error('Falha ao carregar a agenda planejada.');
@@ -248,7 +233,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
           setIsCopyDrawerOpen(true);
         }}
         showCopy={true}
-        disableNext={disableNext}
+        disableNext={false}
       />
       <CopyPlanningDrawer open={isCopyDrawerOpen} onClose={() => setIsCopyDrawerOpen(false)} onApply={handleApplyCopy} />
     </Box>

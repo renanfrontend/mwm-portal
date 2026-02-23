@@ -22,7 +22,9 @@ export interface CooperadoAPIInput {
   responsavel?: string;
   localizacao?: string;
   distancia?: string;
-  filiadaId?: number; }
+  distanciaKm?: number; // Novo campo decimal
+  filiadaId?: number;
+}
 
 export interface CooperadoResponse {
   id: number;
@@ -34,6 +36,7 @@ export interface CooperadoResponse {
     telefonePrincipal: string;
     filiadaId?: number;
     filiadaNome?: string;
+    distanciaKm?: number; // Novo campo também no bioProdutor
   };
   codigoEstabelecimento?: string;
   numeroEstabelecimento?: string;
@@ -45,6 +48,7 @@ export interface CooperadoResponse {
   latitude: number | string;
   longitude: number | string;
   distancia?: string;
+  distanciaKm?: number; // Novo campo na resposta principal
   qtdLagoas?: number;
   volLagoas?: string;
   fase?: string;

@@ -17,15 +17,23 @@ const LoginScreen = () => {
     setError('');
     try {
       // 1. Chama o serviço de API
-      const user = await authLogin(username, password);
-      
-      // 2. Atualiza o contexto global (O erro acontecia aqui!)
-      login(user);
-      
-      // 3. Navega para o Dashboard
+      const response = await authLogin(username, password);
+      console.log('Resposta do login:', response);
+      // Garante que o objeto salvo no contexto tenha token e usuario
+      const userData = {
+        token: response.token || '',
+        usuario: response.usuario || {
+          id: 0,
+          nome: username,
+          perfil: 'ADMIN',
+        },
+      };
+      console.log('UserData salvo:', userData);
+      login(userData);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Erro ao realizar login');
+      console.error('Erro no login:', err);
+      setError(err?.message || 'Erro ao realizar login');
     } finally {
       setLoading(false);
     }

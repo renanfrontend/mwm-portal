@@ -76,30 +76,33 @@ const CooperadoEditModal: React.FC<Props> = ({ isActive, onClose, onSave, data }
   if (!data) return null;
 
   const handleSubmit = () => {
-    const updatedItem: CooperadoItem = {
+    // Converter distancia para decimal (caso exista)
+    let distanciaKm: number | undefined = undefined;
+    if (distancia && !isNaN(Number(distancia))) {
+      distanciaKm = parseFloat(String(distancia).replace(',', '.'));
+    }
+
+    // Montar payload para API (CooperadoAPIInput)
+    const payload: any = {
       ...data,
       matricula: Number(matricula),
-      motorista: produtor,
-      filial: filiada,
+      nomeCooperado: produtor,
       cpfCnpj,
       fase,
-      cabecasAlojadas: cabecas,
-      certificado: certificado as any,
-      doamDejetos: doamDejetos as any,
+      cabecas: Number(cabecas) || 0,
+      certificado,
+      doamDejetos,
       responsavel,
-      telefone: telResponsavel,
-      emailResponsavel,
       tecnico,
-      telefoneTecnico: telTecnico,
-      emailTecnico,
       numPropriedade,
       numEstabelecimento,
       municipio,
-      latitude,
-      longitude,
-      distancia
+      latitude: latitude ? parseFloat(String(latitude).replace(',', '.')) : undefined,
+      longitude: longitude ? parseFloat(String(longitude).replace(',', '.')) : undefined,
+      distanciaKm,
+      // Adicione outros campos obrigatórios conforme necessário
     };
-    onSave(updatedItem);
+    onSave(payload);
   };
 
   return (

@@ -32,19 +32,65 @@ const mockUsers: MockUser[] = [
  * @param password A senha fornecida.
  * @returns Um Promise que resolve com o token JWT mockado se o login for bem-sucedido, ou rejeita em caso de falha.
  */
-export const login = (username: string, password: string): Promise<string> => {
-  if (import.meta.env.VITE_USE_MOCK_API !== 'false') { // Already correct
-    return mockLogin(username, password);
+export interface LoginResponse {
+  token: string;
+  usuario: {
+    id: number;
+    nome: string;
+    perfil: string;
+  };
+}
+
+export const login = (username: string, password: string): Promise<LoginResponse> => {
+  if (import.meta.env.VITE_USE_MOCK_API !== 'false') {
+    // Mock: mantém compatibilidade com o frontend
+    return mockLogin(username, password).then((token: string) => ({
+      token,
+      usuario: {
+        id: 1,
+        nome: username,
+        perfil: 'ADMIN',
+      },
+    }));
   }
 
   return new Promise(async (resolve, reject) => {
     try {
       const response = await api.post('/auth/login', { username, password });
-      const { token } = response.data;
-      // A API real deve retornar um token JWT
-      resolve(token);
-    } catch (error) {
-      reject(new Error('Usuário ou senha inválidos.'));
+      // Adapta para o formato esperado pelo frontend
+      if (response.data.token && response.data.usuario) {
+        resolve(response.data);
+      } else if (response.data.message && response.data.nome) {
+        // Monta um objeto compatível
+        resolve({
+          token: '', // Não há token, pode ser ajustado se backend passar a enviar
+          usuario: {
+            id: 1,
+            nome: response.data.nome,
+            perfil: 'ADMIN', // Ajuste conforme regra de perfil real
+          },
+        });
+      } else {
+        reject(new Error('Resposta inesperada do servidor.'));
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error('Erro na resposta da API:', error.response);
+        if (error.response.status === 401) {
+          // Mostra mensagem do backend se existir
+          const msg = error.response.data?.erro || error.response.data?.error || error.response.data?.message;
+          reject(new Error(msg || 'Usuário ou senha inválidos.'));
+        } else if (error.response.status === 403) {
+          reject(new Error('Usuário bloqueado ou inativo.'));
+        } else if (error.response.status === 500) {
+          reject(new Error('Erro interno ao processar login.'));
+        } else {
+          reject(new Error(error.response.data?.erro || error.response.data?.error || JSON.stringify(error.response.data) || 'Erro desconhecido.'));
+        }
+      } else {
+        console.error('Erro sem resposta da API:', error);
+        reject(new Error('Erro de conexão com o servidor.'));
+      }
     }
   });
 };

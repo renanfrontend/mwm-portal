@@ -74,16 +74,19 @@ const CooperadoInfoModal: React.FC<Props> = ({ isActive, onClose, data }) => {
 
   // --- LÓGICA DE CÁLCULO IDÊNTICA À DA LISTA ---
   let displayDistance = '-';
-
-  if (data.distancia && data.distancia.trim() !== '') {
-      displayDistance = data.distancia;
+  // Preferir distanciaKm se presente
+  if (typeof (data as any).distanciaKm === 'number') {
+    displayDistance = `${(data as any).distanciaKm.toFixed(2)} km`;
+  } else if (data.distancia && data.distancia.trim() !== '') {
+    displayDistance = data.distancia;
   } else if (data.latitude && data.longitude) {
-      const lat = parseFloat(String(data.latitude).replace(',', '.'));
-      const lng = parseFloat(String(data.longitude).replace(',', '.'));
-      if (!isNaN(lat) && !isNaN(lng)) {
-          displayDistance = calculateDistance(BASE_LAT, BASE_LNG, lat, lng);
-      }
+    const lat = parseFloat(String(data.latitude).replace(',', '.'));
+    const lng = parseFloat(String(data.longitude).replace(',', '.'));
+    if (!isNaN(lat) && !isNaN(lng)) {
+      displayDistance = calculateDistance(BASE_LAT, BASE_LNG, lat, lng);
+    }
   }
+
   // ----------------------------------------------
 
   return (
