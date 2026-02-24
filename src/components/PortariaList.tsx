@@ -3,9 +3,10 @@ import { Box, Tabs, Tab, TextField, Button, IconButton, Drawer, Typography, Glob
 import { Delete as DeleteIcon, Add as AddIcon, FileUpload as FileUploadIcon, FilterAlt as FilterAltIcon, Close as CloseIcon } from '@mui/icons-material';
 import PortariaTable from './PortariaTable';
 import PortariaDrawer from './PortariaDrawer';
-import EmptyImage from '../assets/empty-states-sheets.png'; // 🛡️ ASSET RESTAURADO
+import EmptyImage from '../assets/empty-states-sheets.png';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
+const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
 
 export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
   const [tabValue, setTabValue] = useState(0);
@@ -15,20 +16,14 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
   const [drawerConfig, setDrawerConfig] = useState<{open: boolean, mode: 'add'|'edit'|'view', data: any}>({open: false, mode: 'add', data: null});
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false);
   
-  // 🛡️ DADOS INICIAIS (Limpos para testar o Empty State)
   const [data, setData] = useState<any[]>([
     { id: '1', data: '18/02/2026', hora: '08:00', atividade: 'Abastecimento', nome: 'Renan Augusto', placa: 'ABC-1234', status: 'Em andamento', responsavel: 'Gilson Alves' },
     { id: '3', data: '18/02/2026', hora: '09:15', atividade: 'Entrega de dejetos', nome: 'José da Silva', placa: 'ABC-5678', status: 'Concluído', responsavel: 'Renan' },
     { id: '2', data: '18/02/2026', hora: '09:00', atividade: 'Visita', nome: 'Mariana Silva', placa: 'GHI-9012', status: 'Em andamento', responsavel: 'Gilson Alves' }
   ]);
 
-  const filteredData = useMemo(() => {
-    return data.filter(item => (tabValue === 0 ? item.status !== 'Concluído' : item.status === 'Concluído'));
-  }, [data, tabValue]);
-
-  const paginatedData = useMemo(() => {
-    return filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [filteredData, page]);
+  const filteredData = useMemo(() => data.filter(item => (tabValue === 0 ? item.status !== 'Concluído' : item.status === 'Concluído')), [data, tabValue]);
+  const paginatedData = useMemo(() => filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage), [filteredData, page]);
 
   const handleSave = (entry: any) => {
     const formattedData = entry.data instanceof Date ? entry.data.toLocaleDateString('pt-BR') : entry.data;
@@ -44,7 +39,12 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
     setDrawerConfig({open: false, mode: 'add', data: null});
   };
 
-  const iconStyle = { color: 'rgba(0, 0, 0, 0.26)' };
+  const handleConfirmDelete = () => {
+    setData(prev => prev.filter(i => !selectedIds.includes(i.id)));
+    setSelectedIds([]);
+    setIsDeleteDrawerOpen(false);
+    onSuccess("Registro excluído", "O registro foi removido com sucesso.");
+  };
 
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', overflow: 'hidden' }}>
@@ -63,53 +63,54 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
             {tabValue === 0 && (
               <>
                 <IconButton disabled={selectedIds.length === 0} onClick={() => setIsDeleteDrawerOpen(true)} sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'rgba(0, 0, 0, 0.26)' }}><DeleteIcon /></IconButton>
-                <IconButton sx={iconStyle}><FileUploadIcon /></IconButton>
-                <IconButton sx={iconStyle}><FilterAltIcon /></IconButton>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDrawerConfig({open: true, mode: 'add', data: null})} sx={{ bgcolor: '#0072C3', fontFamily: SCHIBSTED, whiteSpace: 'nowrap' }}>ADICIONAR</Button>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDrawerConfig({open: true, mode: 'add', data: null})} sx={{ bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>ADICIONAR</Button>
               </>
-            )}
-            {tabValue === 1 && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton sx={iconStyle}><FileUploadIcon /></IconButton>
-                <IconButton sx={iconStyle}><FilterAltIcon /></IconButton>
-              </Box>
             )}
           </Box>
         </Box>
         
         {filteredData.length === 0 ? (
-          /* 🛡️ EMPTY STATE REFINADO: Imagem de asset + textos */
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8 }}>
             <img src={EmptyImage} alt="Vazio" style={{ width: 150, marginBottom: '24px' }} />
-            <Typography sx={{ color: '#34343F', fontSize: 18, fontFamily: SCHIBSTED, fontWeight: 500, mb: 1 }}>
-              Área sem registros
-            </Typography>
-            <Typography sx={{ maxWidth: 300, textAlign: 'center', color: 'black', fontSize: 14, fontFamily: SCHIBSTED, fontWeight: 400 }}>
-              Utilize o botão “Adicionar” para adicionar as primeiras informações.
-            </Typography>
+            <Typography sx={{ color: '#34343F', fontSize: 18, fontFamily: SCHIBSTED, fontWeight: 500, mb: 1 }}>Área sem registros</Typography>
+            <Typography sx={{ maxWidth: 300, textAlign: 'center', color: 'black', fontSize: 14, fontFamily: SCHIBSTED }}>Utilize o botão “Adicionar” para adicionar as primeiras informações.</Typography>
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', bgcolor: 'white', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.12)', overflow: 'hidden' }}>
             <Box sx={{ width: '100%', overflowX: 'auto' }}>
               <PortariaTable data={paginatedData} selectedIds={selectedIds} onSelectionChange={setSelectedIds} isHistory={tabValue === 1} onEdit={(row: any) => setDrawerConfig({open: true, mode: 'edit', data: row})} onView={(row: any) => setDrawerConfig({open: true, mode: 'view', data: row})} />
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', p: 1, borderTop: '1px solid rgba(0,0,0,0.12)', bgcolor: 'white' }}>
-              <TablePagination component="div" count={filteredData.length} rowsPerPage={rowsPerPage} page={page} onPageChange={(_, newPage) => setPage(newPage)} rowsPerPageOptions={[]} labelDisplayedRows={({ count }) => `5 linhas por página de ${count}`} sx={{ border: 'none', '& .MuiTablePagination-displayedRows': { fontFamily: SCHIBSTED, fontSize: { xs: 10, sm: 12 }, color: 'black' } }} />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, borderTop: '1px solid rgba(0,0,0,0.12)' }}>
+              <TablePagination component="div" count={filteredData.length} rowsPerPage={rowsPerPage} page={page} onPageChange={(_, n) => setPage(n)} rowsPerPageOptions={[]} labelDisplayedRows={({ count }) => `5 linhas por página de ${count}`} />
             </Box>
           </Box>
         )}
       </Box>
 
-      {/* 🛡️ MODAL DE EXCLUSÃO BLINDADO */}
-      <Drawer anchor="right" open={isDeleteDrawerOpen} onClose={() => setIsDeleteDrawerOpen(false)} sx={{ zIndex: 6000 }} PaperProps={{ sx: { width: { xs: '100%', sm: 620 }, bgcolor: 'white' } }}>
-        <Box sx={{ minHeight: { xs: 120, sm: 148 }, px: '20px', pt: { xs: '32px', sm: '48px' }, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box><Typography sx={{ fontSize: { xs: 24, sm: 32 }, fontWeight: 700, fontFamily: SCHIBSTED }}>EXCLUIR REGISTRO</Typography>
-          <Typography sx={{ fontSize: { xs: 16, sm: 20 }, mt: 3, fontFamily: SCHIBSTED, color: 'black', lineHeight: '28px', fontWeight: 400 }}>Ao excluir esse registro todas as informações associadas à ela serão removidas. Deseja excluir esse registro?</Typography></Box>
-          <IconButton onClick={() => setIsDeleteDrawerOpen(false)}><CloseIcon /></IconButton>
+      {/* 🛡️ MODAL DE EXCLUSÃO: ESTRUTURA BLINDADA FIGMA */}
+      <Drawer anchor="right" open={isDeleteDrawerOpen} onClose={() => setIsDeleteDrawerOpen(false)} sx={{ zIndex: 6000 }} PaperProps={{ sx: { width: 620, bgcolor: 'white', border: 'none', display: 'flex', flexDirection: 'column', height: '100%' } }}>
+        <Box sx={{ p: '16px 20px 24px 20px', bgcolor: 'white', flexShrink: 0 }}>
+          {/* 🛡️ BLOCO 1: ÍCONE NO TOPO ABSOLUTO DIREITO */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 1 }}>
+            <IconButton onClick={() => setIsDeleteDrawerOpen(false)} sx={{ p: 0 }}><CloseIcon /></IconButton>
+          </Box>
+          {/* 🛡️ BLOCO 2: TÍTULOS ABAIXO */}
+          <Box>
+            <Typography sx={{ fontSize: 32, fontWeight: 700, fontFamily: SCHIBSTED, lineHeight: 1.1 }}>EXCLUIR REGISTRO</Typography>
+            <Typography sx={{ fontSize: 16, color: 'black', mt: 0.5, ...COMMON_FONT }}>Gestão de registros de portaria</Typography>
+          </Box>
         </Box>
-        <Box sx={{ mt: 'auto', p: '20px', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '20px', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-          <Button variant="outlined" fullWidth onClick={() => setIsDeleteDrawerOpen(false)} sx={{ height: 48, fontFamily: SCHIBSTED }}>NÃO</Button>
-          <Button variant="contained" fullWidth onClick={() => { setData(prev => prev.filter(i => !selectedIds.includes(i.id))); setSelectedIds([]); setIsDeleteDrawerOpen(false); onSuccess("Registro excluído com sucesso", "O registro foi removido e não está mais disponível no sistema."); }} sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>SIM</Button>
+
+        <Box sx={{ px: '20px', pt: 4, flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '28px', pb: '40px' }}>
+          <Typography sx={{ textAlign: 'justify', color: 'black', fontSize: 20, fontFamily: SCHIBSTED, fontWeight: '500', lineHeight: 1.6, letterSpacing: 0.15 }}>
+            Ao excluir esse registro todas as informações associadas à ela serão removidas. 
+            <br /><strong>Deseja excluir esse registro?</strong>
+          </Typography>
+        </Box>
+
+        <Box sx={{ p: '24px 20px', bgcolor: 'white', display: 'flex', gap: 2, flexShrink: 0 }}>
+          <Button variant="outlined" onClick={() => setIsDeleteDrawerOpen(false)} fullWidth sx={{ height: 48, fontFamily: SCHIBSTED, color: '#0072C3', borderColor: 'rgba(0, 114, 195, 0.50)', fontWeight: '500' }}>NÃO</Button>
+          <Button variant="contained" onClick={handleConfirmDelete} fullWidth sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED, fontWeight: '500', boxShadow: 'none' }}>SIM</Button>
         </Box>
       </Drawer>
 

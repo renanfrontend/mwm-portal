@@ -17,6 +17,7 @@ import { TransportadoraList } from '../components/TransportadoraList';
 import { AgendaList } from '../components/AgendaList';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
+const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
 
 const Logistica: React.FC = () => {
   const location = useLocation();
@@ -34,13 +35,11 @@ const Logistica: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // 🛡️ FIX: Removidos isLoading e error (estavam acusando TS6133)
   const { createCooperado, updateCooperado, deleteCooperado } = useCooperadoMutation();
 
   const loadProducers = useCallback(async () => {
     try {
       const response = await ProdutorService.list(1, 1, 1, 9999);
-      console.log('DEBUG - Producers Response:', response.items);
       setProducers(response.items || []);
       setTotalItems(response.total || 0);
     } catch (err) { console.error('Erro ao carregar lista:', err); }
@@ -105,11 +104,10 @@ const Logistica: React.FC = () => {
   const openDrawer = async (mode: 'create' | 'view' | 'edit', producer?: ProdutorListItem) => {
     setDrawerMode(mode); setSelectedProducer(producer || null); setSelectedProducerFullData(null);
     if ((mode === 'view' || mode === 'edit') && producer?.id) {
-       try {
-         const response = await ProdutorService.getById(producer.id);
-         const d = response as any; 
-         console.log('DEBUG - Produtor Detalhes:', d);
-         setSelectedProducerFullData({
+        try {
+          const response = await ProdutorService.getById(producer.id);
+          const d = response as any; 
+          setSelectedProducerFullData({
             cpfCnpj: d.bioProdutor?.cpfCnpj || d.cpfCnpj || d.cpf_cnpj || d.cnpj || d.cpf || '', 
             nome: d.bioProdutor?.nome || d.nomeCooperado || d.nome || '',
             numEstabelecimento: d.numeroEstabelecimento || d.numEstabelecimento || d.numero_estabelecimento || d.num_estabelecimento || '', 
@@ -130,8 +128,8 @@ const Logistica: React.FC = () => {
             long: String(d.longitude || ''),
             distancia: d.distancia || '', 
             localizacao: d.localizacao || ''
-         });
-       } catch (err) { console.error('Erro ao buscar detalhes:', err); }
+          });
+        } catch (err) { console.error('Erro ao buscar detalhes:', err); }
     }
     setIsDrawerOpen(true);
   };
@@ -142,7 +140,6 @@ const Logistica: React.FC = () => {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: '24px', bgcolor: '#F5F5F5', overflow: 'hidden' }}>
-      {/* BREADCRUMBS RESTAURADOS */}
       <Box sx={{ alignSelf: 'stretch', mb: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Link component={NavLink} to="/" sx={{ display: 'flex', color: 'rgba(0, 0, 0, 0.54)' }}><HomeIcon sx={{ fontSize: '18px' }} /></Link>
@@ -173,9 +170,13 @@ const Logistica: React.FC = () => {
             <Box sx={{ p: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextField sx={{ width: 500 }} label="Buscar" size="small" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <IconButton disabled={selectedIds.length === 0} sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'inherit' }} onClick={() => setIsDeleteDialogOpen(true)}><Delete /></IconButton>
-                <IconButton disabled sx={{ color: 'rgba(0,0,0,0.26)' }}><FileDownload /></IconButton>
-                <IconButton disabled sx={{ color: 'rgba(0,0,0,0.26)' }}><FilterAlt /></IconButton>
+                <IconButton 
+                  disabled={selectedIds.length === 0} 
+                  sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'inherit' }} 
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <Delete />
+                </IconButton>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => openDrawer('create')} sx={{ bgcolor: '#0072C3', height: 40, px: 3, fontFamily: SCHIBSTED, fontWeight: 600 }}>ADICIONAR</Button>
               </Box>
             </Box>
@@ -190,8 +191,18 @@ const Logistica: React.FC = () => {
 
               <Box sx={{ flex: 1, overflowY: 'auto' }}>
                 {visibleProducers.map(p => (
-                  <Box key={p.id} onClick={() => handleToggleSelect(p.id)} sx={{ display: 'grid', gridTemplateColumns: tableGrid, minHeight: 52, alignItems: 'center', px: 2, borderBottom: '1px solid rgba(0,0,0,0.12)', cursor: 'pointer', bgcolor: selectedIds.includes(p.id) ? 'rgba(0, 114, 195, 0.12)' : 'inherit' }}>
-                    <Checkbox size="small" checked={selectedIds.includes(p.id)} />
+                  <Box 
+                    key={p.id} 
+                    onClick={() => handleToggleSelect(p.id)} 
+                    sx={{ 
+                      display: 'grid', gridTemplateColumns: tableGrid, minHeight: 52, alignItems: 'center', px: 2, 
+                      borderBottom: '1px solid rgba(0,0,0,0.12)', cursor: 'pointer', 
+                      bgcolor: selectedIds.includes(p.id) ? 'rgba(0, 114, 195, 0.12)' : 'inherit' 
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {selectedIds.includes(p.id) && <Checkbox size="small" checked={true} />}
+                    </Box>
                     <Typography sx={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nomeProdutor}</Typography>
                     <Typography sx={{ fontSize: 13 }}>{p.numEstabelecimento}</Typography>
                     <Typography sx={{ fontSize: 13 }}>{p.filiada}</Typography>
@@ -215,13 +226,25 @@ const Logistica: React.FC = () => {
         {currentTab === 2 && <AgendaList onShowSuccess={handleShowToast} />}
       </Paper>
       
-      <Drawer anchor="right" open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} sx={{ zIndex: 6000 }}>
-        <Box sx={{ width: 620, p: '32px 20px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}><Typography sx={{ fontSize: 32, fontWeight: 700, fontFamily: SCHIBSTED }}>EXCLUIR REGISTRO</Typography><IconButton onClick={() => setIsDeleteDialogOpen(false)}><CloseIcon /></IconButton></Box>
-          <Typography sx={{ fontSize: 20, fontWeight: 500, fontFamily: SCHIBSTED, textAlign: 'justify', mb: 'auto' }}>Deseja excluir esses registros? Ao confirmar todas as informações associadas serão removidas permanentemente.</Typography>
-          <Stack direction="row" spacing={2} sx={{ pt: 3 }}><Button variant="outlined" fullWidth onClick={() => setIsDeleteDialogOpen(false)} sx={{ height: 48, color: '#0072C3', borderColor: 'rgba(0, 114, 195, 0.5)', fontFamily: SCHIBSTED }}>NÃO</Button><Button variant="contained" fullWidth onClick={handleDeleteSelected} sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>SIM</Button></Stack>
+      {/* MODAL EXCLUIR PRODUTOR */}
+      <Drawer anchor="right" open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} sx={{ zIndex: 6000 }} PaperProps={{ sx: { width: 620, bgcolor: 'white', border: 'none', display: 'flex', flexDirection: 'column', height: '100%' } }}>
+        <Box sx={{ p: '16px 20px 24px 20px', bgcolor: 'white', flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 1 }}>
+            <IconButton onClick={() => setIsDeleteDialogOpen(false)} sx={{ p: 0 }}><CloseIcon /></IconButton>
+          </Box>
+          <Box><Typography sx={{ fontSize: 32, fontWeight: 700, fontFamily: SCHIBSTED, lineHeight: 1.1 }}>EXCLUIR PRODUTOR</Typography></Box>
+        </Box>
+        <Box sx={{ px: '20px', pt: 4, flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '28px', pb: '40px' }}>
+          <Typography sx={{ textAlign: 'justify', color: 'black', fontSize: 20, fontFamily: SCHIBSTED, fontWeight: '500', lineHeight: 1.6, letterSpacing: 0.15 }}>
+            Ao excluir esse registro do produtor todas as informações associadas à ela serão removidas. Deseja excluir esse registro do produtor?
+          </Typography>
+        </Box>
+        <Box sx={{ p: '24px 20px', bgcolor: 'white', display: 'flex', gap: 2, flexShrink: 0 }}>
+          <Button variant="outlined" onClick={() => setIsDeleteDialogOpen(false)} fullWidth sx={{ height: 48, fontFamily: SCHIBSTED, color: '#0072C3', borderColor: 'rgba(0, 114, 195, 0.50)', fontWeight: '500' }}>NÃO</Button>
+          <Button variant="contained" onClick={handleDeleteSelected} fullWidth sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED, fontWeight: '500', boxShadow: 'none' }}>SIM</Button>
         </Box>
       </Drawer>
+
       <ProdutorDrawer key={isDrawerOpen ? 'open' : 'closed'} isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} onSave={handleSave} mode={drawerMode} initialData={selectedProducerFullData} />
     </Box>
   );

@@ -297,7 +297,7 @@ const CooperadoCreateModal: React.FC<Props> = ({ isActive, onClose, onSave }) =>
             </div>
             <div className="column is-4">
               <div className="field">
-                <label className="label is-size-7" style={{ color: textColor }}>Distância (Calculada)</label>
+                <label className="label is-size-7" style={{ color: textColor }}>Distância</label>
                 <div className="control has-icons-right">
                   <input 
                     className="input is-small has-background-light" 

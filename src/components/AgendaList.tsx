@@ -67,7 +67,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         id: linha.idEstabelecimento,
         idEstabelecimento: linha.idEstabelecimento,
         produtor: linha.produtor,
-        // Mapeamento robusto para o campo de distância
         distancia: linha.distanciaKm ?? 0,
         transportadora: linha.transportadora || '',
         transp: linha.transportadora || '',
@@ -78,16 +77,13 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
 
   const fetchPlanejadoWeek = useCallback(async (start: Date, end: Date) => {
     setPlanejadoLoading(true);
-
     try {
-      // 1. Carrega dados da semana atual
       const response = await AgendaService.listPlanejadoSemana(
         bioplantaId,
         filiadaId,
         format(start, 'yyyy-MM-dd'),
         format(end, 'yyyy-MM-dd')
       );
-
       setPlanejadoRows(mapResponseToRows(response));
     } catch (err) {
       console.error('Erro ao carregar agenda planejada:', err);
@@ -133,7 +129,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
       const refRange = getWeekRange(refDate);
       const appRange = getWeekRange(appDate);
 
-      // Chamada otimizada ao backend para cópia em massa
       await AgendaService.copiarSemana({
         idBioplanta: bioplantaId,
         idFiliada: filiadaId,
@@ -142,15 +137,12 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         idsEstabelecimentos: selectedIdsToCopy
       });
 
-      // Se a semana de destino for a visualizada atualmente, recarrega
       if (isSameDay(appRange.start, startOfWeek(planejadoDate, { weekStartsOn: 0 }))) {
         fetchPlanejadoWeek(appRange.start, appRange.end);
       }
       
-      // Se copiamos PARA a próxima semana (em relação à atual), precisamos revalidar a navegação
       const nextWeekFromView = addWeeks(startOfWeek(planejadoDate, { weekStartsOn: 0 }), 1);
       if (isSameDay(appRange.start, nextWeekFromView)) {
-        // Força revalidação do botão "Next"
         const { start, end } = getWeekRange(planejadoDate);
         fetchPlanejadoWeek(start, end);
       }
@@ -192,21 +184,14 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
 
     newData.forEach((row) => {
       const previous = previousRows.get(row.id);
-      
-      // Sincroniza transp -> transportadora (caso o Table tenha atualizado só 'transp')
       if (row.transp && row.transp !== row.transportadora) {
           row.transportadora = row.transp;
       }
-
-      // Verifica se a transportadora mudou
       const transportadoraMudou = previous && previous.transportadora !== row.transportadora;
 
       DAY_KEYS.forEach((dayKey) => {
         const previousValue = previous ? previous[dayKey] : 0;
         const nextValue = row[dayKey] || 0;
-        
-        // Se o valor do dia mudou OU se a transportadora mudou (e tem viagem nesse dia ou tinha), precisamos salvar
-        // (Se a transportadora mudou, atualizamos todos os dias da linha para refletir a nova transportadora)
         if (previousValue !== nextValue || (transportadoraMudou)) {
           changes.push({ row, dayKey, value: nextValue });
         }
@@ -214,9 +199,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
     });
 
     setPlanejadoRows(newData);
-
     if (changes.length === 0) return;
-
 
     const { start } = getWeekRange(planejadoDate);
 
@@ -235,7 +218,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
           })
         )
       );
-
       handleSuccess("Registro atualizado com sucesso", "As alterações foram salvas e já estão disponíveis no sistema.");
     } catch (err) {
       console.error('Erro ao salvar agenda:', err);
@@ -247,7 +229,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
 
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: '8px 16px', position: 'relative', overflowX: 'hidden' }}>
-      
       <AgendaTable title="Realizado" referenceDate={realizadoDate} onDateChange={setRealizadoDate} data={[]} />
       <AgendaTable
         title="Planejado"
@@ -258,7 +239,6 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         onDataChange={handleUpdateWeekData}
         onDeleteSelected={handleDeleteSelected}
         onCopyClick={(ids: string[]) => {
-          // Se não houver seleção, envia lista vazia (o backend entende como "Copiar Tudo")
           const validIds = (ids || []).map(id => parseInt(id, 10)).filter(n => !isNaN(n));
           setSelectedIdsToCopy(validIds);
           setIsCopyDrawerOpen(true);
