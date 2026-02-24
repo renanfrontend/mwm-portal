@@ -31,8 +31,9 @@ export const useCooperadoMutation = () => {
       restricoes: form.restricoes,
       responsavel: form.responsavel,
       localizacao: form.localizacao,
-      // 🛡️ Ignorando distancia para evitar erro 400 no banco
-      // distancia: form.distancia, 
+      // 🛡️ CORREÇÃO: Envia a distância limpa (sem "km", "KM", etc) e convertida para número
+      // Remove qualquer caractere que não seja número ou ponto/vírgula
+      distanciaKm: form.distancia ? Number.parseFloat(form.distancia.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0,
       filiadaId: Number(form.filiada) || 1
     };
   };

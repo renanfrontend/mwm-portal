@@ -9,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useTransportadoraMutation } from '../hooks/useTransportadoraMutation';
 import { UF_OPTIONS } from '../constants/transportadoraOptions';
 import { 
-  fetchCategorias, 
+  fetchCategorias,
   fetchVeiculoTipos, 
   fetchVeiculoCombustiveis, 
   type CategoriaOption, 
@@ -74,14 +74,48 @@ const TransportadoraDrawer: React.FC<any> = ({ isOpen, isReadOnly = false, onClo
     if (showVehicleFields && currentVehicle.tipo && currentVehicle.placa) {
       veiculosList.push({ ...currentVehicle, id: Math.random() });
     }
+    const cleanPhone = (phone: string) => phone ? phone.replace(/\D/g, '') : '';
+    
     const payload: any = {
-      nomeFantasia: form.nomeFantasia.trim(), razaoSocial: form.razaoSocial.trim(), cnpj: form.cnpj.trim(), categoria: form.categoria.trim(),
-      endereco: form.enderecoCompleto.trim(), cidade: form.cidade.trim(), uf: form.uf.trim(), telefoneComercial: form.telefone.trim(),
-      emailComercial: form.email.trim(), contatoPrincipal: { nome: form.nomeContato, telefone: form.telefone, email: form.email },
-      veiculos: veiculosList.map(v => ({ tipo: v.tipo, placa: v.placa, capacidade: Number(v.capacidade || 0), tipoAbastecimento: v.tipoAbastecimento }))
+      nomeFantasia: form.nomeFantasia.trim(), 
+      razaoSocial: form.razaoSocial.trim(), 
+      // 🛡️ Envia CNPJ como está no input (formatado), conforme exemplo do Swagger
+      cnpj: form.cnpj.trim(), 
+      categoria: form.categoria.trim(),
+      endereco: form.enderecoCompleto.trim(), 
+      cidade: form.cidade.trim(), 
+      uf: form.uf.trim(), 
+      
+      telefoneComercial: cleanPhone(form.telefone),
+      emailComercial: form.email.trim(), 
+      
+      // Campos da raiz (para satisfazer validação se houver)
+      telefone: cleanPhone(form.telefone),
+      email: form.email.trim(),
+      
+      contatoPrincipal: { 
+        nome: form.nomeContato, 
+        telefone: cleanPhone(form.telefone), 
+        email: form.email 
+      },
+      
+      veiculos: veiculosList.map(v => ({ 
+        tipo: v.tipo, 
+        placa: v.placa, 
+        // Garante que capacidade seja string e não vazia
+        capacidade: String(v.capacidade || '0'), 
+        tipoAbastecimento: v.tipoAbastecimento 
+      }))
     };
-    const result = initialData?.id ? await updateTransportadora(initialData.id, payload) : await createTransportadora(payload);
-    if (result) onSave();
+
+    if (initialData?.id) {
+      const result = await updateTransportadora(initialData.id, payload);
+      if (result) onSave();
+    } else {
+      // 🛡️ CRIAÇÃO DIRETA: O backend aceita lista de veículos
+      const result = await createTransportadora(payload);
+      if (result) onSave();
+    }
   };
 
   // 🛡️ ESTILO PORTARIA: Floating labels sem shrink fixo

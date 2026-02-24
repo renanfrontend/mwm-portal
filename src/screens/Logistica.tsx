@@ -40,6 +40,7 @@ const Logistica: React.FC = () => {
   const loadProducers = useCallback(async () => {
     try {
       const response = await ProdutorService.list(1, 1, 1, 9999);
+      console.log('DEBUG - Producers Response:', response.items);
       setProducers(response.items || []);
       setTotalItems(response.total || 0);
     } catch (err) { console.error('Erro ao carregar lista:', err); }
@@ -122,8 +123,8 @@ const Logistica: React.FC = () => {
             qtdLagoas: String(d.qtdLagoas || '1'), 
             volLagoas: d.volLagoas || '', 
             restricoes: d.restricoes || '',
-            responsavel: d.responsavel || '', 
-            tecnico: d.tecnico || '', 
+            responsavel: d.responsavel || (d.bioEstabelecimento ? d.bioEstabelecimento.responsavel : ''),
+            tecnico: d.tecnico || (d.bioProducao && d.bioProducao.length > 0 ? d.bioProducao[0].tecnicoResponsavel : ''),
             municipio: d.municipio || '',
             lat: String(d.latitude || ''), 
             long: String(d.longitude || ''),
@@ -196,7 +197,7 @@ const Logistica: React.FC = () => {
                     <Typography sx={{ fontSize: 13 }}>{p.filiada}</Typography>
                     <Typography sx={{ fontSize: 13 }}>{p.modalidade}</Typography>
                     <Typography sx={{ fontSize: 13 }}>{p.cabecasAlojadas || 0}</Typography>
-                    <Typography sx={{ fontSize: 13 }}>{p.distancia || '-'}</Typography>
+                    <Typography sx={{ fontSize: 13 }}>{p.distancia && p.distancia !== '-' ? p.distancia : '0 Km'}</Typography>
                     <Box><Chip label={p.certificado} size="small" sx={{ height: 22, fontSize: 10, fontWeight: 600, borderRadius: '4px', bgcolor: (p.certificado === 'Sim' || p.certificado === 'Ativo') ? '#F1F9EE' : '#FFEDEE', color: (p.certificado === 'Sim' || p.certificado === 'Ativo') ? '#70BF54' : '#E4464E' }} /></Box>
                     <Box><Chip label={p.participaProjeto || 'Sim'} size="small" sx={{ height: 22, fontSize: 10, fontWeight: 600, borderRadius: '4px', bgcolor: '#F1F9EE', color: '#70BF54' }} /></Box>
                     <Stack direction="row" spacing={0.5} onClick={e => e.stopPropagation()}>

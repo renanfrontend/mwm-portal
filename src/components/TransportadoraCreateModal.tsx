@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import type { TransportadoraItem } from '../types/models';
 import useTheme from '../hooks/useTheme';
 import { MdSave } from 'react-icons/md';
-import { v4 as uuidv4 } from 'uuid'; // Import para gerar ID fictício
 import { fetchCategorias, type CategoriaOption } from '../services/api';
 import { UF_OPTIONS } from '../constants/transportadoraOptions';
 
@@ -73,28 +72,48 @@ const TransportadoraCreateModal: React.FC<Props> = ({ isActive, onClose, onCreat
   }, [isActive]);
 
   const handleSubmit = () => {
-    // Cria o novo objeto transportadora
-    const newItem: TransportadoraItem = {
-        id: uuidv4(), // Gera um ID temporário
+    // Cria o novo objeto transportadora sem ID (backend gera)
+    const cleanPhone = (phone: string) => phone.replace(/\D/g, '');
+    
+    const newItem: any = {
         nomeFantasia,
         razaoSocial,
-        cnpj,
-        telefone: telefoneComercial,
-        email: emailComercial,
+        cnpj: cnpj.replace(/\D/g, ''), // Remove formatação do CNPJ
+        endereco,
         cidade,
         uf,
-        endereco,
-        estado: uf, // Assumindo UF como estado para preencher o campo obrigatório
-        placa: '', // Valor padrão vazio
-        status: 'Ativo', // Valor padrão
-        tags: [], // Valor padrão vazio
+        
+        // Campos obrigatórios do DTO
+        telefone: cleanPhone(telefoneComercial),
+        email: emailComercial,
+        
+        telefoneComercial: cleanPhone(telefoneComercial),
+        emailComercial,
         categoria,
-        contatoPrincipal: { nome: contatoPrincipalNome, telefone: contatoPrincipalTel, email: contatoPrincipalEmail },
-        contatoComercial: { nome: contatoComercialNome, telefone: contatoComercialTel, email: contatoComercialEmail },
-        contatoFinanceiro: { nome: contatoFinanceiroNome, telefone: contatoFinanceiroTel, email: contatoFinanceiroEmail },
-        contatoJuridico: { nome: contatoJuridicoNome, telefone: contatoJuridicoTel, email: contatoJuridicoEmail },
-        veiculos: [] // Inicia sem veículos
+        contatoPrincipal: { 
+            nome: contatoPrincipalNome, 
+            telefone: cleanPhone(contatoPrincipalTel), 
+            email: contatoPrincipalEmail 
+        },
+        contatoComercial: { 
+            nome: contatoComercialNome, 
+            telefone: cleanPhone(contatoComercialTel), 
+            email: contatoComercialEmail 
+        },
+        contatoFinanceiro: { 
+            nome: contatoFinanceiroNome, 
+            telefone: cleanPhone(contatoFinanceiroTel), 
+            email: contatoFinanceiroEmail 
+        },
+        contatoJuridico: { 
+            nome: contatoJuridicoNome, 
+            telefone: cleanPhone(contatoJuridicoTel), 
+            email: contatoJuridicoEmail 
+        },
+        veiculos: [] // Garante lista vazia para evitar erro 400 em validação de veículos na criação
     };
+    
+    console.log('📦 Payload preparado no Modal:', newItem);
     onCreate(newItem);
   };
 

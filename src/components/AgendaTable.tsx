@@ -4,15 +4,24 @@ import { Close as CloseIcon, Delete, ContentCopy, CalendarMonth, ChevronLeft, Ch
 import { format, startOfWeek, subWeeks, addWeeks, addDays, getWeek, startOfDay, isAfter } from 'date-fns';
 
 const COMMON_FONT = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
-const TRANSPORTERS = ['Expresso São Miguel', 'LogBras', 'TransRápido', 'Alfa Logística'];
 
-export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange, data, onDataChange, showCopy, onDeleteSuccess, onCopyClick, onDeleteSelected, disableNext }) => {
+export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange, data, onDataChange, showCopy, onDeleteSuccess, onCopyClick, onDeleteSelected, disableNext, transportadoras = [] }) => {
   const [selectedIds, setSelectedIds] = useState<Array<string | number>>([]);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
   const [localData, setLocalData] = useState(data);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
+
+  // Loga os dados recebidos para debug
+  React.useEffect(() => {
+    // Só loga se houver dados
+    if (data && data.length > 0) {
+      // Mostra o JSON no console do navegador
+      // eslint-disable-next-line no-console
+      console.log('[AgendaTable] Dados recebidos para o grid:', JSON.stringify(data, null, 2));
+    }
+  }, [data]);
 
   useEffect(() => { setLocalData(data); }, [data]);
 
@@ -152,7 +161,11 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
       {localData.map((row: any) => {
         const isSelected = isPlanejado && selectedIds.includes(row.id);
         const isEditing = isPlanejado && editingRowId === row.id;
-        const totalKm = row.distancia * ((row.seg||0) + (row.ter||0) + (row.qua||0) + (row.qui||0) + (row.sex||0) + (row.sab||0) + (row.dom||0));
+        
+        // Garante que os valores sejam numéricos para o cálculo
+        const dist = Number(row.distancia ?? row.distanciaKm ?? row.km ?? 0);
+        const viagens = (Number(row.seg)||0) + (Number(row.ter)||0) + (Number(row.qua)||0) + (Number(row.qui)||0) + (Number(row.sex)||0) + (Number(row.sab)||0) + (Number(row.dom)||0);
+        const totalKm = Math.round(dist * viagens); // Arredonda para inteiro
         
         return (
           <Box 
@@ -177,8 +190,20 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
             <Typography sx={{ p: '8px 8px', fontSize: 12, ...COMMON_FONT }}>{row.distancia} Km</Typography>
             <Box sx={{ p: '4px 8px' }}>
                {isEditing && !locked && isPlanejado ? (
-                <Select size="small" value={row.transp} fullWidth onClick={(e) => e.stopPropagation()} onChange={(e) => setLocalData((prev: any) => prev.map((r: any) => r.id === row.id ? { ...r, transp: e.target.value } : r))} sx={{ height: 32, fontSize: 11 }}>
-                  {TRANSPORTERS.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                <Select 
+                  size="small" 
+                  value={row.transp} 
+                  fullWidth 
+                  onClick={(e) => e.stopPropagation()} 
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    const newData = localData.map((r: any) => r.id === row.id ? { ...r, transp: newValue } : r);
+                    setLocalData(newData);
+                    onDataChange?.(newData); 
+                  }} 
+                  sx={{ height: 32, fontSize: 11 }}
+                >
+                  {transportadoras.map((t: string) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
                 </Select>
                ) : <Typography sx={{ fontSize: 12, ...COMMON_FONT, color: (!isPlanejado || locked) ? 'rgba(0,0,0,0.5)' : 'inherit' }}>{row.transp}</Typography>}
             </Box>
@@ -192,7 +217,20 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
                       size="small"
                       value={row[day]}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => setLocalData((prev: any) => prev.map((r: any) => r.id === row.id ? { ...r, [day]: Math.max(0, parseInt(e.target.value) || 0) } : r))}
+                      onChange={(e) => {
+                        setLocalData((prev: any) => {
+                          const updated = prev.map((r: any) => {
+                            if (r.id === row.id) {
+                              const newRow = { ...r, [day]: Math.max(0, parseInt(e.target.value) || 0) };
+                              return newRow;
+                            }
+                            return r;
+                          });
+                          // Atualiza imediatamente o total de KM
+                          onDataChange?.(updated);
+                          return updated;
+                        });
+                      }}
                       onBlur={() => onDataChange?.(localData)}
                       onKeyDown={(e) => { if (e.key === 'Enter') onDataChange?.(localData); }}
                       sx={{ '& .MuiOutlinedInput-root': { height: 30, fontSize: 11 } }}

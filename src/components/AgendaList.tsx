@@ -5,6 +5,7 @@ import CopyPlanningDrawer from './CopyPlanningDrawer';
 import { addDays, addWeeks, format, getDay, isSameDay, parseISO, startOfWeek } from 'date-fns';
 import { toast } from 'react-toastify';
 import { AgendaService } from '../services/agendaService';
+import { TransportadoraService } from '../services/transportadoraService';
 import type { AgendaPlanejadaSemanaResponse } from '../types/agenda';
 
 type DayKey = 'seg' | 'ter' | 'qua' | 'qui' | 'sex' | 'sab' | 'dom';
@@ -39,6 +40,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
   const [selectedIdsToCopy, setSelectedIdsToCopy] = useState<number[]>([]);
 
   const [planejadoRows, setPlanejadoRows] = useState<RowData[]>([]);
+  const [transportadoras, setTransportadoras] = useState<string[]>([]);
 
   const [planejadoLoading, setPlanejadoLoading] = useState(false);
 
@@ -65,7 +67,8 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         id: linha.idEstabelecimento,
         idEstabelecimento: linha.idEstabelecimento,
         produtor: linha.produtor,
-        distancia: linha.distanciaKm,
+        // Mapeamento robusto para o campo de distância
+        distancia: linha.distanciaKm ?? 0,
         transportadora: linha.transportadora || '',
         transp: linha.transportadora || '',
         ...dias
@@ -104,6 +107,20 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
   useEffect(() => {
     handlePlanejadoDateChange(planejadoDate);
   }, [handlePlanejadoDateChange]);
+
+  useEffect(() => {
+    const fetchTransportadoras = async () => {
+      try {
+        const response = await TransportadoraService.list(1, 100);
+        const names = response.items.map(t => t.nomeFantasia || t.razaoSocial).sort();
+        setTransportadoras(names);
+      } catch (error) {
+        console.error('Erro ao carregar transportadoras', error);
+        toast.error('Erro ao carregar lista de transportadoras');
+      }
+    };
+    fetchTransportadoras();
+  }, []);
 
   const handleSuccess = (title: string, message: string) => {
     if (onShowSuccess) {
@@ -175,10 +192,22 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
 
     newData.forEach((row) => {
       const previous = previousRows.get(row.id);
+      
+      // Sincroniza transp -> transportadora (caso o Table tenha atualizado só 'transp')
+      if (row.transp && row.transp !== row.transportadora) {
+          row.transportadora = row.transp;
+      }
+
+      // Verifica se a transportadora mudou
+      const transportadoraMudou = previous && previous.transportadora !== row.transportadora;
+
       DAY_KEYS.forEach((dayKey) => {
         const previousValue = previous ? previous[dayKey] : 0;
         const nextValue = row[dayKey] || 0;
-        if (previousValue !== nextValue) {
+        
+        // Se o valor do dia mudou OU se a transportadora mudou (e tem viagem nesse dia ou tinha), precisamos salvar
+        // (Se a transportadora mudou, atualizamos todos os dias da linha para refletir a nova transportadora)
+        if (previousValue !== nextValue || (transportadoraMudou)) {
           changes.push({ row, dayKey, value: nextValue });
         }
       });
@@ -187,6 +216,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
     setPlanejadoRows(newData);
 
     if (changes.length === 0) return;
+
 
     const { start } = getWeekRange(planejadoDate);
 
@@ -224,6 +254,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         referenceDate={planejadoDate}
         onDateChange={handlePlanejadoDateChange}
         data={plannedData}
+        transportadoras={transportadoras}
         onDataChange={handleUpdateWeekData}
         onDeleteSelected={handleDeleteSelected}
         onCopyClick={(ids: string[]) => {

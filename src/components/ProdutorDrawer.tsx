@@ -32,21 +32,41 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen) setForm(mode !== 'create' && initialData ? initialData : initialState);
+    // Carrega dados iniciais sem sobrescrever com cálculo se o usuário não mudou nada ainda
+    if (isOpen) {
+        setForm(mode !== 'create' && initialData ? initialData : initialState);
+    }
   }, [isOpen, mode, initialData]);
 
+  // 🛡️ CÁLCULO AUTOMÁTICO INTELIGENTE
+  // Só recalcula se Latitude ou Longitude mudarem E se não for a primeira carga de edição
   useEffect(() => {
+    if (!isOpen || mode === 'view') return; // Não calcula se fechado ou apenas visualizando
+
     const lat = parseFloat(form.lat?.replace(',', '.'));
     const lon = parseFloat(form.long?.replace(',', '.'));
-    if (!isNaN(lat) && !isNaN(lon)) {
-      const R = 6371;
-      const dLat = (lat - BIOPLANTA_COORDS.lat) * Math.PI / 180;
-      const dLon = (lon - BIOPLANTA_COORDS.lng) * Math.PI / 180;
-      const a = Math.sin(dLat/2) ** 2 + Math.cos(BIOPLANTA_COORDS.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * Math.sin(dLon/2) ** 2;
-      const d = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-      if (form.distancia !== `${d} KM`) setForm(prev => ({ ...prev, distancia: `${d} KM` }));
+    
+    // Coordenadas da Planta (Exemplo: Toledo-PR)
+    const PLANT_COORDS = BIOPLANTA_COORDS; 
+
+    // Verifica se as coordenadas atuais são diferentes das iniciais (evita sobrescrever valor do banco ao abrir)
+    const initialLat = initialData?.lat ? parseFloat(initialData.lat.replace(',', '.')) : NaN;
+    const initialLon = initialData?.long ? parseFloat(initialData.long.replace(',', '.')) : NaN;
+
+    const coordsChanged = (lat !== initialLat) || (lon !== initialLon);
+
+    if (!isNaN(lat) && !isNaN(lon) && coordsChanged) {
+      const R = 6371; // Raio da Terra em km
+      const dLat = (lat - PLANT_COORDS.lat) * Math.PI / 180;
+      const dLon = (lon - PLANT_COORDS.lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) ** 2 + Math.cos(PLANT_COORDS.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * Math.sin(dLon/2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const d = Math.round(R * c);
+      
+      setForm(prev => ({ ...prev, distancia: `${d} KM` }));
     }
-  }, [form.lat, form.long, form.distancia]);
+  }, [form.lat, form.long, isOpen, mode, initialData]);
+  
 
   const handleChange = (field: string, value: string) => setForm(p => ({ ...p, [field]: value }));
 
@@ -157,21 +177,29 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
         <Typography sx={{ fontSize: 24, fontWeight: 600, fontFamily: INTER }}>Contato</Typography>
 
         <Stack direction="row" spacing={2}>
-          <TextField fullWidth label="Nome do responsável" value={form.responsavel} onChange={e => handleChange('responsavel', e.target.value)} disabled={isReadOnly} sx={fieldStyle} />
-          <TextField fullWidth label="Nome do técnico" value={form.tecnico} onChange={e => handleChange('tecnico', e.target.value)} disabled={isReadOnly} sx={fieldStyle} />
+          <TextField fullWidth label="Nome do responsável" value={form.responsavel} onChange={e => handleChange('responsavel', e.target.value)} disabled={isReadOnly} sx={fieldStyle} InputLabelProps={{ shrink: !!form.responsavel || isReadOnly }} />
+          <TextField fullWidth label="Nome do técnico" value={form.tecnico} onChange={e => handleChange('tecnico', e.target.value)} disabled={isReadOnly} sx={fieldStyle} InputLabelProps={{ shrink: !!form.tecnico || isReadOnly }} />
         </Stack>
 
         <Typography sx={{ fontSize: 24, fontWeight: 600, fontFamily: INTER }}>Localização</Typography>
 
-        <TextField fullWidth label="Município" value={form.municipio} onChange={e => handleChange('municipio', e.target.value)} disabled={isReadOnly} sx={fieldStyle} />
+        <TextField fullWidth label="Município" value={form.municipio} onChange={e => handleChange('municipio', e.target.value)} disabled={isReadOnly} sx={fieldStyle} InputLabelProps={{ shrink: !!form.municipio || isReadOnly }} />
 
         <Stack direction="row" spacing={2}>
-          <TextField fullWidth label="Latitude" value={form.lat} onChange={e => handleChange('lat', e.target.value)} disabled={isReadOnly} sx={fieldStyle} />
-          <TextField fullWidth label="Longitude" value={form.long} onChange={e => handleChange('long', e.target.value)} disabled={isReadOnly} sx={fieldStyle} />
+          <TextField fullWidth label="Latitude" value={form.lat} onChange={e => handleChange('lat', e.target.value)} disabled={isReadOnly} sx={fieldStyle} InputLabelProps={{ shrink: !!form.lat || isReadOnly }} />
+          <TextField fullWidth label="Longitude" value={form.long} onChange={e => handleChange('long', e.target.value)} disabled={isReadOnly} sx={fieldStyle} InputLabelProps={{ shrink: !!form.long || isReadOnly }} />
         </Stack>
 
         <Stack direction="row" spacing={2}>
-          <TextField fullWidth label="Distância (Calculada)" value={form.distancia} sx={fieldStyle} disabled />
+          <TextField 
+            fullWidth 
+            label="Distância (Calculada)" 
+            value={form.distancia} 
+            onChange={e => handleChange('distancia', e.target.value)}
+            sx={fieldStyle} 
+            disabled={isReadOnly}
+            helperText="Calculado automaticamente via coordenadas, mas pode ser ajustado."
+          />
           <TextField 
             fullWidth label="Localização" value="Ver no mapa" sx={{ ...fieldStyle, cursor: 'pointer', '& input': { cursor: 'pointer' } }}
             onClick={handleOpenMap}
