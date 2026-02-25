@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MdSearch, MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
+import { MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
+
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Box, Typography, IconButton, Button, Drawer } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { CooperadoListItem } from '../components/CooperadoListItem';
-import { fetchNewAgendaData, type AgendaData, fetchCooperadosData, type CooperadoItem } from '../services/api';
+import { type CooperadoItem, fetchCooperadosData } from '../services/api';
+
 import { TransportadoraList } from '../components/TransportadoraList';
 
 // Importação do novo Drawer
@@ -21,9 +23,11 @@ const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
 const Transportadora: React.FC = () => {
   const [activeTab, setActiveTab] = useState('cadastro');
   const navigate = useNavigate();
-  const [agendaData, setAgendaData] = useState<AgendaData[]>([]);
+  // const [agendaData, setAgendaData] = useState<any[]>([]);
+
   const [cooperadosData, setCooperadosData] = useState<CooperadoItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<(string | number)[]>([]);
@@ -40,8 +44,9 @@ const Transportadora: React.FC = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      if (activeTab === 'agenda') setAgendaData(await fetchNewAgendaData() || []);
+      if (activeTab === 'agenda') { /* setAgendaData(await fetchNewAgendaData() || []); */ }
       else if (activeTab === 'cadastro') setCooperadosData(await fetchCooperadosData() || []);
+
     } catch { toast.error("Falha ao carregar dados."); } finally { setLoading(false); }
   }, [activeTab]);
 
@@ -51,7 +56,8 @@ const Transportadora: React.FC = () => {
   const handleSelectItem = (id: string | number) => setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
 
   const handleConfirmDelete = () => {
-    if (activeTab === 'agenda') setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+    if (activeTab === 'agenda') { /* setAgendaData(prev => prev.filter(item => !selectedItems.includes(item.id))); */ }
+
     else if (activeTab === 'cadastro') setCooperadosData(prev => prev.filter(item => !selectedItems.includes(item.id)));
     toast.success("Excluído!"); setSelectedItems([]); setIsModalOpen(false); setIsDeleteMode(false);
   };
@@ -84,7 +90,20 @@ const Transportadora: React.FC = () => {
               </div>
             </div>
             {filteredCooperadosData.map(item => (
-              <CooperadoListItem key={item.id} item={item} isDeleteMode={isDeleteMode} isSelected={selectedItems.includes(item.id)} onSelectItem={handleSelectItem} onContactItem={() => {setSelectedCooperado(item); setIsContactModalActive(true);}} onEditItem={() => {setSelectedCooperado(item); setIsEditModalActive(true);}} />
+              <CooperadoListItem 
+                key={item.id} 
+                item={item} 
+                isDeleteMode={isDeleteMode} 
+                isSelected={selectedItems.includes(item.id)} 
+                onSelectItem={handleSelectItem} 
+                onContactItem={() => {setSelectedCooperado(item); setIsContactModalActive(true);}} 
+                onEditItem={() => {setSelectedCooperado(item); setIsEditModalActive(true);}}
+                // Props fictícias para satisfazer a interface
+                onLocationItem={() => {}}
+                onViewItem={() => {}}
+                onCalendarItem={() => {}}
+              />
+
             ))}
           </div>
         )}
@@ -93,16 +112,19 @@ const Transportadora: React.FC = () => {
         {activeTab === 'transportadora' && (
           <TransportadoraList 
             onShowSuccess={(t, m) => toast.success(`${t}: ${m}`)} 
-            onOpenAdd={() => setIsTransDrawerOpen(true)} 
+            // onOpenAdd={() => setIsTransDrawerOpen(true)}
+
           />
         )}
       </div>
 
       {/* DRAWER TRANSPORTADORA (INDIVIDUAL) */}
       <TransportadoraDrawer 
+        key={isTransDrawerOpen ? 'open' : 'closed'}
         isOpen={isTransDrawerOpen} 
         onClose={() => setIsTransDrawerOpen(false)} 
-        onSave={(data: any) => {
+        onSave={(_: any) => {
+
           toast.success("Transportadora salva com sucesso!");
           setIsTransDrawerOpen(false);
           // loadData(); // Se quiser atualizar a lista

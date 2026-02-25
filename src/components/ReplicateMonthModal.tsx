@@ -29,7 +29,8 @@ const ReplicateMonthModal: React.FC<Props> = ({ isActive, onClose, onConfirm }) 
 
         <section className="modal-card-body has-text-centered" style={{ border: 'none', padding: '20px' }}>
           <span className="icon is-large has-text-success mb-2"><MdDateRange size={48} /></span>
-          <p style={{ fontFamily: SCHIBSTED, fontSize: '16px', mt: 2 }}>Selecione o mês para replicar o planejamento:</p>
+          <p style={{ fontFamily: SCHIBSTED, fontSize: '16px', marginTop: '16px' }}>Selecione o mês para replicar o planejamento:</p>
+
           <div className="field mt-4">
             <div className="control"><input className="input" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} style={{ fontFamily: SCHIBSTED }} /></div>
           </div>

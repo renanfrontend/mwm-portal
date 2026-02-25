@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Drawer, Box, Typography, IconButton, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, getWeek, addMonths, subMonths, isSameMonth, isSameDay, startOfDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, getWeek, addMonths, subMonths, isSameMonth, isSameDay } from 'date-fns';
+
 import { ptBR } from 'date-fns/locale';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
@@ -18,7 +19,8 @@ const CalendarTable = ({ title, currentMonth, onMonthChange, selectedWeekStart, 
     return rows;
   };
   const grid = getCalendarGrid(currentMonth);
-  const today = startOfDay(new Date());
+  // const today = startOfDay(new Date());
+
 
   return (
     <Box sx={{ width: 320 }}>

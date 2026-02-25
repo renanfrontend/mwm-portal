@@ -6,7 +6,8 @@ import {
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   CloseIcon, CheckCircleOutlined, HomeIcon, MoreHorizIcon, 
-  AddIcon, VisibilityIcon, EditIcon, Delete, FileDownload, FilterAlt 
+  AddIcon, VisibilityIcon, EditIcon, Delete
+
 } from '../constants/muiIcons';
 
 import ProdutorDrawer from '../components/ProdutorDrawer';
@@ -17,7 +18,8 @@ import { TransportadoraList } from '../components/TransportadoraList';
 import { AgendaList } from '../components/AgendaList';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
-const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
+// // const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
+
 
 const Logistica: React.FC = () => {
   const location = useLocation();
@@ -54,9 +56,17 @@ const Logistica: React.FC = () => {
 
   const visibleProducers = useMemo(() => {
     return producers
-      .filter(p => (p.nomeProdutor || '').toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(p => {
+        const s = searchTerm.toLowerCase();
+        return (
+          (p.nomeProdutor || '').toLowerCase().includes(s) ||
+          (p.numEstabelecimento || '').toLowerCase().includes(s) ||
+          (p.filiada || '').toLowerCase().includes(s)
+        );
+      })
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [producers, searchTerm, page, rowsPerPage]);
+
 
   const isAllSelected = visibleProducers.length > 0 && visibleProducers.every(p => selectedIds.includes(p.id));
   const isSomeSelected = visibleProducers.some(p => selectedIds.includes(p.id)) && !isAllSelected;
@@ -81,7 +91,7 @@ const Logistica: React.FC = () => {
       await loadProducers(); 
       setSelectedIds([]); 
       setIsDeleteDialogOpen(false);
-      handleShowToast('Registro excluído com sucesso', 'O registro foi removido do sistema.');
+      handleShowToast('Registro excluído com sucesso', 'O registro foi removido e não está mais disponível no sistema.');
     } catch (err) { console.error("Erro na exclusão:", err); }
   };
 
@@ -124,9 +134,11 @@ const Logistica: React.FC = () => {
             responsavel: d.responsavel || (d.bioEstabelecimento ? d.bioEstabelecimento.responsavel : ''),
             tecnico: d.tecnico || (d.bioProducao && d.bioProducao.length > 0 ? d.bioProducao[0].tecnicoResponsavel : ''),
             municipio: d.municipio || '',
-            lat: String(d.latitude || ''), 
-            long: String(d.longitude || ''),
+            // Força 6 casas decimais para garantir precisão visual de GPS (ex: 12 -> "12.000000")
+            lat: d.latitude !== null && d.latitude !== undefined ? Number(d.latitude).toFixed(6) : '',
+            long: d.longitude !== null && d.longitude !== undefined ? Number(d.longitude).toFixed(6) : '',
             distancia: d.distancia || '', 
+
             localizacao: d.localizacao || ''
           });
         } catch (err) { console.error('Erro ao buscar detalhes:', err); }

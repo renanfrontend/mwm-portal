@@ -9,6 +9,7 @@ import type { ProdutorFormInput } from '../types/cooperado';
 import { fetchFiliadas, type FiliadaOption } from '../services/api';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
+
 const INTER = 'Inter, sans-serif';
 
 // --- MÁSCARA RÍGIDA (SÓ NÚMEROS) ---
@@ -46,10 +47,11 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
       setErrors({});
       const baseState = {
         cpfCnpj: '', nome: '', numEstabelecimento: '', nPropriedade: '', matricula: '', 
-        filiada: '', faseDejeto: 'GRSC', cabecas: '', certificado: 'Não', doamDejetos: 'Não',
-        qtdLagoas: '1', volLagoas: '', restricoes: 'Nenhuma', responsavel: '', tecnico: '', 
-        municipio: 'Toledo-PR', lat: '', long: '', distancia: '', localizacao: ''
+        filiada: '', faseDejeto: '', cabecas: '', certificado: '', doamDejetos: '',
+        qtdLagoas: '', volLagoas: '', restricoes: 'Nenhuma', responsavel: '', tecnico: '', 
+        municipio: '', lat: '', long: '', distancia: '', localizacao: ''
       };
+
       setForm(mode !== 'create' && initialData ? { ...baseState, ...initialData } : baseState);
     }
   }, [isOpen, mode, initialData]);
@@ -133,15 +135,17 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
                 setForm(prev => ({ ...prev, nome: val.nome, cpfCnpj: val.cpfCnpj }));
               }
             }}
+            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
             renderInput={(params) => (
-              <TextField {...params} label="CPF/CNPJ" error={!!errors.cpfCnpj} helperText={errors.cpfCnpj} sx={fieldStyle('cpfCnpj')} disabled={isReadOnly} />
+              <TextField {...params} label="CPF/CNPJ" error={!!errors.cpfCnpj} helperText={errors.cpfCnpj} sx={fieldStyle('cpfCnpj')} />
             )}
           />
           <TextField 
             fullWidth label="Nome do produtor" 
             value={form.nome || ''} 
             onChange={e => setForm({...form, nome: e.target.value})} 
-            disabled={isReadOnly} sx={fieldStyle()} 
+            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
+            sx={fieldStyle()} 
           />
         </Stack>
 
@@ -154,10 +158,13 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             onChange={e => setForm({...form, numEstabelecimento: e.target.value.replace(/\D/g, "")})}
             error={!!errors.numEstabelecimento}
             helperText={errors.numEstabelecimento}
-            disabled={isReadOnly} sx={fieldStyle('numEstabelecimento')} 
+            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
+            sx={fieldStyle('numEstabelecimento')} 
           />
           <TextField fullWidth label="N° da propriedade" value={form.nPropriedade || ''} onChange={e => setForm({...form, nPropriedade: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
         </Stack>
+
+
 
         <Stack direction="row" spacing={2}>
           <TextField fullWidth label="Matricula" value={form.matricula || ''} onChange={e => setForm({...form, matricula: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
@@ -180,7 +187,7 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             <InputLabel>Fase do dejeto</InputLabel>
             <Select 
               label="Fase do dejeto" 
-              value={form.faseDejeto || 'GRSC'} 
+              value={form.faseDejeto || ''} 
               onChange={e => setForm({...form, faseDejeto: e.target.value as string})}
               MenuProps={globalMenuProps}
             >
@@ -195,7 +202,7 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             <InputLabel>Certificado</InputLabel>
             <Select 
               label="Certificado" 
-              value={form.certificado || 'Não'} 
+              value={form.certificado || ''} 
               onChange={e => setForm({...form, certificado: e.target.value as string})}
               MenuProps={globalMenuProps}
             >
@@ -206,7 +213,7 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             <InputLabel>Doam dejetos</InputLabel>
             <Select 
               label="Doam dejetos" 
-              value={form.doamDejetos || 'Não'} 
+              value={form.doamDejetos || ''} 
               onChange={e => setForm({...form, doamDejetos: e.target.value as string})}
               MenuProps={globalMenuProps}
             >
@@ -220,13 +227,14 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             <InputLabel>Quantidades de lagoas</InputLabel>
             <Select 
               label="Quantidades de lagoas" 
-              value={form.qtdLagoas || '1'} 
+              value={form.qtdLagoas || ''} 
               onChange={e => setForm({...form, qtdLagoas: e.target.value as string})}
               MenuProps={globalMenuProps}
             >
               {['1','2','3','4','5'].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
             </Select>
           </FormControl>
+
           <TextField fullWidth label="Volume das lagoas" value={form.volLagoas || ''} onChange={e => setForm({...form, volLagoas: e.target.value.replace(/\D/g, "")})} disabled={isReadOnly} sx={fieldStyle()} />
         </Stack>
 
@@ -237,7 +245,8 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
         </Stack>
 
         <Typography sx={{ fontSize: 24, fontWeight: 600, fontFamily: INTER }}>Localização</Typography>
-        <TextField fullWidth label="Município" value={form.municipio || 'Toledo-PR'} onChange={e => setForm({...form, municipio: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
+        <TextField fullWidth label="Município" value={form.municipio || ''} onChange={e => setForm({...form, municipio: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
+
         <Stack direction="row" spacing={2}>
           <TextField fullWidth label="Latitude" value={form.lat || ''} onChange={e => setForm({...form, lat: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
           <TextField fullWidth label="Longitude" value={form.long || ''} onChange={e => setForm({...form, long: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
@@ -264,16 +273,17 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
       </Box>
 
       {/* FOOTER */}
-      <Box sx={{ p: '24px 20px', bgcolor: 'white', borderTop: '1px solid rgba(0,0,0,0.12)', display: 'flex', gap: 2, flexShrink: 0 }}>
-        <Button variant="outlined" onClick={onClose} fullWidth sx={{ height: 48, fontFamily: SCHIBSTED, color: 'rgba(0,0,0,0.6)', borderColor: 'rgba(0,0,0,0.23)' }}>
-          VOLTAR
-        </Button>
-        {!isReadOnly && (
+      {!isReadOnly && (
+        <Box sx={{ p: '24px 20px', bgcolor: 'white', borderTop: '1px solid rgba(0,0,0,0.12)', display: 'flex', gap: 2, flexShrink: 0 }}>
+          <Button variant="outlined" onClick={onClose} fullWidth sx={{ height: 48, fontFamily: SCHIBSTED, color: 'rgba(0,0,0,0.6)', borderColor: 'rgba(0,0,0,0.23)' }}>
+            VOLTAR
+          </Button>
           <Button variant="contained" onClick={() => onSave(form)} disabled={!!errors.cpfCnpj} fullWidth sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED, fontWeight: 600 }}>
             SALVAR
           </Button>
-        )}
-      </Box>
+        </Box>
+      )}
+
     </Drawer>
   );
 };

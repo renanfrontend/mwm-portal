@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, IconButton, TextField, InputAdornment, Checkbox, Drawer, Button, MenuItem, Select } from '@mui/material';
-import { Close as CloseIcon, Delete, ContentCopy, CalendarMonth, ChevronLeft, ChevronRight, FileUpload, FilterAlt } from "@mui/icons-material";
+import { Close as CloseIcon, Delete, ContentCopy, CalendarMonth, ChevronLeft, ChevronRight } from "@mui/icons-material";
+
 import { format, startOfWeek, subWeeks, addWeeks, addDays, getWeek, startOfDay, isAfter } from 'date-fns';
 
 const COMMON_FONT = { fontFamily: 'Schibsted Grotesk', letterSpacing: '0.15px' };
@@ -196,15 +197,23 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
         );
       })}
 
-      <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} sx={{ zIndex: 999999 }} PaperProps={{ sx: { width: 620 } }}>
-        <Box sx={{ p: '32px' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-            <Typography sx={{ fontSize: 32, fontWeight: 700, ...COMMON_FONT }}>LIMPAR O REGISTRO</Typography>
-            <IconButton onClick={() => setIsDrawerOpen(false)}><CloseIcon /></IconButton>
+      <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} sx={{ zIndex: 999999 }} PaperProps={{ sx: { width: 620, display: 'flex', flexDirection: 'column' } }}>
+        <Box sx={{ p: '16px 20px 24px 20px', bgcolor: 'white', flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 1 }}>
+            <IconButton onClick={() => setIsDrawerOpen(false)} sx={{ p: 0 }}><CloseIcon /></IconButton>
           </Box>
-          <Typography sx={{ fontSize: 20, fontWeight: 500, ...COMMON_FONT, textAlign: 'justify', lineHeight: '32px', mb: 5 }}>Ao limpar esse registro do planejado da semana todas as informações associadas à ela serão limpas nos dados. Deseja limpar esse registro?</Typography>
-          <Box sx={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-            <Button variant="outlined" onClick={() => setIsDrawerOpen(false)} sx={{ width: 280, height: 48, fontWeight: 600, color: '#0072C3', borderColor: 'rgba(0,114,195,0.5)' }}>NÃO</Button>
+          <Box>
+            <Typography sx={{ fontSize: 32, fontWeight: 700, ...COMMON_FONT, lineHeight: 1.1 }}>LIMPAR O REGISTRO</Typography>
+
+          </Box>
+        </Box>
+
+        <Box sx={{ px: '20px', pt: 4, flex: 1, overflowY: 'auto' }}>
+          <Typography sx={{ fontSize: 20, fontWeight: 500, ...COMMON_FONT, textAlign: 'justify', lineHeight: '32px', mb: 5 }}>Ao limpar este registro do planejamento da semana, todas as informações associadas a ele serão removidas. Deseja continuar?</Typography>
+        </Box>
+
+        <Box sx={{ p: '24px 20px', bgcolor: 'white', display: 'flex', gap: 2, flexShrink: 0 }}>
+            <Button variant="outlined" onClick={() => setIsDrawerOpen(false)} fullWidth sx={{ height: 48, fontWeight: 600, color: '#0072C3', borderColor: 'rgba(0,114,195,0.5)' }}>NÃO</Button>
             <Button variant="contained" onClick={async () => {
               if (onDeleteSelected) {
                 try { await onDeleteSelected(selectedIds); } catch (error) { return; }
@@ -213,8 +222,7 @@ export const AgendaTable: React.FC<any> = ({ title, referenceDate, onDateChange,
                 onDataChange(resetData);
               }
               setIsDrawerOpen(false); setSelectedIds([]); onDeleteSuccess?.(); setEditingRowId(null);
-            }} sx={{ width: 280, height: 48, fontWeight: 600, bgcolor: '#0072C3' }}>SIM</Button>
-          </Box>
+            }} fullWidth sx={{ height: 48, fontWeight: 600, bgcolor: '#0072C3' }}>SIM</Button>
         </Box>
       </Drawer>
     </Box>

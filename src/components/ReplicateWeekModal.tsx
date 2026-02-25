@@ -29,7 +29,8 @@ const ReplicateWeekModal: React.FC<Props> = ({ isActive, onClose, onConfirm }) =
 
         <section className="modal-card-body has-text-centered" style={{ border: 'none', padding: '20px' }}>
           <span className="icon is-large has-text-info mb-2"><MdContentCopy size={48} /></span>
-          <p style={{ fontFamily: SCHIBSTED, fontSize: '16px', mt: 2 }}>Selecione a semana para replicar o planejamento:</p>
+          <p style={{ fontFamily: SCHIBSTED, fontSize: '16px', marginTop: '16px' }}>Selecione a semana para replicar o planejamento:</p>
+
           <div className="field mt-4">
             <div className="control"><input className="input" type="week" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} style={{ fontFamily: SCHIBSTED }} /></div>
           </div>

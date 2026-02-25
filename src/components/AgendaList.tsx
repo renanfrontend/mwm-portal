@@ -227,9 +227,24 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
 
   const plannedData = planejadoLoading ? [] : planejadoRows;
 
+  const isNextWeekLocked = (date: Date) => {
+    const today = new Date();
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 });
+    const viewWeekStart = startOfWeek(date, { weekStartsOn: 0 });
+    // Se a semana visualizada já for a semana atual (ou futura), bloqueia ir para a próxima
+    return viewWeekStart >= currentWeekStart;
+  };
+
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: '8px 16px', position: 'relative', overflowX: 'hidden' }}>
-      <AgendaTable title="Realizado" referenceDate={realizadoDate} onDateChange={setRealizadoDate} data={[]} />
+      <AgendaTable 
+        title="Realizado" 
+        referenceDate={realizadoDate} 
+        onDateChange={setRealizadoDate} 
+        data={[]} 
+        disableNext={isNextWeekLocked(realizadoDate)}
+      />
+
       <AgendaTable
         title="Planejado"
         referenceDate={planejadoDate}

@@ -3,8 +3,10 @@ export interface CooperadoAPIInput {
   transportadoraId: number;
   tipoVeiculoId: number;
   nomeCooperado: string;
+
   cpfCnpj: string;
   placa: string;
+
   certificado: string;
   doamDejetos: string;
   fase: string;
@@ -83,7 +85,9 @@ export interface ProdutorFormInput {
   long: string;
   distancia: string;
   localizacao: string;
+  transportadora?: string;
 }
+
 
 export interface ProdutorListItem {
   id: number;

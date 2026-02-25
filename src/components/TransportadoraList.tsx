@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Box, Typography, IconButton, Stack, CircularProgress, TextField, Button, Checkbox, Drawer, TablePagination } from '@mui/material';
-import { Visibility, Edit, Add, FilterAlt, FileDownload, Delete, CloseIcon } from '../constants/muiIcons';
+import { Visibility, Edit, Add, Delete, CloseIcon } from '../constants/muiIcons';
+
 import { TransportadoraService } from '../services/transportadoraService';
 import type { TransportadoraListItem } from '../types/transportadora';
 import TransportadoraDrawer from './TransportadoraDrawer';
@@ -8,7 +9,9 @@ import TransportadoraDrawer from './TransportadoraDrawer';
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };
 
-export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: string) => void }> = ({ onShowSuccess }) => {
+// Adicione onOpenAdd opcional na interface se quiser usar
+export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: string) => void, onOpenAdd?: () => void }> = ({ onShowSuccess, onOpenAdd }) => {
+
   const [searchTerm, setSearchTerm] = useState('');
   const [data, setData] = useState<TransportadoraListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,7 +19,8 @@ export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: strin
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [drawerState, setDrawerState] = useState<{ open: boolean; item: any; readOnly: boolean }>({ open: false, item: null, readOnly: false });
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage] = useState(5);
+
 
   const loadTransportadoras = useCallback(async () => {
     setLoading(true);
@@ -28,7 +32,16 @@ export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: strin
 
   useEffect(() => { loadTransportadoras(); }, [loadTransportadoras]);
 
-  const visibleItems = useMemo(() => (data || []).filter(i => i.nomeFantasia?.toLowerCase().includes(searchTerm.toLowerCase())).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage), [data, searchTerm, page, rowsPerPage]);
+  const visibleItems = useMemo(() => {
+    return (data || []).filter(i => {
+      const s = searchTerm.toLowerCase();
+      return (
+        i.nomeFantasia?.toLowerCase().includes(s) ||
+        i.cnpj?.toLowerCase().includes(s) ||
+        i.endereco?.toLowerCase().includes(s)
+      );
+    }).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [data, searchTerm, page, rowsPerPage]);
   const isAllSelected = visibleItems.length > 0 && visibleItems.every(i => selectedIds.includes(i.id));
 
   const handleDeleteSelected = async () => {
@@ -47,7 +60,8 @@ export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: strin
           <TextField sx={{ width: 500 }} label="Buscar" size="small" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <IconButton disabled={selectedIds.length === 0} onClick={() => setIsDeleteDialogOpen(true)} sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'rgba(0,0,0,0.26)' }}><Delete /></IconButton>
-            <Button variant="contained" startIcon={<Add />} onClick={() => setDrawerState({ open: true, item: null, readOnly: false })} sx={{ bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>ADICIONAR</Button>
+            <Button variant="contained" startIcon={<Add />} onClick={() => { if (onOpenAdd) onOpenAdd(); else setDrawerState({ open: true, item: null, readOnly: false }); }} sx={{ bgcolor: '#0072C3', height: 40, px: 3, fontFamily: SCHIBSTED, fontWeight: 600 }}>ADICIONAR</Button>
+
           </Box>
       </Box>
 
@@ -100,7 +114,14 @@ export const TransportadoraList: React.FC<{ onShowSuccess?: (t: string, m: strin
         </Box>
       </Drawer>
 
-      <TransportadoraDrawer isOpen={drawerState.open} isReadOnly={drawerState.readOnly} onClose={() => setDrawerState({ ...drawerState, open: false })} onSave={() => { setDrawerState({ ...drawerState, open: false }); loadTransportadoras(); }} initialData={drawerState.item} />
+      <TransportadoraDrawer 
+        key={drawerState.open ? (drawerState.item?.id || 'create') : 'closed'}
+        isOpen={drawerState.open} 
+        isReadOnly={drawerState.readOnly} 
+        onClose={() => setDrawerState({ ...drawerState, open: false })} 
+        onSave={() => { setDrawerState({ ...drawerState, open: false }); loadTransportadoras(); if (onShowSuccess) onShowSuccess('Sucesso', 'Transportadora salva com sucesso!'); }} 
+        initialData={drawerState.item} 
+      />
     </Box>
   );
 };

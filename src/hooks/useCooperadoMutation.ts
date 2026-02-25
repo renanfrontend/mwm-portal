@@ -8,13 +8,17 @@ export const useCooperadoMutation = () => {
 
   // ADAPTER ORIGINAL RESTAURADO
   const toApiPayload = (form: ProdutorFormInput): CooperadoAPIInput => {
-    return {
+    const payload = {
       matricula: Number.parseInt(form.matricula) || 0,
-      transportadoraId: 1, 
-      tipoVeiculoId: 1,    
+      
+      // ⚠️ BACKEND EXIGE: Transportadora, Veículo e Placa são obrigatórios no JSON.
+      // Preenchendo com valores padrão válidos para permitir o cadastro do produtor.
+      transportadoraId: 8, // ID 8 = MWM (Existente)
+      tipoVeiculoId: 1,    // ID 1 = Truck (Existente)
+      placa: 'AAA-0000',   // Placa fictícia obrigatória
+
       nomeCooperado: form.nome,
       cpfCnpj: form.cpfCnpj,
-      placa: 'AAA-0000',   
       certificado: form.certificado === 'Sim' ? 'Ativo' : 'Inativo',
       doamDejetos: form.doamDejetos,
       fase: form.faseDejeto,
@@ -32,13 +36,16 @@ export const useCooperadoMutation = () => {
       responsavel: form.responsavel,
       localizacao: form.localizacao,
       // 🛡️ CORREÇÃO: Envia a distância limpa (sem "km", "KM", etc) e convertida para número
-      // Remove qualquer caractere que não seja número ou ponto/vírgula
       distanciaKm: form.distancia ? Number.parseFloat(form.distancia.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 : 0,
       filiadaId: Number(form.filiada) || 1
     };
+    
+    console.log('📦 Payload gerado para envio (Produtor):', JSON.stringify(payload, null, 2));
+    return payload;
   };
 
   const createCooperado = async (form: ProdutorFormInput) => {
+
     setIsLoading(true); setError(null);
     try {
       const payload = toApiPayload(form);

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Box, Tabs, Tab, TextField, Button, IconButton, Drawer, Typography, GlobalStyles, TablePagination } from '@mui/material';
-import { Delete as DeleteIcon, Add as AddIcon, FileUpload as FileUploadIcon, FilterAlt as FilterAltIcon, Close as CloseIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Add as AddIcon, Close as CloseIcon } from '@mui/icons-material';
+
 import PortariaTable from './PortariaTable';
 import PortariaDrawer from './PortariaDrawer';
 import EmptyImage from '../assets/empty-states-sheets.png';
