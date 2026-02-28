@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useCpfCnpjLookup } from '../hooks/useCpfCnpjLookup';
+import { useNumeroEstabelecimentoLookup } from '../hooks/useNumeroEstabelecimentoLookup';
 import { 
   Box, Typography, TextField, IconButton, Button, 
   Stack, Drawer, MenuItem, Autocomplete, InputAdornment, FormControl, InputLabel, Select
@@ -36,10 +38,37 @@ const globalMenuProps = {
 };
 
 const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create', initialData = null }) => {
+    // Hook isolado para busca de CPF/CNPJ (apenas no modo create)
+    const {
+      nomeProdutor: lookupNomeProdutor,
+      isLocked: lookupLocked,
+      isCpfReadOnly,
+      isNomeReadOnly,
+      focusEstabelecimentoSignal,
+      handleCpfCnpjChange: lookupCpfCnpjChange,
+      handleCpfCnpjFocus: lookupCpfCnpjFocus,
+      resetFields: lookupReset
+    } = useCpfCnpjLookup((produtor) => {
+      setForm(prev => ({
+        ...prev,
+        nome: produtor.nomeProdutor || '',
+        numEstabelecimento: produtor.numEstabelecimento || prev.numEstabelecimento || ''
+      }));
+    });
+
   const [form, setForm] = useState<ProdutorFormInput>({} as any);
   const [filiadas, setFiliadas] = useState<FiliadaOption[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [existingProdutores, setExistingProdutores] = useState<any[]>([]);
+  const estabelecimentoInputRef = useRef<HTMLInputElement | null>(null);
+  const {
+    isChecking: isEstabelecimentoChecking,
+    duplicateMessage: estabelecimentoDuplicateMessage,
+    duplicateFocusSignal,
+    handleNumeroEstabelecimentoInputChange,
+    validateNumeroEstabelecimentoOnBlur,
+    clearDuplicateMessage
+  } = useNumeroEstabelecimentoLookup();
+  // ...
 
   useEffect(() => {
     if (isOpen) {
@@ -51,35 +80,71 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
         qtdLagoas: '', volLagoas: '', restricoes: 'Nenhuma', responsavel: '', tecnico: '', 
         municipio: '', lat: '', long: '', distancia: '', localizacao: ''
       };
-
-      setForm(mode !== 'create' && initialData ? { ...baseState, ...initialData } : baseState);
+        // ...
+        // Campo telefone no formulário
+        // Adicione o campo telefone no local apropriado do formulário:
+        // <TextField fullWidth label="Telefone" value={form.telefone || ''} onChange={e => setForm({...form, telefone: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
+      setForm(
+        mode !== 'create' && initialData
+          ? {
+              ...baseState,
+              ...initialData
+            }
+          : baseState
+      );
+      if (mode === 'create') {
+        lookupReset();
+        clearDuplicateMessage();
+      }
     }
-  }, [isOpen, mode, initialData]);
+  }, [isOpen, mode, initialData, lookupReset, clearDuplicateMessage]);
+
+  useEffect(() => {
+    if (isOpen && mode === 'create' && focusEstabelecimentoSignal > 0) {
+      estabelecimentoInputRef.current?.focus();
+    }
+  }, [isOpen, mode, focusEstabelecimentoSignal]);
+
+  useEffect(() => {
+    if (isOpen && mode === 'create' && duplicateFocusSignal > 0) {
+      estabelecimentoInputRef.current?.focus();
+    }
+  }, [isOpen, mode, duplicateFocusSignal]);
 
   const handleCpfChange = (rawInputValue: string) => {
-    if (rawInputValue === '') {
-      setForm(prev => ({ ...prev, cpfCnpj: '' }));
-      setExistingProdutores([]);
+    // No modo create, delega ao hook isolado
+    if (mode === 'create') {
+      const masked = applyMask(rawInputValue.replace(/\D/g, ""));
+      setForm(prev => ({ ...prev, cpfCnpj: masked }));
       return;
     }
-    const onlyNums = rawInputValue.replace(/\D/g, "");
-    if (onlyNums === form.cpfCnpj?.replace(/\D/g, "") && rawInputValue.length > (form.cpfCnpj?.length || 0)) {
+    // ...existing code para outros modos...
+  };
+
+  const handleCpfBlur = () => {
+    if (mode !== 'create') return;
+    void lookupCpfCnpjChange(form.cpfCnpj || '');
+  };
+
+  const handleEstabelecimentoChange = (rawInputValue: string) => {
+    const nextValue = handleNumeroEstabelecimentoInputChange(rawInputValue);
+    setForm(prev => ({ ...prev, numEstabelecimento: nextValue }));
+  };
+
+  const handleEstabelecimentoBlur = () => {
+    if (mode !== 'create') return;
+    void validateNumeroEstabelecimentoOnBlur(form.numEstabelecimento || '');
+  };
+
+  const handleSaveClick = async () => {
+    if (mode === 'create') {
+      const result = await validateNumeroEstabelecimentoOnBlur(form.numEstabelecimento || '');
+      if (result.isDuplicate) {
+        estabelecimentoInputRef.current?.focus();
         return;
+      }
     }
-    const masked = applyMask(onlyNums);
-    setForm(prev => ({ ...prev, cpfCnpj: masked }));
-
-    if (onlyNums.length > 0 && onlyNums.length !== 11 && onlyNums.length !== 14) {
-      setErrors(prev => ({ ...prev, cpfCnpj: 'Documento incompleto' }));
-    } else {
-      setErrors(prev => ({ ...prev, cpfCnpj: '' }));
-    }
-
-    if (onlyNums === '12345678901') {
-      setExistingProdutores([{ cpfCnpj: masked, nome: 'PRODUTOR CADASTRADO NO PORTAL' }]);
-    } else {
-      setExistingProdutores([]);
-    }
+    onSave(form);
   };
 
   const fieldStyle = (fieldName?: string) => ({
@@ -123,28 +188,39 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
         <Stack direction="row" spacing={2} alignItems="flex-start">
           <Autocomplete
             freeSolo fullWidth disableClearable
-            options={existingProdutores}
-            open={existingProdutores.length > 0}
-            // CORREÇÃO Z-INDEX AUTOCOMPLETE
-            slotProps={{ popper: { sx: { zIndex: 10000 } } }}
-            getOptionLabel={(opt: any) => typeof opt === 'string' ? opt : opt.cpfCnpj}
+            options={[]}
+            open={false}
             inputValue={form.cpfCnpj || ''}
             onInputChange={(_, val) => handleCpfChange(val)}
-            onChange={(_, val: any) => {
-              if (val && typeof val !== 'string') {
-                setForm(prev => ({ ...prev, nome: val.nome, cpfCnpj: val.cpfCnpj }));
+            onFocus={mode === 'create' ? () => {
+              const shouldClear = lookupCpfCnpjFocus();
+              if (shouldClear) {
+                setForm(prev => ({ ...prev, cpfCnpj: '', nome: '' }));
               }
-            }}
-            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
+            } : undefined}
+            disabled={isReadOnly || mode === 'edit'}
             renderInput={(params) => (
-              <TextField {...params} label="CPF/CNPJ" error={!!errors.cpfCnpj} helperText={errors.cpfCnpj} sx={fieldStyle('cpfCnpj')} />
+              <TextField
+                {...params}
+                label="CPF/CNPJ"
+                onBlur={mode === 'create' ? handleCpfBlur : undefined}
+                error={!!errors.cpfCnpj}
+                helperText={errors.cpfCnpj}
+                sx={{
+                  ...fieldStyle('cpfCnpj'),
+                  ...(mode === 'create' && isCpfReadOnly
+                    ? { '& .MuiInputBase-input': { color: 'rgba(0, 0, 0, 0.38)' } }
+                    : {})
+                }}
+                inputProps={{ ...params.inputProps, readOnly: mode === 'create' && isCpfReadOnly }}
+              />
             )}
           />
           <TextField 
             fullWidth label="Nome do produtor" 
-            value={form.nome || ''} 
+            value={mode === 'create' && lookupLocked ? lookupNomeProdutor : form.nome || ''} 
             onChange={e => setForm({...form, nome: e.target.value})} 
-            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
+            disabled={isReadOnly || mode === 'edit' || (mode === 'create' && isNomeReadOnly)}
             sx={fieldStyle()} 
           />
         </Stack>
@@ -155,11 +231,24 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
           <TextField 
             fullWidth label="N° de estabelecimento" 
             value={form.numEstabelecimento || ''} 
-            onChange={e => setForm({...form, numEstabelecimento: e.target.value.replace(/\D/g, "")})}
-            error={!!errors.numEstabelecimento}
-            helperText={errors.numEstabelecimento}
-            disabled={isReadOnly || mode === 'edit'} // Desabilita visualmente na edição também
-            sx={fieldStyle('numEstabelecimento')} 
+            onChange={e => handleEstabelecimentoChange(e.target.value)}
+            onBlur={handleEstabelecimentoBlur}
+            inputRef={estabelecimentoInputRef}
+            error={!!errors.numEstabelecimento || !!estabelecimentoDuplicateMessage}
+            helperText={estabelecimentoDuplicateMessage || errors.numEstabelecimento}
+            disabled={isReadOnly || mode === 'edit'}
+            sx={{
+              ...fieldStyle('numEstabelecimento'),
+              ...(estabelecimentoDuplicateMessage
+                ? {
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: '#FB4D56' },
+                      '&:hover fieldset': { borderColor: '#FB4D56' },
+                      '&.Mui-focused fieldset': { borderColor: '#FB4D56' }
+                    }
+                  }
+                : {})
+            }} 
           />
           <TextField fullWidth label="N° da propriedade" value={form.nPropriedade || ''} onChange={e => setForm({...form, nPropriedade: e.target.value})} disabled={isReadOnly} sx={fieldStyle()} />
         </Stack>
@@ -210,9 +299,9 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
             </Select>
           </FormControl>
           <FormControl fullWidth sx={fieldStyle()} disabled={isReadOnly}>
-            <InputLabel>Doam dejetos</InputLabel>
+            <InputLabel>Participa do Projeto</InputLabel>
             <Select 
-              label="Doam dejetos" 
+              label="Participa do Projeto" 
               value={form.doamDejetos || ''} 
               onChange={e => setForm({...form, doamDejetos: e.target.value as string})}
               MenuProps={globalMenuProps}
@@ -278,7 +367,7 @@ const ProdutorDrawer: React.FC<any> = ({ isOpen, onClose, onSave, mode = 'create
           <Button variant="outlined" onClick={onClose} fullWidth sx={{ height: 48, fontFamily: SCHIBSTED, color: 'rgba(0,0,0,0.6)', borderColor: 'rgba(0,0,0,0.23)' }}>
             VOLTAR
           </Button>
-          <Button variant="contained" onClick={() => onSave(form)} disabled={!!errors.cpfCnpj} fullWidth sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED, fontWeight: 600 }}>
+          <Button variant="contained" onClick={handleSaveClick} disabled={!!errors.cpfCnpj || !!estabelecimentoDuplicateMessage || isEstabelecimentoChecking} fullWidth sx={{ height: 48, bgcolor: '#0072C3', fontFamily: SCHIBSTED, fontWeight: 600 }}>
             SALVAR
           </Button>
         </Box>

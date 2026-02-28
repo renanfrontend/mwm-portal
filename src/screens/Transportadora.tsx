@@ -3,8 +3,9 @@ import { MdArrowBack, MdDelete, MdPersonAdd } from 'react-icons/md';
 
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Box, Typography, IconButton, Button, Drawer } from '@mui/material';
+import { Box, Typography, IconButton, Button, Drawer, Collapse } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { CheckCircleOutlined } from '@mui/icons-material';
 import { CooperadoListItem } from '../components/CooperadoListItem';
 import { type CooperadoItem, fetchCooperadosData } from '../services/api';
 
@@ -41,6 +42,12 @@ const Transportadora: React.FC = () => {
   // --- ESTADO PARA O DRAWER DE TRANSPORTADORA ---
   const [isTransDrawerOpen, setIsTransDrawerOpen] = useState(false);
 
+  const [toastConfig, setToastConfig] = useState({ open: false, title: '', message: '' });
+  const handleShowToast = (title: string, message: string) => {
+    setToastConfig({ open: true, title, message });
+    setTimeout(() => setToastConfig(prev => ({ ...prev, open: false })), 6000);
+  };
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -70,6 +77,17 @@ const Transportadora: React.FC = () => {
           <span className="title is-4 mb-0" style={{ fontFamily: SCHIBSTED }}>Transportadora</span>
         </div></div></div>
       </div>
+
+      <Collapse in={toastConfig.open}>
+        <Box sx={{ bgcolor: '#F1F9EE', borderRadius: '4px', p: '8px 16px', display: 'flex', alignItems: 'flex-start', gap: 2, border: '1px solid rgba(112, 191, 84, 0.2)', mb: 3, mx: 2, mt: 2 }}>
+            <CheckCircleOutlined sx={{ color: '#70BF54', mt: 0.5 }} />
+            <Box sx={{ flex: 1 }}>
+                <Typography sx={{ color: '#2F5023', fontSize: 16, fontFamily: SCHIBSTED, fontWeight: 500 }}>{toastConfig.title}</Typography>
+                <Typography sx={{ color: '#2F5023', fontSize: 14, fontFamily: SCHIBSTED, opacity: 0.8 }}>{toastConfig.message}</Typography>
+            </Box>
+            <IconButton onClick={() => setToastConfig(prev => ({ ...prev, open: false }))} size="small" sx={{ color: '#2F5023' }}><CloseIcon fontSize="small" /></IconButton>
+        </Box>
+      </Collapse>
 
       <div className="tabs is-toggle is-fullwidth mb-0">
         <ul>
@@ -111,7 +129,7 @@ const Transportadora: React.FC = () => {
         {/* ABA TRANSPORTADORA - Passando a função de abrir */}
         {activeTab === 'transportadora' && (
           <TransportadoraList 
-            onShowSuccess={(t, m) => toast.success(`${t}: ${m}`)} 
+            onShowSuccess={handleShowToast} 
             // onOpenAdd={() => setIsTransDrawerOpen(true)}
 
           />

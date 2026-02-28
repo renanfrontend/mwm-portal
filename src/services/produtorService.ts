@@ -29,12 +29,80 @@ api.interceptors.response.use(
   }
 );
 
+const toValidNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+};
+
+const resolveProdutorId = (item: any): number => {
+  const candidates = [
+    item?.id,
+    item?.cooperadoId,
+    item?.produtorId,
+    item?.bioProdutorId,
+    item?.bioProdutor?.id,
+    item?.cooperado?.id
+  ];
+
+  for (const candidate of candidates) {
+    const validId = toValidNumber(candidate);
+    if (validId !== null) return validId;
+  }
+
+  throw new Error('Resposta inválida da API: produtor sem ID para operações de edição/exclusão.');
+};
+
 export const ProdutorService = {
+    findByCpfCnpj: async (cpfCnpj: string) => {
+      try {
+        const response = await api.get(`/logistica/produtores/busca`, { params: { cpfCnpj } });
+        // Espera-se que o backend retorne o produtor encontrado ou null
+        return response.data;
+      } catch (err: any) {
+        if (err.response?.status === 404 || err.response?.status === 400) return null;
+        throw err;
+      }
+    },
+    findByNumEstabelecimento: async (numEstabelecimento: string) => {
+      try {
+        const response = await api.get(`/logistica/produtores/busca`, { params: { numEstabelecimento } });
+        return response.data;
+      } catch (err: any) {
+        if (err.response?.status === 404) return null;
+        throw err;
+      }
+    },
   list: async (plantaId: number, filiadaId: number, page: number = 1, pageSize: number = 9999): Promise<ProdutorListResponse> => {
     const response = await api.get<ProdutorListResponse>('/logistica/produtores', {
       params: { plantaId, filiadaId, page, pageSize }
     });
-    return response.data;
+
+    const payload: any = response.data;
+    let rawItems: any[] = [];
+
+    if (Array.isArray(payload?.items)) {
+      rawItems = payload.items;
+    } else if (Array.isArray(payload?.data?.items)) {
+      rawItems = payload.data.items;
+    }
+
+    const items = rawItems.map((item: any) => ({
+      ...item,
+      id: resolveProdutorId(item),
+      produtorId: toValidNumber(item?.produtorId) ?? resolveProdutorId(item),
+      estabelecimentoId: toValidNumber(item?.estabelecimentoId)
+    }));
+
+    return {
+      page: payload?.page ?? payload?.data?.page ?? page,
+      pageSize: payload?.pageSize ?? payload?.data?.pageSize ?? pageSize,
+      total: payload?.total ?? payload?.data?.total ?? items.length,
+      items
+    };
   },
   create: async (payload: CooperadoAPIInput): Promise<CooperadoResponse> => {
     const response = await api.post<CooperadoResponse>('/logistica/produtores', payload);
@@ -49,7 +117,10 @@ export const ProdutorService = {
     return response.data;
   },
   // 🛡️ DELETE: Se o erro 405 persistir, verifique com o backend se o método é DELETE ou POST/PUT
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/logistica/produtores/${id}`);
+  delete: async (estabelecimentoId: number): Promise<void> => {
+    await api.delete(`/logistica/produtores/${estabelecimentoId}`);
+  },
+  deleteBatch: async (estabelecimentoIds: number[]): Promise<void> => {
+    await api.post('/logistica/produtores/exclusao-lote', { estabelecimentoIds });
   }
 };

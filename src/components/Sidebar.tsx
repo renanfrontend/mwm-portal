@@ -10,7 +10,7 @@ import LocalGasStation from '@mui/icons-material/LocalGasStation';
 import AttachMoney from '@mui/icons-material/AttachMoney';
 // 🛡️ ADIÇÃO DO ÍCONE DE MONITORAMENTO
 import InsertChartOutlined from '@mui/icons-material/InsertChartOutlined';
-
+import { BarChart } from '@mui/icons-material';
 import logoMwm from '../../logo.png'; 
 
 interface SidebarProps {
@@ -26,6 +26,7 @@ const menuItems = [
   { text: 'Faturamento', icon: <AttachMoney />, path: '/faturamentos' },
   // 🛡️ NOVA CATEGORIA INSERIDA NA POSIÇÃO CORRETA
   { text: 'Monitoramento', icon: <InsertChartOutlined />, path: '/monitoramento' },
+  { text: 'Dashboard', icon: <BarChart />, path: 'https://app.powerbi.com/reportEmbed?reportId=ea3cb6bc-366f-45ba-8735-29177cc9e85c&autoAuth=true&ctid=b319d8e6-dbe5-4575-a16d-9a0938aa6ef0', isExternal: true },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
@@ -43,13 +44,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
       <List disablePadding sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mt: 2 }}>
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = !item.isExternal && location.pathname === item.path;
           
           return (
             <ListItem key={item.text} disablePadding sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
               <ListItemButton
-                component={NavLink}
-                to={item.path}
+                component={item.isExternal ? 'a' : NavLink}
+                {...(item.isExternal 
+                  ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' } 
+                  : { to: item.path })}
                 sx={{
                   minHeight: 48,
                   transition: 'all 0.2s ease',

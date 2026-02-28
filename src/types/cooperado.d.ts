@@ -1,18 +1,13 @@
 export interface CooperadoAPIInput {
   matricula: number;
-  transportadoraId: number;
-  tipoVeiculoId: number;
   nomeCooperado: string;
-
   cpfCnpj: string;
-  placa: string;
 
   certificado: string;
   doamDejetos: string;
   fase: string;
   cabecas: number;
   tecnico: string;
-  telefone: string;
   numPropriedade: string;
   numEstabelecimento: string;
   municipio: string;
@@ -91,6 +86,8 @@ export interface ProdutorFormInput {
 
 export interface ProdutorListItem {
   id: number;
+  produtorId?: number;
+  estabelecimentoId?: number;
   nomeProdutor: string;
   numEstabelecimento: string;
   filiada: string;
@@ -98,7 +95,7 @@ export interface ProdutorListItem {
   cabecasAlojadas: number;
   distancia: string | null;
   certificado: string;
-  participaProjeto: string;
+  doamDejetos: string; // Participa do projeto
   qtdLagoas: number | null;
   volLagoas: string | null;
   restricoesOperacionais: string | null;
