@@ -43,7 +43,7 @@ export function useCpfCnpjLookup(onFound?: (produtor: ProdutorListItem) => void)
       const result = await ProdutorService.findByCpfCnpj(onlyNums);
       if (result) {
         setNomeProdutor(result.nomeProdutor || result.nome || '');
-        setNumEstabelecimento(result.numEstabelecimento || result.numeroEstabelecimento || '');
+        // setNumEstabelecimento(result.numEstabelecimento || result.numeroEstabelecimento || '');
         setIsLocked(true);
         setFocusEstabelecimentoSignal(prev => prev + 1);
         if (onFound) onFound(result);
