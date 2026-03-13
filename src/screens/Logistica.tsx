@@ -14,7 +14,7 @@ import { useCooperadoMutation } from '../hooks/useCooperadoMutation';
 import { ProdutorService } from '../services/produtorService';
 import type { ProdutorFormInput, ProdutorListItem } from '../types/cooperado';
 import { TransportadoraList } from '../components/TransportadoraList';
-import { AgendaList } from '../components/AgendaList';
+import AgendaList from '../components/AgendaList';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 
@@ -166,7 +166,15 @@ const Logistica: React.FC = () => {
   const isSuccess = toastConfig.severity === 'success';
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', p: '8px 24px 12px 24px', bgcolor: '#F5F5F5', overflow: 'hidden', boxSizing: 'border-box', minWidth: 0 }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      p: '8px 24px 12px 24px',
+      bgcolor: '#F5F5F5',
+      boxSizing: 'border-box',
+      minWidth: 0,
+      ...(currentTabIndex === 2 ? { height: 'auto', overflow: 'visible' } : { height: '100vh', overflow: 'hidden' })
+    }}>
       <Box sx={{ mb: '2px', flexShrink: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mb: 0.2 }}>
           <Link component={NavLink} to="/" sx={{ display: 'flex', color: 'rgba(0, 0, 0, 0.54)' }}><HomeIcon sx={{ fontSize: '18px' }} /></Link>
@@ -195,11 +203,15 @@ const Logistica: React.FC = () => {
         </Box>
       </Collapse>
 
-      <Paper elevation={0} sx={{ 
-        flex: 1, border: '1px solid rgba(0,0,0,0.12)', 
+      <Paper elevation={0} sx={{
+        flex: 1,
+        border: '1px solid rgba(0,0,0,0.12)',
         borderTop: toastConfig.open ? 'none' : '1px solid rgba(0,0,0,0.12)',
         borderRadius: toastConfig.open ? '0 0 4px 4px' : '4px',
-        bgcolor: '#FFFFFF', display: 'flex', flexDirection: 'column', overflow: 'hidden' 
+        bgcolor: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        ...(currentTabIndex === 2 ? { overflow: 'visible', height: 'auto' } : { overflow: 'hidden' })
       }}>
         <Box sx={{ pt: 1.5, px: 2, flexShrink: 0 }}>
           <Tabs 
@@ -268,7 +280,11 @@ const Logistica: React.FC = () => {
           </Box>
         )}
         {currentTabIndex === 1 && <TransportadoraList onShowSuccess={handleShowToast} />}
-        {currentTabIndex === 2 && <AgendaList onShowSuccess={handleShowToast} />}
+        {currentTabIndex === 2 && (
+          <Box sx={{ minHeight: '100vh', overflow: 'visible', width: '100%' }}>
+            <AgendaList produtoresList={producers} />
+          </Box>
+        )}
       </Paper>
 
       <Drawer anchor="right" open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} sx={{ zIndex: 1400 }} PaperProps={{ sx: { width: 620 } }}>

@@ -5,19 +5,20 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Box, CssBaseline } from '@mui/material';
 
 // Telas
-import Dashboard from './screens/Dashboard';
-import Logistica from './screens/Logistica';
-import Portaria from './screens/Portaria';
-import Faturamentos from './screens/Faturamentos';
-import Abastecimentos from './screens/Abastecimentos';
-import AbastecimentoReport from './screens/AbastecimentoReport';
-import Coleta from './screens/Coleta';
-import Qualidade from './screens/Qualidade';
-import Conta from './screens/Conta';
-import LoginScreen from './screens/auth/LoginScreen';
-import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
-import NewPasswordScreen from './screens/auth/NewPasswordScreen';
-import Monitoramento from './screens/Monitoramento';
+import React from 'react';
+const Dashboard = React.lazy(() => import('./screens/Dashboard'));
+const Logistica = React.lazy(() => import('./screens/Logistica'));
+const Portaria = React.lazy(() => import('./screens/Portaria'));
+const Faturamentos = React.lazy(() => import('./screens/Faturamentos'));
+const Abastecimentos = React.lazy(() => import('./screens/Abastecimentos'));
+const AbastecimentoReport = React.lazy(() => import('./screens/AbastecimentoReport'));
+const Coleta = React.lazy(() => import('./screens/Coleta'));
+const Qualidade = React.lazy(() => import('./screens/Qualidade'));
+const Conta = React.lazy(() => import('./screens/Conta'));
+const LoginScreen = React.lazy(() => import('./screens/auth/LoginScreen'));
+const ForgotPasswordScreen = React.lazy(() => import('./screens/auth/ForgotPasswordScreen'));
+const NewPasswordScreen = React.lazy(() => import('./screens/auth/NewPasswordScreen'));
+const Monitoramento = React.lazy(() => import('./screens/Monitoramento'));
 
 // Componentes e Contextos
 import Header from './components/Header';
@@ -33,12 +34,14 @@ const AppContent = () => {
 
   if (!isAuthenticated) {
     return (
-      <Routes>
-        <Route path="/login" element={<LoginScreen />} />
-        <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-        <Route path="/new-password" element={<NewPasswordScreen />} />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
+      <React.Suspense fallback={<div>Carregando...</div>}>
+        <Routes>
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+          <Route path="/new-password" element={<NewPasswordScreen />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </React.Suspense>
     );
   }
 
@@ -66,24 +69,24 @@ const AppContent = () => {
           minWidth: 0,
           height: '100%'
         }}>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            
-            {/* ROTAS DE LOGÍSTICA: Agora mapeadas para não redirecionar para a Home */}
-            <Route path="/logistica" element={<Logistica />} />
-            <Route path="/transportadoras" element={<Logistica />} />
-            <Route path="/agenda" element={<Logistica />} />
-
-            <Route path="/portaria" element={<Portaria />} />
-            <Route path="/abastecimentos" element={<Abastecimentos />} />
-            <Route path="/abastecimento-report" element={<AbastecimentoReport />} />
-            <Route path="/faturamentos" element={<Faturamentos />} />
-            <Route path="/monitoramento" element={<Monitoramento />} />
-            <Route path="/coleta" element={<Coleta />} />
-            <Route path="/qualidade" element={<Qualidade />} />
-            <Route path="/conta" element={<Conta />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+          <React.Suspense fallback={<div>Carregando...</div>}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              {/* ROTAS DE LOGÍSTICA: Agora mapeadas para não redirecionar para a Home */}
+              <Route path="/logistica" element={<Logistica />} />
+              <Route path="/transportadoras" element={<Logistica />} />
+              <Route path="/agenda" element={<Logistica />} />
+              <Route path="/portaria" element={<Portaria />} />
+              <Route path="/abastecimentos" element={<Abastecimentos />} />
+              <Route path="/abastecimento-report" element={<AbastecimentoReport />} />
+              <Route path="/faturamentos" element={<Faturamentos />} />
+              <Route path="/monitoramento" element={<Monitoramento />} />
+              <Route path="/coleta" element={<Coleta />} />
+              <Route path="/qualidade" element={<Qualidade />} />
+              <Route path="/conta" element={<Conta />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </React.Suspense>
         </Box>
       </Box>
     </Box>

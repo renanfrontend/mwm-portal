@@ -5,7 +5,12 @@ import {
   Typography, 
   IconButton,
 } from '@mui/material';
-import AgendaTable from './AgendaTable'; 
+import AgendaTable from './AgendaTable';
+import type { ProdutorListItem } from '../types/cooperado';
+import { useUniqueDistanciasFromAgenda } from '../hooks/useUniqueDistanciasFromAgenda';
+import { useUniqueTotalKmFromAgenda } from '../hooks/useUniqueTotalKmFromAgenda';
+import { useUniqueProdutoresFromAgenda } from '../hooks/useUniqueProdutoresFromAgenda';
+import type { AgendaRow } from '../types/AgendaRow';
 import CopyPlanningDrawer from './CopyPlanningDrawer'; 
 import { addDays, addWeeks, format, getDay, isSameDay, parseISO, startOfWeek } from 'date-fns';
 import { AgendaService } from '../services/agendaService';
@@ -27,6 +32,7 @@ interface RowData {
   idEstabelecimento: number;
   produtor: string;
   distancia: number;
+  km: number;
   transportadora: string;
   transp: string;
   seg: number;
@@ -45,13 +51,78 @@ interface AgendaListProps {
   onShowSuccess?: (title: string, message: string, severity?: 'success' | 'error') => void;
 }
 
-export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
+// Recebe a lista de produtores como prop opcional
+export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorListItem[] }> = ({ onShowSuccess, produtoresList = [] }) => {
   const [realizadoDate, setRealizadoDate] = useState(new Date());
   const [planejadoDate, setPlanejadoDate] = useState(new Date());
   const [isCopyDrawerOpen, setIsCopyDrawerOpen] = useState(false);
   const [selectedIdsToCopy, setSelectedIdsToCopy] = useState<number[]>([]);
   const [planejadoRows, setPlanejadoRows] = useState<RowData[]>([]);
+  // Produtores únicos extraídos das linhas planejadas
+  const produtores = useUniqueProdutoresFromAgenda(
+    planejadoRows.map(row => ({
+      idEstabelecimento: row.idEstabelecimento,
+      produtor: row.produtor,
+      distanciaKm: row.distancia,
+      transportadora: row.transportadora,
+      dias: [] // dias não é usado para o filtro
+    }))
+  );
+
+  // Distâncias únicas extraídas das linhas planejadas (convertidas para string[] para compatibilidade)
+  const distancias = useUniqueDistanciasFromAgenda(
+    planejadoRows.map(row => ({
+      idEstabelecimento: row.idEstabelecimento,
+      produtor: row.produtor,
+      distanciaKm: row.distancia,
+      transportadora: row.transportadora,
+      dias: []
+    }))
+  ).map(String);
+
+  // Totais únicos de KM extraídos das linhas planejadas (convertidos para string[] para compatibilidade)
+  const totaisKm = useUniqueTotalKmFromAgenda(
+    planejadoRows.map(row => ({
+      idEstabelecimento: row.idEstabelecimento,
+      produtor: row.produtor,
+      distanciaKm: row.km, // 'km' is set in RowData as the total km
+      transportadora: row.transportadora,
+      dias: []
+    }))
+  ).map(String);
+
+  // Mapeia estabelecimentos para [{ id, numEstabelecimento }]
+  const estabelecimentoOptions = React.useMemo(() => {
+    if (!planejadoRows.length || !produtoresList.length) return [];
+    // Cria um map idEstabelecimento -> numEstabelecimento
+    const idToNum = new Map<number, string>();
+    produtoresList.forEach((p) => {
+      if (p.estabelecimentoId != null && p.numEstabelecimento)
+        idToNum.set(p.estabelecimentoId, p.numEstabelecimento);
+    });
+    // Extrai ids únicos das linhas planejadas
+    const ids = Array.from(new Set(planejadoRows.map(r => r.idEstabelecimento)));
+    return ids.map(id => ({
+      id,
+      numEstabelecimento: idToNum.get(id) || String(id)
+    }));
+  }, [planejadoRows, produtoresList]);
+  // Transportadoras únicas extraídas dos dados planejados
+  // transportadoras deve vir da API, não do grid
   const [transportadoras, setTransportadoras] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchTransportadoras() {
+      try {
+        // Exemplo: ajuste conforme seu TransportadoraService
+        const response = await TransportadoraService.list(1, 100);
+        setTransportadoras(response.items.map(t => t.nomeFantasia || t.razaoSocial).filter(Boolean).sort());
+      } catch (e) {
+        setTransportadoras([]);
+      }
+    }
+    fetchTransportadoras();
+  }, []);
   const [planejadoLoading, setPlanejadoLoading] = useState(false);
 
   // ✅ Estado do Snackbar Local para Células
@@ -72,6 +143,12 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
   };
 
   const mapResponseToRows = (response: AgendaPlanejadaSemanaResponse): RowData[] => {
+    // Cria um map idEstabelecimento -> numEstabelecimento para exibir no grid
+    const idToNum = new Map<number, string>();
+    produtoresList.forEach((p) => {
+      if (p.estabelecimentoId != null && p.numEstabelecimento)
+        idToNum.set(p.estabelecimentoId, p.numEstabelecimento);
+    });
     return (response.linhas || []).map((linha) => {
       const dias: Record<DayKey, number> = { seg: 0, ter: 0, qua: 0, qui: 0, sex: 0, sab: 0, dom: 0 };
       (linha.dias || []).forEach((dia) => {
@@ -79,15 +156,18 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         const dayKey = DAY_KEYS[dayIndex];
         if (dayKey) dias[dayKey] = dia.qtdViagens || 0;
       });
-      return {
-        id: linha.idEstabelecimento,
-        idEstabelecimento: linha.idEstabelecimento,
-        produtor: linha.produtor,
-        distancia: linha.distanciaKm ?? 0,
-        transportadora: linha.transportadora || '',
-        transp: linha.transportadora || '',
-        ...dias
-      };
+         // Busca o numEstabelecimento diretamente da linha, do mapeamento, ou faz fallback para o id
+         return {
+           id: linha.idEstabelecimento,
+           idEstabelecimento: linha.idEstabelecimento,
+           // numEstabelecimento será resolvido via idToNumEstabelecimento no grid
+           produtor: linha.produtor,
+           distancia: linha.distanciaKm ?? 0,
+           km: linha.distanciaKm ?? 0,
+           transportadora: linha.transportadora || '',
+           transp: linha.transportadora || '',
+           ...dias
+         };
     });
   };
 
@@ -117,16 +197,7 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
     handlePlanejadoDateChange(planejadoDate);
   }, [handlePlanejadoDateChange]);
 
-  useEffect(() => {
-    const fetchTransportadoras = async () => {
-      try {
-        const response = await TransportadoraService.list(1, 100);
-        const names = response.items.map(t => t.nomeFantasia || t.razaoSocial).sort();
-        setTransportadoras(names);
-      } catch (error) { console.error(error); }
-    };
-    fetchTransportadoras();
-  }, []);
+
 
   const handleApplyCopy = async (refDate: Date, appDate: Date) => {
     try {
@@ -223,7 +294,22 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
     }
   };
 
-  const plannedData = planejadoLoading ? [] : planejadoRows;
+  // Converte RowData para AgendaRow para compatibilidade
+  const plannedData: AgendaRow[] = planejadoLoading ? [] : planejadoRows.map(row => ({
+    ...row,
+    id: String(row.id),
+    distancia: row.distancia,
+    transp: row.transp,
+    produtor: row.produtor,
+    seg: row.seg,
+    ter: row.ter,
+    qua: row.qua,
+    qui: row.qui,
+    sex: row.sex,
+    sab: row.sab,
+    dom: row.dom,
+    // outros campos se necessário
+  }));
 
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: '8px 16px', position: 'relative', overflowX: 'hidden' }}>
@@ -232,7 +318,10 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         referenceDate={realizadoDate} 
         onDateChange={setRealizadoDate} 
         data={[]} 
+        onDataChange={() => {}} 
+        showCopy={false}
         disableNext={false}
+        produtores={[]}
       />
 
       <AgendaTable
@@ -241,15 +330,20 @@ export const AgendaList: React.FC<AgendaListProps> = ({ onShowSuccess }) => {
         onDateChange={handlePlanejadoDateChange}
         data={plannedData}
         transportadoras={transportadoras}
-        onDataChange={handleUpdateWeekData}
+        produtores={produtores}
+        estabelecimentos={estabelecimentoOptions}
+        distancias={distancias}
+        totaisKm={totaisKm}
+        onDataChange={(d: AgendaRow[]) => handleUpdateWeekData(d as any)}
         onDeleteSelected={handleDeleteSelected}
-        onCopyClick={(ids: string[]) => {
-          const validIds = (ids || []).map(id => parseInt(id, 10)).filter(n => !isNaN(n));
+        onCopyClick={(ids: (string | number)[]) => {
+          const validIds = (ids || []).map(id => typeof id === 'number' ? id : parseInt(id, 10)).filter(n => !isNaN(n));
           setSelectedIdsToCopy(validIds);
           setIsCopyDrawerOpen(true);
         }}
         showCopy={true}
         disableNext={false}
+        produtoresList={produtoresList}
       />
       <CopyPlanningDrawer open={isCopyDrawerOpen} onClose={() => setIsCopyDrawerOpen(false)} onApply={handleApplyCopy} />
 

@@ -12,7 +12,24 @@ export default defineConfig({
     setupFiles: './setupTests.ts', // Caminho relativo ajustado para o diretório raiz
     css: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString();
+          }
+        }
+      },
+    },
+  },
   server: {
-    // Proxy removed to use direct CORS connection
+    proxy: {
+      '/api': {
+        target: 'https://pgrsbpcapp-backend.lemonwater-1dd3241c.eastus2.azurecontainerapps.io',
+        changeOrigin: true,
+        secure: true
+      }
+    }
   },
 });

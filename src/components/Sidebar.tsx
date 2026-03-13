@@ -11,7 +11,7 @@ import AttachMoney from '@mui/icons-material/AttachMoney';
 // 🛡️ ADIÇÃO DO ÍCONE DE MONITORAMENTO
 import InsertChartOutlined from '@mui/icons-material/InsertChartOutlined';
 import { BarChart } from '@mui/icons-material';
-import logoMwm from '../../logo.png'; 
+import logoMwm from '../assets/logo.png'; 
 
 interface SidebarProps {
   isOpen: boolean;

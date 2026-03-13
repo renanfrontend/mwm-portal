@@ -15,7 +15,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Inicialização síncrona do localStorage para evitar flickering no refresh
   const [user, setUser] = useState<any>(() => {
     const savedUser = localStorage.getItem(STORAGE_KEY);
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      return null;
+    }
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!user);

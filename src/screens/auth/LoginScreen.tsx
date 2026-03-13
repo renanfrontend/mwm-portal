@@ -6,6 +6,12 @@ import { useAuth } from '../../context/AuthContext';
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  // Limpa usuário e senha sempre que a tela é carregada
+  React.useEffect(() => {
+    setUsername('');
+    setPassword('');
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth(); // Agora 'login' não será undefined

@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 // --- IMPORTAÇÃO DO LOGO ---
-import logoMwm from '../../logo.png';
+import logoMwm from '../assets/logo.png';
 
 // --- INTERFACES ---
 interface AbastecimentoItem {
