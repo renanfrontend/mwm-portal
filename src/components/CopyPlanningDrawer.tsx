@@ -34,9 +34,9 @@ const CalendarTable = ({ title, currentMonth, onMonthChange, selectedWeekStart, 
           const weekStart = startOfWeek(weekDays[0], { weekStartsOn: 0 });
           return (
             <React.Fragment key={idx}>
-              <Box onClick={() => onSelect(weekStart)} sx={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '100px', cursor: 'pointer', bgcolor: selectedWeekStart && isSameDay(selectedWeekStart, weekStart) ? '#66AE4C' : 'transparent', color: selectedWeekStart && isSameDay(selectedWeekStart, weekStart) ? 'white' : 'rgba(0,0,0,0.38)' }}><Typography sx={{ fontSize: 13, ...COMMON_FONT }}>{getWeek(weekDays[0])}</Typography></Box>
+              <Box onClick={() => onSelect(weekStart)} sx={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '100px', cursor: 'pointer', bgcolor: selectedWeekStart && isSameDay(selectedWeekStart, weekStart) ? '#66AE4C' : 'transparent', color: selectedWeekStart && isSameDay(selectedWeekStart, weekStart) ? 'white' : 'rgba(0,0,0,0.38)' }}><Typography sx={{ fontSize: 13, ...COMMON_FONT, pointerEvents: 'none' }}>{getWeek(weekDays[0])}</Typography></Box>
               {weekDays.map((day, dIdx) => (
-                <Box key={dIdx} sx={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '100px', bgcolor: selectedWeekStart && isSameDay(startOfWeek(day), selectedWeekStart) ? '#0072C3' : 'transparent', color: isSameMonth(day, currentMonth) ? 'black' : 'rgba(0,0,0,0.1)' }}><Typography sx={{ fontSize: 13, ...COMMON_FONT }}>{format(day, 'd')}</Typography></Box>
+                <Box key={dIdx} onClick={() => onSelect(startOfWeek(day, { weekStartsOn: 0 }))} sx={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '100px', cursor: 'pointer', bgcolor: selectedWeekStart && isSameDay(startOfWeek(day), selectedWeekStart) ? '#0072C3' : 'transparent', color: isSameMonth(day, currentMonth) ? 'black' : 'rgba(0,0,0,0.1)' }}><Typography sx={{ fontSize: 13, ...COMMON_FONT, pointerEvents: 'none' }}>{format(day, 'd')}</Typography></Box>
               ))}
             </React.Fragment>
           );

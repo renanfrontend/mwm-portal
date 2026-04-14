@@ -99,6 +99,7 @@ export interface ProdutorListItem {
   qtdLagoas: number | null;
   volLagoas: string | null;
   restricoesOperacionais: string | null;
+  matricula?: string; // Número de matrícula do produtor (para diferenciação)
 }
 
 export interface ProdutorListResponse {

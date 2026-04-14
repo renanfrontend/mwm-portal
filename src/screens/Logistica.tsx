@@ -265,7 +265,18 @@ const Logistica: React.FC = () => {
                         <Typography sx={{ fontSize: 14, fontWeight: 400, fontFamily: SCHIBSTED }}>{p.cabecasAlojadas || 0}</Typography>
                         <Typography sx={{ fontSize: 14, fontWeight: 400, fontFamily: SCHIBSTED }}>{p.distancia || '0 Km'}</Typography>
                         <Box><Chip label={p.certificado} size="small" sx={{ height: 22, fontSize: 10, bgcolor: p.certificado === 'Sim' ? '#F1F9EE' : '#FFEDEE', color: p.certificado === 'Sim' ? '#70BF54' : '#E4464E' }} /></Box>
-                        <Box><Chip label="Sim" size="small" sx={{ height: 22, fontSize: 10, bgcolor: '#F1F9EE', color: '#70BF54' }} /></Box>
+                        <Box>
+                          <Chip
+                            label={p.doamDejetos}
+                            size="small"
+                            sx={{
+                              height: 22,
+                              fontSize: 10,
+                              bgcolor: p.doamDejetos === 'Sim' ? '#F1F9EE' : '#FFEDEE',
+                              color: p.doamDejetos === 'Sim' ? '#70BF54' : '#E4464E'
+                            }}
+                          />
+                        </Box>
                         <Stack direction="row" spacing={0.5} onClick={e => e.stopPropagation()}>
                           <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => openDrawer('view', p)}><VisibilityIcon sx={{ fontSize: 20 }} /></IconButton>
                           <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => openDrawer('edit', p)}><EditIcon sx={{ fontSize: 20 }} /></IconButton>

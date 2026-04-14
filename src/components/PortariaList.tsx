@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Box, Tabs, Tab, TextField, Button, IconButton, Drawer, Typography, GlobalStyles, TablePagination } from '@mui/material';
 import { 
   Delete as DeleteIcon, 
@@ -9,6 +9,9 @@ import {
 } from '@mui/icons-material';
 import PortariaTable from './PortariaTable';
 import PortariaDrawer from './PortariaDrawer';
+import { portariaRegistroService, portariaMapperService } from '../features/portaria';
+import { PortariaRegistroFactory } from '../features/portaria/services/portariaRegistroFactory';
+import type { PortariaOrigem } from '../features/portaria/types';
 import EmptyImage from '../assets/empty-states-sheets.png'; 
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
@@ -20,43 +23,261 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [drawerConfig, setDrawerConfig] = useState<{open: boolean, mode: 'add'|'edit'|'view', data: any}>({open: false, mode: 'add', data: null});
   const [isDeleteDrawerOpen, setIsDeleteDrawerOpen] = useState(false);
-  
-  const [data, setData] = useState<any[]>([
-    { id: '1', data: '18/02/2026', hora: '08:00', atividade: 'Abastecimento', nome: 'Renan Augusto', placa: 'ABC-1234', status: 'Em andamento', responsavel: 'Gilson Alves' },
-    { id: '3', data: '18/02/2026', hora: '09:15', atividade: 'Entrega de dejetos', nome: 'José da Silva', placa: 'ABC-5678', status: 'Concluído', responsavel: 'Gilson Silva Alves' },
-    { id: '2', data: '18/02/2026', hora: '09:00', atividade: 'Visita', nome: 'Mariana Silva', placa: 'GHI-9012', status: 'Em andamento', responsavel: 'Gilson Alves' }
-  ]);
+  const [data, setData] = useState<any[]>([]);
+  const [fullApiData, setFullApiData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const response = await portariaRegistroService.listRegistros({ page: 0, pageSize: 9999 });
+      console.log('📋 [MAPPER] Resposta raw:', response.data);
+      
+      // Armazenar dados completos da API para usar quando EDIT/VIEW
+      setFullApiData(response.data);
+      
+      const rows = response.data.map((api: any) => {
+        console.log('🔍 [API RAW] Registro completo:', JSON.stringify(api, null, 2));
+        const row = portariaMapperService.mapApiToTableRow(api);
+        console.log('🔄 [MAPPER] Row mapeada:', row);
+        return {
+          id: row.id,
+          data: row.data,
+          hora: row.hora,
+          atividade: row.atividade,
+          nome: row.nome,
+          placa: row.placa,
+          status: row.status,
+          responsavel: row.responsavel,
+        };
+      });
+      console.log('✅ [GRID] Dados finais:', rows);
+      setData(rows);
+    } catch (error) {
+      console.error('Erro ao carregar registros:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao carregar registros');
+      setData([]);
+      setFullApiData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const filteredData = useMemo(() => {
-    return data.filter(item => (tabValue === 0 ? item.status !== 'Concluído' : item.status === 'Concluído'));
-  }, [data, tabValue]);
+    let filtered = data.filter(item => (tabValue === 0 ? item.status !== 'Concluído' : item.status === 'Concluído'));
+    
+    // Aplica filtro de busca se houver
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => {
+        return (
+          (item.data && item.data.toLowerCase().includes(search)) ||
+          (item.hora && item.hora.toLowerCase().includes(search)) ||
+          (item.atividade && item.atividade.toLowerCase().includes(search)) ||
+          (item.nome && item.nome.toLowerCase().includes(search)) ||
+          (item.placa && item.placa.toLowerCase().includes(search)) ||
+          (item.status && item.status.toLowerCase().includes(search))
+        );
+      });
+    }
+    
+    return filtered;
+  }, [data, tabValue, searchTerm]);
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [filteredData, page, rowsPerPage]);
 
-  const handleSave = (entry: any) => {
-    const formattedData = entry.data instanceof Date ? entry.data.toLocaleDateString('pt-BR') : entry.data;
-    const formattedHora = entry.horario instanceof Date ? entry.horario.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : entry.hora;
-    
-    if (drawerConfig.mode === 'edit') {
-       setData(prev => prev.map(i => i.id === entry.id ? { ...entry, data: formattedData, hora: formattedHora } : i));
-       
-       // ✅ MENSAGEM: DENSIDADE NO HISTÓRICO
-       if (tabValue === 1 && entry.atividade === 'Entrega de dejetos') {
-          onSuccess("Densidade registrada", "As informações foram salvas com sucesso.");
-       } else {
-          // ✅ MENSAGEM: EDIÇÃO COMUM
-          onSuccess("Registro atualizado com sucesso", "As alterações foram salvas e já estão disponíveis no sistema.");
-       }
-    } else {
-       const newRow = { ...entry, id: Math.random().toString(), status: 'Em andamento', data: formattedData, hora: formattedHora, responsavel: 'Gilson Alves', nome: entry.motorista || entry.visitante || entry.nome };
-       setData(prev => [newRow, ...prev]);
-       
-       // ✅ MENSAGEM: NOVO CADASTRO
-       onSuccess("Registro atualizado com sucesso", "As alterações foram salvas e já estão disponíveis no sistema.");
+  /**
+   * Helper: Recupera dados completos da API para um registro específico
+   * Necessário para popular corretamente o formulário no drawer
+   */
+  const getFullDataForRow = (rowId: string) => {
+    return fullApiData.find((api: any) => api.id === rowId);
+  };
+
+  /**
+    * Prepara o payload correto baseado na atividade selecionada
+    * Cada atividade tem seu próprio endpoint com estrutura específica
+    */
+  const preparePayloadForActivity = (entry: any) => {
+    const basePayload = {
+      tipoRegistro: entry.atividade,
+      data_entrada: entry.data instanceof Date ? entry.data.toISOString().split('T')[0] : entry.data,
+      hora_entrada: entry.horario instanceof Date ? entry.horario.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : entry.horario,
+      data_saida: entry.dataSaida ? (entry.dataSaida instanceof Date ? entry.dataSaida.toISOString().split('T')[0] : entry.dataSaida) : undefined,
+      hora_saida: entry.horarioSaida ? (entry.horarioSaida instanceof Date ? entry.horarioSaida.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : entry.horarioSaida) : undefined,
+      observacoes: entry.observacoes,
+      status: entry.status || 'Em andamento',
+      origem_entrada: 'ESPONTANEA' as PortariaOrigem,
+    };
+
+    // Monta payload específico para cada atividade
+    switch (entry.atividade) {
+      case 'Entrega de dejetos':
+        return {
+          ...basePayload,
+          entrega_dejetos: {
+            produtor_id: entry.produtorId || entry.cooperado || '',  // Usa produtorId ou cooperado como fallback
+            motorista_nome: entry.motorista || '',
+            cpf_motorista: entry.cpf || '',  // ✅ CORRIGIDO: usar entry.cpf, não entry.cpf_cnpj
+            motorista_id: null,
+            transportadora_id: entry.transportadora && entry.transportadora !== 'outros' ? entry.transportadora : null,
+            transportadora_manual: entry.transportadora === 'outros' ? entry.transportadoraManual : null,
+            veiculo_id: entry.veiculoId || null,
+            placa: entry.placa && entry.placa !== 'Outros' ? entry.placa : null,
+            placa_manual: entry.transportadora === 'outros' ? entry.placaManual : null,
+            tipo_veiculo: entry.tipoVeiculo || '',
+            peso_inicial: parseInt(entry.pesoInicial?.toString().replace(/[^\d]/g, '') || '0'),
+            peso_final: parseInt(entry.pesoFinal?.toString().replace(/[^\d]/g, '') || '0'),
+            densidade: entry.densidade || ''
+          }
+        };
+      
+      case 'Entrega de Insumo':
+        // TODO: Implementar estrutura para Entrega de Insumo
+        return basePayload;
+      
+      case 'Expedição':
+        // TODO: Implementar estrutura para Expedição
+        return basePayload;
+      
+      case 'Abastecimento':
+        return {
+          ...basePayload,
+          abastecimento: {
+            motorista_nome: entry.motorista || '',
+            cpf_motorista: entry.cpf || '',
+            motorista_id: null,
+            transportadora_id: entry.transportadora && entry.transportadora !== 'outros' ? entry.transportadora : null,
+            transportadora_manual: entry.transportadora === 'outros' ? entry.transportadoraManual : null,
+            veiculo_id: entry.veiculoId || null,
+            placa: entry.placa && entry.placa !== 'Outros' ? entry.placa : null,
+            placa_manual: entry.transportadora === 'outros' || entry.placa === 'Outros' ? entry.placaManual : null,
+            tipo_veiculo: entry.tipoVeiculo || '',
+            peso_inicial: parseInt(entry.pesoInicial?.toString().replace(/[^\d]/g, '') || '0'),
+            peso_final: parseInt(entry.pesoFinal?.toString().replace(/[^\d]/g, '') || '0')
+          }
+        };
+      
+      case 'Visita':
+        // TODO: Implementar estrutura para Visita
+        return basePayload;
+      
+      default:
+        return basePayload;
     }
-    setDrawerConfig({open: false, mode: 'add', data: null});
+  };
+
+  /**
+   * ============================================================================
+   * HANDLER: SALVAR REGISTRO
+   * ============================================================================
+   * Responsabilidade: Processar salvamento de registros (novo ou existente)
+   * e sincronizar com a API para garantir dados consistentes
+   * 
+   * Dois cenários:
+   * SITUAÇÃO 1: Modo EDIT - Atualizar registro existente
+   * SITUAÇÃO 2: Modo ADD - Criar novo registro
+   */
+  const handleSave = (entry: any) => {
+    if (drawerConfig.mode === 'edit') {
+      /**
+       * SITUAÇÃO 1: EDIÇÃO DE REGISTRO EXISTENTE
+       * ============================================================================
+       * Responsabilidade: Enviar alterações para API e sincronizar grid
+       * 
+       * Fluxo:
+       * 1. Preparar payload com dados do formulário
+       * 2. Enviar para API via updateRegistro()
+       * 3. Recarregar TODOS os dados da API (não confia em dados locais)
+       * 4. Fechar drawer e mostrar mensagem de sucesso
+       * 
+       * Por que recarregar da API?
+       * - A API pode ter regras de negócio que modificam os dados
+       * - Ex: normalizar placa, recalcular densidade, etc
+       * - Garantir que o grid mostra exatamente o que está no banco
+       */
+      console.log('📝 [SITUAÇÃO-1-EDIT] Atualizando registro:', entry.id);
+      
+      const payload = preparePayloadForActivity(entry);
+      console.log('📤 [PAYLOAD] Enviando para backend:', payload);
+      
+      portariaRegistroService.updateRegistro(entry.id, payload)
+        .then(() => {
+          console.log('✅ [SUCESSO-EDIT] Recarregando dados da API');
+          // Sincronizar com API - garante que o grid mostra dados corretos
+          loadData();
+          onSuccess("Registro atualizado com sucesso", "As alterações foram salvas e já estão disponíveis no sistema.");
+          setDrawerConfig({open: false, mode: 'add', data: null});
+        })
+        .catch((error) => {
+          console.error('❌ [ERRO-EDIT] Falha ao atualizar:', error);
+          onSuccess("Erro ao atualizar", "Falha ao salvar as alterações.");
+        });
+    } else {
+      /**
+       * SITUAÇÃO 2: CRIAÇÃO DE NOVO REGISTRO
+       * ============================================================================
+       * Responsabilidade: Enviar novo registro para API e sincronizar grid
+       * 
+       * Fluxo:
+       * 1. Usar Factory pattern para obter estratégia correta (por tipo de atividade)
+       * 2. Preparar payload com dados do formulário
+       * 3. Enviar para API via estratégia.criar()
+       * 4. Recarregar TODOS os dados da API (não confia em dados locais)
+       * 5. Fechar drawer e mostrar mensagem de sucesso
+       * 
+       * Por que recarregar da API?
+       * - Registro novo pode ter IDs gerados no banco (sequences)
+       * - Transportadora "Outros" pode ter sido normalizada
+       * - API pode ter aplicado regras de negócio (ex: campo densidade)
+       * - Garante consistência total entre frontend e banco
+       * 
+       * Por que usar Factory pattern?
+       * - Cada tipo de atividade tem comportamento diferente
+       * - Entrega de Dejetos, Abastecimento, Visita, etc
+       * - Mantém código desacoplado (SOLID - Open/Closed Principle)
+       */
+      console.log('✨ [SITUAÇÃO-2-ADD] Criando novo registro de tipo:', entry.atividade);
+      
+      try {
+        // PASSO 1: Obter estratégia correta baseada na atividade
+        const strategy = PortariaRegistroFactory.getStrategy(entry.atividade);
+        console.log('🎯 [ESTRATÉGIA] Usando estratégia para:', entry.atividade);
+        
+        // PASSO 2: Preparar payload
+        const payload = preparePayloadForActivity(entry);
+        console.log('📤 [PAYLOAD] Enviando para backend:', payload);
+        
+        // PASSO 3-4: Enviar e sincronizar
+        strategy.criar(payload)
+          .then(() => {
+            console.log('✅ [SUCESSO-ADD] Registro criado, recarregando dados da API');
+            // Sincronizar com API - garante que o grid mostra dados corretos
+            // Especialmente importante para transportadora "Outros" que pode ter sido processada
+            loadData();
+            onSuccess(`${entry.atividade} registrada`, "As informações foram salvas com sucesso.");
+            setDrawerConfig({open: false, mode: 'add', data: null});
+          })
+          .catch((error) => {
+            console.error(`❌ [ERRO-ADD] Falha ao criar ${entry.atividade}:`, error);
+            onSuccess("Erro ao salvar", `Falha ao registrar ${entry.atividade}.`);
+            setDrawerConfig({open: false, mode: 'add', data: null});
+          });
+      } catch (error) {
+        // SITUAÇÃO 2-ERRO: Estratégia não encontrada para atividade
+        console.error('❌ [ERRO-ESTRATÉGIA] Tipo de atividade não suportado:', error);
+        onSuccess("Erro", error instanceof Error ? error.message : "Atividade não suportada");
+        setDrawerConfig({open: false, mode: 'add', data: null});
+      }
+    }
   };
 
   const handleDelete = () => {
@@ -82,8 +303,17 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
       </Box>
       
       <Box sx={{ p: '8px 16px 12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextField placeholder="Buscar" size="small" sx={{ width: 400, '& .MuiInputBase-root': { height: 32 } }} />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+         <TextField 
+           placeholder="Buscar" 
+           size="small" 
+           value={searchTerm}
+           onChange={(e) => {
+             setSearchTerm(e.target.value);
+             setPage(0); // Reseta paginação ao buscar
+           }}
+           sx={{ width: 400, '& .MuiInputBase-root': { height: 32 } }} 
+         />
+         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {tabValue === 0 && <IconButton disabled={selectedIds.length === 0} onClick={() => setIsDeleteDrawerOpen(true)} sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'rgba(0,0,0,0.26)' }}><DeleteIcon /></IconButton>}
           <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FileUploadIcon /></IconButton>
           <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FilterAltIcon /></IconButton>
@@ -91,38 +321,83 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
         </Box>
       </Box>
       
-      <Box sx={{ p: '0 16px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {filteredData.length === 0 ? (
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <img src={EmptyImage} alt="Vazio" style={{ width: 150, marginBottom: '24px' }} />
-            <Typography sx={{ color: '#34343F', fontSize: 18, fontFamily: SCHIBSTED, fontWeight: 500 }}>Área sem registros</Typography>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', bgcolor: 'white', borderRadius: '4px', overflow: 'hidden' }}>
-            <Box sx={{ width: '100%', overflowX: 'auto', '& .MuiTableCell-root': { borderBottom: 'none' } }}>
-              <PortariaTable 
-                data={paginatedData} selectedIds={selectedIds} onSelectionChange={setSelectedIds} isHistory={tabValue === 1} 
-                onEdit={(row: any) => setDrawerConfig({open: true, mode: 'edit', data: row})} 
-                onView={(row: any) => setDrawerConfig({open: true, mode: 'view', data: row})} 
-              />
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', p: 1, bgcolor: 'white' }}>
-              <TablePagination 
-                component="div" 
-                count={filteredData.length} 
-                page={page} 
-                onPageChange={(_, n) => setPage(n)} 
-                rowsPerPage={rowsPerPage} 
-                onRowsPerPageChange={e => { setRowsPerPage(Number(e.target.value)); setPage(0); }} 
-                rowsPerPageOptions={[5, 10, 25]} 
-                labelRowsPerPage="Linhas por página:" 
-                labelDisplayedRows={({ from, to, count }) => `${from}–${to} of ${count}`}
-                sx={{ border: 'none', '& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel': { fontFamily: SCHIBSTED, fontSize: 12, color: 'black' } }} 
-              />
-            </Box>
-          </Box>
-        )}
-      </Box>
+       <Box sx={{ p: '0 16px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+         {loading && data.length === 0 ? (
+           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+             <Typography sx={{ color: '#34343F', fontSize: 16, fontFamily: SCHIBSTED }}>Carregando dados...</Typography>
+           </Box>
+         ) : error ? (
+           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+             <Typography sx={{ color: '#D32F2F', fontSize: 16, fontFamily: SCHIBSTED }}>Erro: {error}</Typography>
+           </Box>
+         ) : filteredData.length === 0 ? (
+           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+             <img src={EmptyImage} alt="Vazio" style={{ width: 150, marginBottom: '24px' }} />
+             <Typography sx={{ color: '#34343F', fontSize: 18, fontFamily: SCHIBSTED, fontWeight: 500 }}>Área sem registros</Typography>
+           </Box>
+         ) : null}
+         {!error && filteredData.length > 0 && (
+           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', bgcolor: 'white', borderRadius: '4px', overflow: 'hidden', flex: 1 }}>
+             <Box sx={{ width: '100%', overflowX: 'auto', '& .MuiTableCell-root': { borderBottom: 'none' } }}>
+               <PortariaTable 
+                 data={paginatedData} selectedIds={selectedIds} onSelectionChange={setSelectedIds} isHistory={tabValue === 1} 
+                  onEdit={(row: any) => {
+                     console.log('✏️ [EDIT] Abrindo registro:', row.id);
+                     portariaRegistroService.getRegistroById(row.id)
+                       .then((response: any) => {
+                         console.log('✅ [EDIT] Dados carregados via API:', response);
+                         setDrawerConfig({open: true, mode: 'edit', data: response});
+                       })
+                       .catch((error: any) => {
+                         console.warn('⚠️ [EDIT] Erro ao buscar via API, usando cache local:', error);
+                         const fullData = getFullDataForRow(row.id);
+                         if (fullData) {
+                           console.log('✅ [EDIT] Usando dados do cache:', fullData);
+                           setDrawerConfig({open: true, mode: 'edit', data: fullData});
+                         } else {
+                           console.error('❌ [EDIT] Nenhum dado disponível:', row.id);
+                           setDrawerConfig({open: true, mode: 'edit', data: row});
+                         }
+                       });
+                   }}
+                   onView={(row: any) => {
+                       console.log('👁️ [VIEW] Abrindo visualização:', row.id);
+                       portariaRegistroService.getRegistroById(row.id)
+                        .then((response: any) => {
+                          console.log('✅ [VIEW] Dados carregados via API:', response);
+                          setDrawerConfig({open: true, mode: 'view', data: response});
+                        })
+                        .catch((error: any) => {
+                          console.warn('⚠️ [VIEW] Erro ao buscar via API, usando cache local:', error);
+                          const fullData = getFullDataForRow(row.id);
+                          if (fullData) {
+                            console.log('✅ [VIEW] Usando dados do cache:', fullData);
+                            setDrawerConfig({open: true, mode: 'view', data: fullData});
+                          } else {
+                            console.error('❌ [VIEW] Nenhum dado disponível:', row.id);
+                            setDrawerConfig({open: true, mode: 'view', data: row});
+                          }
+                        });
+                    }}
+               />
+             </Box>
+             <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', p: 1, bgcolor: 'white' }}>
+               <TablePagination 
+                 component="div" 
+                 count={filteredData.length} 
+                 page={page} 
+                 onPageChange={(_, n) => setPage(n)} 
+                 rowsPerPage={rowsPerPage} 
+                 onRowsPerPageChange={e => { setRowsPerPage(Number(e.target.value)); setPage(0); }} 
+                 rowsPerPageOptions={[5, 10, 25]} 
+                 labelRowsPerPage="Linhas por página:" 
+                 labelDisplayedRows={({ from, to, count }) => `${from}–${to} of ${count}`}
+                 sx={{ border: 'none', '& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel': { fontFamily: SCHIBSTED, fontSize: 12, color: 'black' } }} 
+               />
+             </Box>
+           </Box>
+         )}
+       </Box>
 
       {/* MODAL DE EXCLUSÃO */}
       <Drawer anchor="right" open={isDeleteDrawerOpen} onClose={() => setIsDeleteDrawerOpen(false)} PaperProps={{ sx: { width: 620 } }}>

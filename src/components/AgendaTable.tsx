@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { calcularTotaisAgenda } from '../utils/calcularTotaisAgenda';
 import { Box, Typography, IconButton, TextField, InputAdornment, Checkbox, Drawer, Button, MenuItem, Select, Divider } from '@mui/material';
 import { Close as CloseIcon, Delete, ContentCopy, CalendarMonth, ChevronLeft, ChevronRight, FileUpload, FilterAlt } from "@mui/icons-material";
 import FilterPanel from './filter-panel/FilterPanel';
 import ExportPanel from './export-panel/ExportPanel';
+import { getUniqueTransportadoras } from '../utils/transportadoraUtils';
 import type { AgendaRow } from '../types/AgendaRow';
 import { format, startOfWeek, subWeeks, addWeeks, addDays, getWeek, startOfDay, isAfter } from 'date-fns';
 
@@ -106,7 +108,7 @@ export const AgendaTable: React.FC<AgendaTableProps> = ({ title, referenceDate, 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const isMuiMenu = target.closest('.MuiPopover-root') || target.closest('.MuiMenu-root');
+      const isMuiMenu = target.closest('.MuiPopover-root') || target.closest('.MuiMenu-root') || target.closest('.MuiDrawer-root');
       if (tableRef.current && !tableRef.current.contains(target) && !isMuiMenu) {
         if (editingRowId) onDataChange?.(localData);
         setEditingRowId(null);
@@ -146,6 +148,9 @@ export const AgendaTable: React.FC<AgendaTableProps> = ({ title, referenceDate, 
     }
     setSelectedIds(prev => prev.includes(rowId) ? prev.filter(i => i !== rowId) : [...prev, rowId]);
   };
+
+  // Memoiza o cálculo dos totais para performance e atualização automática
+  const totais = useMemo(() => calcularTotaisAgenda(localData), [localData]);
 
   return (
     <Box ref={tableRef} sx={{ display: 'flex', flexDirection: 'column', width: '100%', mb: 4, px: 2 }}>
@@ -211,32 +216,34 @@ export const AgendaTable: React.FC<AgendaTableProps> = ({ title, referenceDate, 
         justifyContent: "flex-end"
       }}
     >
-      <FilterPanel
-        open={showFilter}
-        filters={filters}
-        transportadoras={transportadoras}
-        produtores={produtores}
-        estabelecimentos={estabelecimentos}
-        distancias={distancias}
-        totaisKm={totaisKm}
-        onChange={handleFilterChange}
-        onApply={() => {
-          applyFilters(filters);
-          setShowFilter(false);
-        }}
-        onClear={() => {
-          const empty = {
-            estabelecimento: '',
-            produtor: '',
-            distancia: '',
-            transportadora: '',
-            totalKm: ''
-          };
-          setFilters(empty);
-          setLocalData(data);
-          setShowFilter(false);
-        }}
-      />
+      {showFilter && (
+        <FilterPanel
+          open={showFilter}
+          filters={filters}
+          transportadoras={transportadoras}
+          produtores={produtores}
+          estabelecimentos={estabelecimentos}
+          distancias={distancias}
+          totaisKm={totaisKm}
+          onChange={handleFilterChange}
+          onApply={() => {
+            applyFilters(filters);
+            setShowFilter(false);
+          }}
+          onClear={() => {
+            const empty = {
+              estabelecimento: '',
+              produtor: '',
+              distancia: '',
+              transportadora: '',
+              totalKm: ''
+            };
+            setFilters(empty);
+            setLocalData(data);
+            setShowFilter(false);
+          }}
+        />
+      )}
     </Box>
 
         {/* Divider separador acima do grid */}
@@ -323,9 +330,68 @@ export const AgendaTable: React.FC<AgendaTableProps> = ({ title, referenceDate, 
             </Box>
           );
         })}
+        {/* Linha de totalização */}
+        {localData.length > 0 && (
+          <Box sx={{ display: 'grid', gridTemplateColumns: gridLayout, borderTop: '2px solid #bdbdbd', bgcolor: 'rgba(0,0,0,0.03)', alignItems: 'center', fontWeight: 700 }}>
+            <Box />
+            <Typography sx={{ p: '8px 8px', fontSize: 12, ...COMMON_FONT, fontWeight: 700 }}>Totais</Typography>
+            <Box />
+            <Box />
+            <Box />
+            {/* Total de KM */}
+            <Typography sx={{ p: '8px 8px', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.totalKm} Km</Typography>
+            {/* Dias da semana */}
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.dom}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.seg}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.ter}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.qua}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.qui}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.sex}</Typography>
+            <Typography sx={{ textAlign: 'center', fontSize: 12, fontWeight: 700, ...COMMON_FONT }}>{totais.sab}</Typography>
+          </Box>
+        )}
       </Box>
+        {/* ...existing code... */}
       {/* Export Drawer */}
-      <ExportPanel open={openExport} onClose={() => setOpenExport(false)} />
+      {openExport && (
+        <ExportPanel
+          open={openExport}
+          onClose={() => setOpenExport(false)}
+          transportadoras={getUniqueTransportadoras(
+            data.map(row => ({
+              id: typeof row.id === 'number' ? row.id : 0,
+              cooperado: row.produtor || '',
+              seg: row.seg ?? 0,
+              ter: row.ter ?? 0,
+              qua: row.qua ?? 0,
+              qui: row.qui ?? 0,
+              sex: row.sex ?? 0,
+              sab: row.sab ?? 0,
+              dom: row.dom ?? 0,
+              qtd: 0,
+              km: Number(row.km ?? 0),
+              transportadora: row.transp || '',
+              status: 'Planejado'
+            }))
+          )}
+          dadosPlanejados={data.map(row => ({
+            id: typeof row.id === 'number' ? row.id : 0,
+            cooperado: row.produtor || '',
+            seg: row.seg ?? 0,
+            ter: row.ter ?? 0,
+            qua: row.qua ?? 0,
+            qui: row.qui ?? 0,
+            sex: row.sex ?? 0,
+            sab: row.sab ?? 0,
+            dom: row.dom ?? 0,
+            qtd: 0,
+            km: Number(row.km ?? 0),
+            transportadora: row.transp || '',
+            status: 'Planejado'
+          })
+          )}
+        />
+      )}
       {/* Drawer permanece igual */}
       <Drawer anchor="right" open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} sx={{ zIndex: 999999 }} PaperProps={{ sx: { width: 620, display: 'flex', flexDirection: 'column' } }}>
         <Box sx={{ p: '16px 20px 24px 20px', bgcolor: 'white', flexShrink: 0 }}>

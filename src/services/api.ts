@@ -1,3 +1,4 @@
+export { api };
 // src/services/api.ts
 
 import axios from 'axios';

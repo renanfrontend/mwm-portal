@@ -16,6 +16,9 @@ import { addDays, addWeeks, format, getDay, isSameDay, parseISO, startOfWeek } f
 import { AgendaService } from '../services/agendaService';
 import { TransportadoraService } from '../services/transportadoraService';
 import type { AgendaPlanejadaSemanaResponse } from '../types/agenda';
+import AgendaRealizadaService from '../services/agendaRealizadaService';
+import { calcularDatasSemana } from '../utils/calcularDatasSemana';
+import { mapearAgendaRealizadaParaRowData } from '../utils/mapearAgendaRealizadaParaRowData';
 
 // ✅ Importação centralizada de ícones do seu projeto
 import { 
@@ -58,6 +61,12 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
   const [isCopyDrawerOpen, setIsCopyDrawerOpen] = useState(false);
   const [selectedIdsToCopy, setSelectedIdsToCopy] = useState<number[]>([]);
   const [planejadoRows, setPlanejadoRows] = useState<RowData[]>([]);
+  
+  // ============================================================================
+  // ESTADO: Agenda Realizada
+  // ============================================================================
+  // Estado para armazenar as linhas de agenda realizada
+  const [realizadoRows, setRealizadoRows] = useState<RowData[]>([]);
   // Produtores únicos extraídos das linhas planejadas
   const produtores = useUniqueProdutoresFromAgenda(
     planejadoRows.map(row => ({
@@ -187,15 +196,67 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
     }
   }, [bioplantaId, filiadaId]);
 
-  const handlePlanejadoDateChange = useCallback((newDate: Date) => {
-    const { start, end } = getWeekRange(newDate);
-    setPlanejadoDate(newDate);
-    fetchPlanejadoWeek(start, end);
-  }, [fetchPlanejadoWeek]);
+   const handlePlanejadoDateChange = useCallback((newDate: Date) => {
+     const { start, end } = getWeekRange(newDate);
+     setPlanejadoDate(newDate);
+     fetchPlanejadoWeek(start, end);
+   }, [fetchPlanejadoWeek]);
 
+   /**
+    * ============================================================================
+    * CALLBACK: Manejar mudança de data no grid Realizado
+    * ============================================================================
+    * Responsabilidade: Atualizar estado e dispara o efeito de carregamento
+    */
+   const handleRealizadoDateChange = useCallback((newDate: Date) => {
+     setRealizadoDate(newDate);
+   }, []);
+
+   useEffect(() => {
+     handlePlanejadoDateChange(planejadoDate);
+   }, [handlePlanejadoDateChange]);
+
+  /**
+   * ============================================================================
+   * USEEFFECT: Carregar Agenda Realizada quando data muda
+   * ============================================================================
+   * Responsabilidade: Buscar dados de agenda realizada ao mudar a semana
+   * 
+   * Dispara quando: realizadoDate muda
+   * 
+   * Fluxo:
+   * 1. Calcular domingo e sábado da semana
+   * 2. Chamar API com essas datas
+   * 3. Mapear resposta para RowData[]
+   * 4. Atualizar estado realizadoRows
+   */
   useEffect(() => {
-    handlePlanejadoDateChange(planejadoDate);
-  }, [handlePlanejadoDateChange]);
+    const carregarRealizadoSemanal = async () => {
+      try {
+        console.log('📅 [REALIZADO] Carregando dados para:', realizadoDate);
+        
+        // PASSO 1: Calcular datas da semana (domingo a sábado)
+        const { dataInicio, dataFim } = calcularDatasSemana(realizadoDate);
+        
+        // PASSO 2: Chamar API com essas datas
+        const resposta = await AgendaRealizadaService.getAgendaRealizadaSemanal(dataInicio, dataFim);
+        
+        // PASSO 3: Mapear resposta para formato que AgendaTable espera
+        const linhasFormatadas = mapearAgendaRealizadaParaRowData(resposta);
+        
+        // PASSO 4: Atualizar estado com os dados
+        setRealizadoRows(linhasFormatadas);
+        
+        console.log('✅ [REALIZADO] Dados carregados:', linhasFormatadas);
+      } catch (error) {
+        console.error('❌ [REALIZADO] Erro ao carregar:', error);
+        // Em caso de erro, manter grid vazio
+        setRealizadoRows([]);
+      }
+    };
+    
+    carregarRealizadoSemanal();
+  }, [realizadoDate]);
 
 
 
@@ -314,15 +375,15 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: '8px 16px', position: 'relative', overflowX: 'hidden' }}>
       <AgendaTable 
-        title="Realizado" 
-        referenceDate={realizadoDate} 
-        onDateChange={setRealizadoDate} 
-        data={[]} 
-        onDataChange={() => {}} 
-        showCopy={false}
-        disableNext={false}
-        produtores={[]}
-      />
+         title="Realizado" 
+         referenceDate={realizadoDate} 
+         onDateChange={handleRealizadoDateChange} 
+         data={realizadoRows as any}
+         onDataChange={() => {}} 
+         showCopy={false}
+         disableNext={false}
+         produtores={[]}
+       />
 
       <AgendaTable
         title="Planejado"

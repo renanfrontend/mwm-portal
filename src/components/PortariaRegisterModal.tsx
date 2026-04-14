@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { entregaDejetosService } from '../features/portaria/services/entregaDejetosService';
 import { type PortariaItem } from '../types/models';
 
+
 interface Props {
-  isActive: boolean;
-  onClose: () => void;
-  onSave: (newItem: PortariaItem) => void;
+    isActive: boolean;
+    onClose: () => void;
+    onSave: (newItem: PortariaItem) => void;
 }
 
-// --- DADOS MOCKADOS PARA SUGESTÕES (DATALISTS) ---
-const transportadoraOptions = ["Translog", "Rapidão", "Braspress", "Jadlog", "Loggi"];
-const veiculoOptions = ["Caminhão Truck", "Carreta", "Bitrem", "Vuc", "Utilitário"];
-const placaOptions = ["ABC-1234", "XYZ-9876", "MWM-2025", "AGR-1010", "BIO-5566"];
+
 
 const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) => {
   // --- ESTADOS ---
@@ -18,11 +17,83 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
   const [hora, setHora] = useState(new Date().toTimeString().slice(0, 5));
   const [atividade, setAtividade] = useState('');
 
-  // Logística / Transporte
-  const [cooperado, setCooperado] = useState('');
-  const [transportadora, setTransportadora] = useState('');
-  const [tipoVeiculo, setTipoVeiculo] = useState('');
-  const [placa, setPlaca] = useState('');
+
+    // Logística / Transporte
+    const [cooperado, setCooperado] = useState('');
+    const [transportadora, setTransportadora] = useState('');
+    const [tipoVeiculo, setTipoVeiculo] = useState('');
+    const [placa, setPlaca] = useState('');
+
+         // Selects dinâmicos
+         const [transportadoraOptions, setTransportadoraOptions] = useState<{ id: string; nomeFantasia: string }[]>([]);
+         const [veiculoOptions, setVeiculoOptions] = useState<{ id: string; label: string; value: string }[]>([]);
+         const [placaOptions, setPlacaOptions] = useState<{ id: string; placa: string }[]>([]);
+
+        // Carregar selects quando atividade for 'Entrega de dejetos'
+        useEffect(() => {
+            console.log('🔄 useEffect acionado - Atividade atual:', atividade);
+            if (atividade === 'Entrega de dejetos') {
+                console.group('🚚 ENTREGA DE DEJETOS - CARREGANDO DADOS');
+                console.log('⏱️ Timestamp:', new Date().toLocaleTimeString());
+                
+                // Transportadoras
+                console.log('📡 Chamando API: getTransportadoras()...');
+                entregaDejetosService.getTransportadoras().then(data => {
+                    console.log('📡 Resposta recebida da API (Transportadoras):', data);
+                    setTransportadoraOptions(data);
+                    console.log('%c✅ TRANSPORTADORAS', 'color: #10b981; font-weight: bold; font-size: 12px;');
+                    console.table(data);
+                    console.log('Total:', data.length);
+                }).catch(e => {
+                    console.error('%c❌ ERRO - TRANSPORTADORAS', 'color: #ef4444; font-weight: bold; font-size: 12px;');
+                    console.error('Status:', e.response?.status);
+                    console.error('Mensagem:', e.response?.data || e.message);
+                });
+                
+                // Tipos de Veículo
+                entregaDejetosService.getTiposVeiculo().then(data => {
+                    setVeiculoOptions(data);
+                    console.log('%c✅ TIPOS DE VEÍCULO', 'color: #3b82f6; font-weight: bold; font-size: 12px;');
+                    console.table(data);
+                    console.log('Total:', data.length);
+                }).catch(e => {
+                    console.error('%c❌ ERRO - TIPOS DE VEÍCULO', 'color: #ef4444; font-weight: bold; font-size: 12px;');
+                    console.error('Status:', e.response?.status);
+                    console.error('Mensagem:', e.response?.data || e.message);
+                });
+                
+                // Limpa placas
+                setPlacaOptions([]);
+                setPlaca('');
+                console.groupEnd();
+            }
+        }, [atividade]);
+
+        // Carregar placas ao selecionar transportadora (só se for entrega de dejetos)
+        useEffect(() => {
+            if (atividade === 'Entrega de dejetos' && transportadora) {
+                console.group('🚛 PLACAS - CARREGANDO');
+                console.log('%c📌 Transportadora Selecionada:', 'color: #f59e0b; font-weight: bold;', transportadora);
+                console.log('⏱️ Timestamp:', new Date().toLocaleTimeString());
+                
+                entregaDejetosService.getPlacasByTransportadora(transportadora).then(data => {
+                    setPlacaOptions(data);
+                    console.log('%c✅ PLACAS', 'color: #10b981; font-weight: bold; font-size: 12px;');
+                    console.table(data);
+                    console.log('Total:', data.length);
+                    console.groupEnd();
+                }).catch(e => {
+                    console.error('%c❌ ERRO - PLACAS', 'color: #ef4444; font-weight: bold; font-size: 12px;');
+                    console.error('Transportadora ID:', transportadora);
+                    console.error('Status:', e.response?.status);
+                    console.error('Mensagem:', e.response?.data || e.message);
+                    console.groupEnd();
+                });
+            } else if (atividade === 'Entrega de dejetos') {
+                console.log('%c🔄 PLACAS LIMPAS', 'color: #8b5cf6; font-weight: bold; font-size: 12px;');
+                setPlacaOptions([]);
+            }
+        }, [atividade, transportadora]);
   
   // Pessoas
   const [motorista, setMotorista] = useState('');
@@ -135,13 +206,13 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
             
             {/* DATALISTS (Sugestões para inputs) */}
             <datalist id="transportadoras-list">
-                {transportadoraOptions.map(opt => <option key={opt} value={opt} />)}
+                {transportadoraOptions.map(opt => <option key={opt.id} value={opt.nomeFantasia} />)}
             </datalist>
             <datalist id="veiculos-list">
-                {veiculoOptions.map(opt => <option key={opt} value={opt} />)}
+                {veiculoOptions.map(opt => <option key={opt.id} value={opt.label} />)}
             </datalist>
             <datalist id="placas-list">
-                {placaOptions.map(opt => <option key={opt} value={opt} />)}
+                {placaOptions.map(opt => <option key={opt.id} value={opt.placa} />)}
             </datalist>
 
             {/* DATA */}
@@ -170,15 +241,20 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                 {errors.hora && <p className="help is-danger">Campo obrigatório</p>}
             </div>
 
-            {/* ATIVIDADE */}
-            <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Atividade a realizar *</label></div>
-            <div className="column is-12 pt-1">
-              <div className={`select is-fullwidth ${errors.atividade ? 'is-danger' : ''}`}>
-                <select 
-                    value={atividade} 
-                    onChange={e => { setAtividade(e.target.value); clearError('atividade'); }}
-                    style={{ color: defaultTextColor }}
-                >
+             {/* ATIVIDADE */}
+             <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Atividade a realizar *</label></div>
+             <div className="column is-12 pt-1">
+               <div className={`select is-fullwidth ${errors.atividade ? 'is-danger' : ''}`}>
+                 <select 
+                     value={atividade} 
+                     onChange={e => {
+                       const novaAtividade = e.target.value;
+                       setAtividade(novaAtividade);
+                       clearError('atividade');
+                       console.log('%c📋 ATIVIDADE SELECIONADA', 'color: #8b5cf6; font-weight: bold; font-size: 13px;', novaAtividade);
+                     }}
+                     style={{ color: defaultTextColor }}
+                 >
                   <option value="" disabled>Selecionar</option>
                   <option value="Entrega de dejetos">Entrega de dejetos</option>
                   <option value="Entrega de Insumo">Entrega de Insumo</option>
@@ -218,14 +294,16 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     {/* Transportadora (Lista Fixa conforme CSV, mas mantive Select) */}
                     <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Transportadora *</label></div>
                     <div className="column is-12 pt-1">
-                        <div className={`select is-fullwidth ${errors.transportadora ? 'is-danger' : ''}`}>
+                        <div className={`select is-fullwidth ${errors.transportadora ? 'is-danger' : ''}`}> 
                             <select 
                                 value={transportadora} 
-                                onChange={e => { setTransportadora(e.target.value); clearError('transportadora'); }}
+                                onChange={e => { setTransportadora(e.target.value); clearError('transportadora'); setPlaca(''); }}
                                 style={{ color: defaultTextColor }}
                             >
                                 <option value="">Selecionar Transportadora</option>
-                                {transportadoraOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                                {transportadoraOptions.map(t => (
+                                  <option key={t.id} value={t.id}>{t.nomeFantasia}</option>
+                                ))}
                             </select>
                         </div>
                         {errors.transportadora && <p className="help is-danger">Campo obrigatório</p>}
@@ -234,14 +312,16 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     {/* Tipo Veículo */}
                     <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Tipo de Veículo *</label></div>
                     <div className="column is-12 pt-1">
-                        <div className={`select is-fullwidth ${errors.tipoVeiculo ? 'is-danger' : ''}`}>
+                        <div className={`select is-fullwidth ${errors.tipoVeiculo ? 'is-danger' : ''}`}> 
                             <select 
                                 value={tipoVeiculo} 
                                 onChange={e => { setTipoVeiculo(e.target.value); clearError('tipoVeiculo'); }}
                                 style={{ color: defaultTextColor }}
                             >
                                 <option value="">Selecionar</option>
-                                {veiculoOptions.map(v => <option key={v} value={v}>{v}</option>)}
+                                {veiculoOptions.map(v => (
+                                  <option key={v.id} value={v.value}>{v.label}</option>
+                                ))}
                             </select>
                         </div>
                         {errors.tipoVeiculo && <p className="help is-danger">Campo obrigatório</p>}
@@ -258,6 +338,9 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                             style={{ color: defaultTextColor }}
                             placeholder="Selecione ou digite..."
                         />
+                        <datalist id="placas-list">
+                            {placaOptions.map(opt => <option key={opt.id} value={opt.placa} />)}
+                        </datalist>
                         {errors.placa && <p className="help is-danger">Campo obrigatório</p>}
                     </div>
 
@@ -269,6 +352,104 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     <div className="column is-12 pb-0"><label className="label is-small has-text-grey">CPF ou Passaporte</label></div>
                     <div className="column is-12 pt-1">
                         <input className="input" type="text" value={cpfCnpj} onChange={e => setCpfCnpj(e.target.value)} style={{ color: defaultTextColor }} />
+                    </div>
+
+                    {/* DEBUG VISUAL: Mostra dados carregados na tela */}
+                    <div className="column is-12 mt-4">
+                        <details style={{
+                            background:'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+                            border:'2px solid #3b82f6',
+                            padding:'16px',
+                            borderRadius:'6px',
+                            fontSize:'0.85em',
+                            boxShadow:'0 2px 8px rgba(0,0,0,0.1)'
+                        }} open>
+                            <summary style={{
+                                cursor:'pointer',
+                                fontWeight:'bold',
+                                fontSize:'1.1em',
+                                color:'#1e40af',
+                                marginBottom:'12px',
+                                userSelect:'none'
+                            }}>
+                                🔍 DEBUG: Dados Carregados
+                            </summary>
+                            
+                            <div style={{marginBottom:'16px'}}>
+                                <div style={{
+                                    background:'#ecfdf5',
+                                    border:'1px solid #10b981',
+                                    padding:'8px 12px',
+                                    borderRadius:'4px',
+                                    marginBottom:'8px',
+                                    fontWeight:'600',
+                                    color:'#047857'
+                                }}>
+                                    ✅ Transportadoras ({transportadoraOptions.length})
+                                </div>
+                                <pre style={{
+                                    whiteSpace:'pre-wrap',
+                                    wordBreak:'break-all',
+                                    background:'#f9fafb',
+                                    padding:'8px',
+                                    borderRadius:'4px',
+                                    border:'1px solid #e5e7eb',
+                                    maxHeight:'200px',
+                                    overflow:'auto',
+                                    fontSize:'0.8em'
+                                }}>{transportadoraOptions.length === 0 ? '⏳ Carregando...' : JSON.stringify(transportadoraOptions, null, 2)}</pre>
+                            </div>
+
+                            <div style={{marginBottom:'16px'}}>
+                                <div style={{
+                                    background:'#eff6ff',
+                                    border:'1px solid #3b82f6',
+                                    padding:'8px 12px',
+                                    borderRadius:'4px',
+                                    marginBottom:'8px',
+                                    fontWeight:'600',
+                                    color:'#1e40af'
+                                }}>
+                                    ✅ Tipos de Veículo ({veiculoOptions.length})
+                                </div>
+                                <pre style={{
+                                    whiteSpace:'pre-wrap',
+                                    wordBreak:'break-all',
+                                    background:'#f9fafb',
+                                    padding:'8px',
+                                    borderRadius:'4px',
+                                    border:'1px solid #e5e7eb',
+                                    maxHeight:'200px',
+                                    overflow:'auto',
+                                    fontSize:'0.8em'
+                                }}>{veiculoOptions.length === 0 ? '⏳ Carregando...' : JSON.stringify(veiculoOptions, null, 2)}</pre>
+                            </div>
+
+                            <div>
+                                <div style={{
+                                    background:'#fef3c7',
+                                    border:'1px solid #f59e0b',
+                                    padding:'8px 12px',
+                                    borderRadius:'4px',
+                                    marginBottom:'8px',
+                                    fontWeight:'600',
+                                    color:'#92400e'
+                                }}>
+                                    ✅ Placas ({placaOptions.length})
+                                </div>
+                                <pre style={{
+                                    whiteSpace:'pre-wrap',
+                                    wordBreak:'break-all',
+                                    background:'#f9fafb',
+                                    padding:'8px',
+                                    borderRadius:'4px',
+                                    border:'1px solid #e5e7eb',
+                                    maxHeight:'200px',
+                                    overflow:'auto',
+                                    fontSize:'0.8em'
+                                }}>{placaOptions.length === 0 ? '⏳ Selecione uma transportadora...' : JSON.stringify(placaOptions, null, 2)}</pre>
+                            </div>
+                        </details>
                     </div>
                 </>
             )}
@@ -398,7 +579,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                                 style={{ color: defaultTextColor }}
                             >
                                 <option value="">Selecionar</option>
-                                {transportadoraOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                                {transportadoraOptions.map(t => <option key={t.id} value={t.id}>{t.nomeFantasia}</option>)}
                             </select>
                         </div>
                         {errors.transportadora && <p className="help is-danger">Campo obrigatório</p>}

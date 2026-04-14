@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Box, CssBaseline } from '@mui/material';
 
 // Telas
-import React from 'react';
+
 const Dashboard = React.lazy(() => import('./screens/Dashboard'));
 const Logistica = React.lazy(() => import('./screens/Logistica'));
 const Portaria = React.lazy(() => import('./screens/Portaria'));

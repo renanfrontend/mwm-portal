@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, isSidebarOpen }) => {
   return (
     <Box sx={{ 
       height: 64, bgcolor: '#0072C3', color: 'white', display: 'flex', 
-      alignItems: 'center', pr: 3, justifyContent: 'space-between', zIndex: 1300 
+      alignItems: 'center', justifyContent: 'space-between', zIndex: 1300 
     }}>
       <Stack direction="row" alignItems="center" sx={{ height: '100%' }}>
         <Box sx={{ 
