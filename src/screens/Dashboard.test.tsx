@@ -11,8 +11,8 @@ vi.mock('../services/api');
 // Mock dos componentes filhos para isolar a lógica do Dashboard
 vi.mock('../components/MetricCard', () => ({ default: (props: { title: string }) => <div data-testid="metric-card">{props.title}</div> }));
 vi.mock('../components/StockStatus', () => ({ default: () => ({ default: () => <div>StockStatus Mock</div> }) }));
-vi.mock('../components/CooperativeAnalysisChart', () => ({ default: () => <div>CooperativeAnalysisChart Mock</div> }));
-vi.mock('../components/AbastecimentoPieChart', () => ({ default: () => <div>AbastecimentoPieChart Mock</div> }));
+vi.mock('../components/logistica/CooperativeAnalysisChart', () => ({ default: () => <div>CooperativeAnalysisChart Mock</div> }));
+vi.mock('../components/logistica/AbastecimentoPieChart', () => ({ default: () => <div>AbastecimentoPieChart Mock</div> }));
 
 // Mock do hook useAuth e react-router-dom
 vi.mock('../context/AuthContext', () => ({

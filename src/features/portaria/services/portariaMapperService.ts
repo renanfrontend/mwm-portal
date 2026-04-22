@@ -12,6 +12,8 @@ import type {
   PortariaRegistroApiData,
   PortariaAbastecimento,
   PortariaEntregaDejetos,
+  PortariaEntregaInsumo,
+  PortariaExpedicao,
   PortariaVisita,
 } from '../types';
 import { portariaFormatterService } from './portariaFormatterService';
@@ -41,10 +43,10 @@ export const portariaMapperService = {
       criado_em: new Date(apiData.criado_em),
       atualizado_em: new Date(apiData.atualizado_em),
 
-      abastecimento: null,
+      abastecimento: apiData.abastecimento ? this.mapApiToAbastecimento(apiData.abastecimento as Record<string, unknown>) : null,
       entrega_dejetos: apiData.entrega_dejetos ? this.mapApiToEntregaDejetos(apiData.entrega_dejetos as Record<string, unknown>) : null,
-      entrega_insumo: null,
-      expedicao: null,
+      entrega_insumo: apiData.entrega_insumo ? this.mapApiToEntregaInsumo(apiData.entrega_insumo as Record<string, unknown>) : null,
+      expedicao: apiData.expedicao ? this.mapApiToExpedicao(apiData.expedicao as Record<string, unknown>) : null,
       visita: apiData.visita ? this.mapApiToVisita(apiData.visita as Record<string, unknown>) : null,
     };
   },
@@ -84,11 +86,98 @@ export const portariaMapperService = {
     let veiculoId = '';
     let responsavel = null;
 
-    // Se tem entrega_dejetos, extrair dados de lá
-    if (apiData.entrega_dejetos) {
-      nome = (apiData.entrega_dejetos as any).motorista_nome || '';
-      placa = (apiData.entrega_dejetos as any).placa || (apiData.entrega_dejetos as any).placa_manual || '';
-      veiculoId = (apiData.entrega_dejetos as any).veiculo_id || '';
+    // Para Entrega de dejetos, usar apenas o próprio bloco de dados.
+    if (apiData.tipo_registro === 'ENTREGA_DEJETOS' && apiData.entrega_dejetos) {
+      nome =
+        (apiData.entrega_dejetos as any).motorista_nome ||
+        (apiData.entrega_dejetos as any).motoristaNome ||
+        '';
+      placa =
+        (apiData.entrega_dejetos as any).placa ||
+        (apiData.entrega_dejetos as any).placa_manual ||
+        (apiData.entrega_dejetos as any).placaManual ||
+        '';
+      veiculoId =
+        (apiData.entrega_dejetos as any).veiculo_id ||
+        (apiData.entrega_dejetos as any).veiculoId ||
+        '';
+    }
+
+    if (apiData.entrega_insumo) {
+      nome =
+        nome ||
+        (apiData.entrega_insumo as any).motorista_nome ||
+        (apiData.entrega_insumo as any).motoristaNome ||
+        (apiData.entrega_insumo as any).empresa ||
+        '';
+      placa =
+        placa ||
+        (apiData.entrega_insumo as any).placa ||
+        (apiData.entrega_insumo as any).placa_manual ||
+        (apiData.entrega_insumo as any).placaManual ||
+        '';
+      veiculoId =
+        veiculoId ||
+        (apiData.entrega_insumo as any).veiculo_id ||
+        (apiData.entrega_insumo as any).veiculoId ||
+        '';
+    }
+
+    if (apiData.expedicao) {
+      nome =
+        nome ||
+        (apiData.expedicao as any).motorista_nome ||
+        (apiData.expedicao as any).motoristaNome ||
+        '';
+      placa =
+        placa ||
+        (apiData.expedicao as any).placa ||
+        (apiData.expedicao as any).placa_manual ||
+        (apiData.expedicao as any).placaManual ||
+        '';
+      veiculoId =
+        veiculoId ||
+        (apiData.expedicao as any).veiculo_id ||
+        (apiData.expedicao as any).veiculoId ||
+        '';
+    }
+
+    if (apiData.visita) {
+      nome =
+        (apiData.visita as any).visitante_nome ||
+        (apiData.visita as any).visitanteNome ||
+        nome;
+      placa =
+        placa ||
+        (apiData.visita as any).placa ||
+        (apiData.visita as any).placa_manual ||
+        (apiData.visita as any).placaManual ||
+        '';
+      veiculoId =
+        veiculoId ||
+        (apiData.visita as any).veiculo_id ||
+        (apiData.visita as any).veiculoId ||
+        '';
+    }
+
+    // Para abastecimento, aceitar tanto snake_case quanto camelCase do backend.
+    if (apiData.tipo_registro === 'ABASTECIMENTO' && apiData.abastecimento) {
+      nome =
+        nome ||
+        (apiData.abastecimento as any).motoristaNome ||
+        (apiData.abastecimento as any).motorista_nome ||
+        '';
+      placa =
+        placa ||
+        (apiData.abastecimento as any).placa ||
+        (apiData.abastecimento as any).placaManual ||
+        (apiData.abastecimento as any).placa_manual ||
+        '';
+      veiculoId =
+        veiculoId ||
+        (apiData.abastecimento as any).veiculoId ||
+        (apiData.abastecimento as any).veiculo_id ||
+        '';
     }
     
     // Responsável vem direto da API
@@ -119,6 +208,20 @@ export const portariaMapperService = {
    */
   mapApiToEntregaDejetos(apiData: Record<string, unknown>): PortariaEntregaDejetos {
     return apiData as unknown as PortariaEntregaDejetos;
+  },
+
+  /**
+   * Mapear Entrega Insumo
+   */
+  mapApiToEntregaInsumo(apiData: Record<string, unknown>): PortariaEntregaInsumo {
+    return apiData as unknown as PortariaEntregaInsumo;
+  },
+
+  /**
+   * Mapear Expedição
+   */
+  mapApiToExpedicao(apiData: Record<string, unknown>): PortariaExpedicao {
+    return apiData as unknown as PortariaExpedicao;
   },
 
   /**

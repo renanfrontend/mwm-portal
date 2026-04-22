@@ -6,17 +6,17 @@ import { toast } from 'react-toastify';
 import { Box, Typography, IconButton, Button, Drawer, Collapse } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { CheckCircleOutlined } from '@mui/icons-material';
-import { CooperadoListItem } from '../components/CooperadoListItem';
+import { CooperadoListItem } from '../components/logistica/CooperadoListItem';
 import { type CooperadoItem, fetchCooperadosData } from '../services/api';
 
-import { TransportadoraList } from '../components/TransportadoraList';
+import { TransportadoraList } from '../components/logistica/TransportadoraList';
 
 // Importação do novo Drawer
-import TransportadoraDrawer from '../components/TransportadoraDrawer'; 
+import TransportadoraDrawer from '../components/logistica/TransportadoraDrawer';
 
-import CooperadoContactModal from '../components/CooperadoContactModal';
-import CooperadoEditModal from '../components/CooperadoEditModal';
-import CooperadoCreateModal from '../components/CooperadoCreateModal';
+import CooperadoContactModal from '../components/logistica/CooperadoContactModal';
+import CooperadoEditModal from '../components/logistica/CooperadoEditModal';
+import CooperadoCreateModal from '../components/logistica/CooperadoCreateModal';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 const COMMON_FONT = { fontFamily: SCHIBSTED, letterSpacing: '0.15px' };

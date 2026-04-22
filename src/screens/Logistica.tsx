@@ -9,12 +9,12 @@ import {
   AddIcon, VisibilityIcon, EditIcon, Delete, ErrorIcon
 } from '../constants/muiIcons';
 
-import ProdutorDrawer from '../components/ProdutorDrawer';
+import ProdutorDrawer from '../components/logistica/ProdutorDrawer';
 import { useCooperadoMutation } from '../hooks/useCooperadoMutation';
 import { ProdutorService } from '../services/produtorService';
 import type { ProdutorFormInput, ProdutorListItem } from '../types/cooperado';
-import { TransportadoraList } from '../components/TransportadoraList';
-import AgendaList from '../components/AgendaList';
+import { TransportadoraList } from '../components/logistica/TransportadoraList';
+import AgendaList from '../components/logistica/AgendaList';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 

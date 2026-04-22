@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios';
+import type { PortariaEntregaDejetosDeletePayload } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 const ENDPOINT = '/portaria/entrega_de_dejetos';
@@ -78,6 +79,10 @@ export const portariaEntregaDejetosRegistroService = {
     return this.createEntregaDejetos(data);
   },
 
+  async deletar(data: PortariaEntregaDejetosDeletePayload): Promise<any> {
+    return this.deleteEntregaDejetos(data);
+  },
+
   /**
    * Criar novo registro de Entrega de Dejetos
    * POST /api/portaria/entrega_de_dejetos
@@ -93,6 +98,24 @@ export const portariaEntregaDejetosRegistroService = {
       return response.data;
     } catch (error) {
       console.error('❌ Erro ao criar Entrega de Dejetos:', error);
+      throw error;
+    }
+  },
+
+  async deleteEntregaDejetos(data: PortariaEntregaDejetosDeletePayload): Promise<any> {
+    try {
+      // DEBUG: Mostra o payload real enviado para o backend
+      console.log('🟡 [DEBUG] Payload enviado para exclusão de ENTREGA_DE_DEJETOS:');
+      console.log(data);
+      console.log('🗑️ Excluindo Entrega de Dejetos em:', `${API_BASE_URL}${ENDPOINT}/excluir`);
+      console.log('📦 Payload exclusão (JSON):', JSON.stringify(data, null, 2));
+
+      const response = await api.post(`${ENDPOINT}/excluir`, data);
+
+      console.log('✅ Exclusão Entrega de Dejetos concluída:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erro ao excluir Entrega de Dejetos:', error);
       throw error;
     }
   },

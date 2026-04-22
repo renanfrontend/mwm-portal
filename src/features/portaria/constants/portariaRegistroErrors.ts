@@ -19,6 +19,7 @@ export const PORTARIA_VALIDATION_ERRORS = {
   VISITANTE_OBRIGATORIO: 'Nome do visitante é obrigatório',
   DOCUMENTO_OBRIGATORIO: 'Documento do visitante é obrigatório',
   EMPRESA_OBRIGATORIA: 'Empresa é obrigatória para entrega de insumo',
+  NOTA_FISCAL_OBRIGATORIA: 'Nota fiscal é obrigatória',
   TIPO_VEICULO_OBRIGATORIO: 'Tipo de veículo é obrigatório',
   DATA_FUTURA: 'Data não pode ser no futuro',
   HORA_INVALIDA: 'Hora deve estar no formato HH:mm',

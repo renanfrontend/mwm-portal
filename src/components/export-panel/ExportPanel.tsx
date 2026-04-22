@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { exportRelatorio } from '../../services/exportService';
 import type { ExportFormat } from '../../services/exportService';
 import { downloadBlob } from '../../utils/downloadUtils';
-import { CalendarTable } from '../CalendarTable';
+import { CalendarTable } from '../logistica/CalendarTable';
 import { addDays } from 'date-fns';
 
 

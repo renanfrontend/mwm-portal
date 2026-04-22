@@ -1,0 +1,1 @@
+export { validateVisita } from './validateVisita';

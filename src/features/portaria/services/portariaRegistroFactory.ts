@@ -23,7 +23,7 @@ export class PortariaRegistroFactory {
       case 'Entrega de dejetos':
         return portariaEntregaDejetosRegistroService;
       
-      case 'Entrega de Insumo':
+      case 'Entrega de insumo':
         return portariaEntregaInsumoRegistroService;
       
       case 'Expedição':

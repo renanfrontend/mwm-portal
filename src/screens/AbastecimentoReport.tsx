@@ -5,7 +5,7 @@ import { MdArrowBack } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/hooks';
 import { loadAbastecimentoData } from '../features/abastecimento/abastecimentoSlice';
-import DetailedSupplyChart from '../components/DetailedSupplyChart';
+import DetailedSupplyChart from '../components/logistica/DetailedSupplyChart';
 
 const AbastecimentoReport = () => {
   const navigate = useNavigate();

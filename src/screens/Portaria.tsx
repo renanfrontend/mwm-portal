@@ -8,7 +8,7 @@ import {
   Home as HomeIcon, 
   MoreHoriz as MoreHorizIcon 
 } from '@mui/icons-material';
-import { PortariaList } from '../components/PortariaList';
+import { PortariaList } from '../components/portaria/PortariaList';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 

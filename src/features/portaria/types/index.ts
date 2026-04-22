@@ -47,6 +47,14 @@ export type {
   PortariaDrawerProps,
 } from './portariaRegistroForm';
 
+export type {
+  PortariaDeleteTransportOrigin,
+  PortariaAbastecimentoDeletePayload,
+  PortariaEntregaDejetosDeletePayload,
+  PortariaRegistroDeletePayload,
+  PortariaRegistroDeleteContext,
+} from './portariaRegistroDelete';
+
 // Tipos e classes de erro
 export {
   PortariaRegistroError,

@@ -9,3 +9,15 @@ export { portariaRegistroService } from './portariaRegistroService';
 export { portariaValidationService } from './portariaValidationService';
 export { portariaMapperService } from './portariaMapperService';
 export { portariaFormatterService } from './portariaFormatterService';
+export {
+	portariaActivityPayloadService,
+	portariaDeletionPayloadService,
+	abastecimentoService,
+	entregaDejetosService,
+	entregaInsumoService,
+	expedicaoService,
+} from './activities';
+export {
+	portariaDeletionService,
+	portariaSubmissionService,
+} from './orchestration'; // portariaDrawerHydrationService agora é exportado diretamente de services/portariaDrawerHydrationService

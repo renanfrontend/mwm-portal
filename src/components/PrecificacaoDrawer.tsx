@@ -35,7 +35,7 @@ export const PrecificacaoDrawer: React.FC<PrecificacaoDrawerProps> = ({ open, on
     }
   }, [open]);
 
-  // Máscara de moeda para o campo de preço ($ 0,00)
+  // ✅ AJUSTE: Máscara de moeda alterada para Real Brasileiro (R$ 0,00)
   const handlePrecoMask = (value: string) => {
     let v = value.replace(/\D/g, ''); 
     if (!v) return '';
@@ -43,7 +43,7 @@ export const PrecificacaoDrawer: React.FC<PrecificacaoDrawerProps> = ({ open, on
     v = v.replace(".", ",");
     v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
     v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
-    return `$ ${v}`;
+    return `R$ ${v}`;
   };
 
   const handleSaveClick = () => {
@@ -91,8 +91,9 @@ export const PrecificacaoDrawer: React.FC<PrecificacaoDrawerProps> = ({ open, on
         {/* CORPO DO FORMULÁRIO */}
         <Box sx={{ flex: 1, px: '20px', pt: '32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px', pb: '40px' }}>
           
+          {/* ✅ AJUSTE: Placeholder atualizado */}
           <TextField 
-            fullWidth label="Preço" placeholder="$ 0,00" 
+            fullWidth label="Preço" placeholder="R$ 0,00" 
             value={form.preco} 
             onChange={e => setForm({...form, preco: handlePrecoMask(e.target.value)})} 
             sx={fieldStyle} 

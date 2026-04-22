@@ -20,6 +20,10 @@ export {
   portariaValidationService,
   portariaMapperService,
   portariaFormatterService,
+  portariaActivityPayloadService,
+  portariaDeletionPayloadService,
+  portariaDeletionService,
+  portariaSubmissionService,
 } from './services';
 
 // Types

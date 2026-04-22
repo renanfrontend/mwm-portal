@@ -1,0 +1,2 @@
+// Portaria components
+export {};

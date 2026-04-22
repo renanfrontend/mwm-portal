@@ -37,16 +37,17 @@ export interface PortariaRegistroFormData {
 }
 
 // ============================================================================
-// ABASTECIMENTO FORM
+// TRANSPORTE FORM BASE
 // ============================================================================
 
-export interface PortariaAbastecimentoForm {
+export interface PortariaTransportFormBase {
   motorista_nome: string;
   cpf_motorista: string;
   motorista_id?: string | null;
   transportadora_id?: string | null;
   transportadora_manual?: string | null;
   veiculo_id?: string | null;
+  placa?: string | null;
   placa_manual?: string | null;
   tipo_veiculo: TipoVeiculo;
   peso_inicial?: number | null;
@@ -54,10 +55,16 @@ export interface PortariaAbastecimentoForm {
 }
 
 // ============================================================================
+// ABASTECIMENTO FORM
+// ============================================================================
+
+export interface PortariaAbastecimentoForm extends PortariaTransportFormBase {}
+
+// ============================================================================
 // ENTREGA DEJETOS FORM
 // ============================================================================
 
-export interface PortariaEntregaDejetosForm extends PortariaAbastecimentoForm {
+export interface PortariaEntregaDejetosForm extends PortariaTransportFormBase {
   produtor_id: string;
   densidade?: string | null;
 }
@@ -66,7 +73,7 @@ export interface PortariaEntregaDejetosForm extends PortariaAbastecimentoForm {
 // ENTREGA INSUMO FORM
 // ============================================================================
 
-export interface PortariaEntregaInsumoForm extends PortariaAbastecimentoForm {
+export interface PortariaEntregaInsumoForm extends PortariaTransportFormBase {
   empresa: string;
   nota_fiscal?: string | null;
 }
@@ -75,7 +82,7 @@ export interface PortariaEntregaInsumoForm extends PortariaAbastecimentoForm {
 // EXPEDIÇÃO FORM
 // ============================================================================
 
-export interface PortariaExpedicaoForm extends PortariaAbastecimentoForm {
+export interface PortariaExpedicaoForm extends PortariaTransportFormBase {
   nota_fiscal?: string | null;
 }
 
@@ -132,6 +139,8 @@ export interface PortariaDrawerFormState {
   // Atividade selecionada
   atividade: string;
   status: PortariaStatus;
+  origem_entrada?: PortariaOrigem;
+  observacoes?: string;
 
   // Transportadora (Entrega de Dejetos)
   transportadora: string; // ID da transportadora ou 'outros'
@@ -201,5 +210,5 @@ export interface PortariaDrawerProps {
   onClose: () => void;
   onSave: (formData: PortariaDrawerFormState) => void;
   mode: 'add' | 'edit' | 'view';
-  initialData?: PortariaRegistroApiData | null;
+  initialData?: PortariaRegistroApiData | null | any;
 }

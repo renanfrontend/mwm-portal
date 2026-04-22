@@ -9,6 +9,7 @@
  */
 
 import axios from 'axios';
+import type { PortariaAbastecimentoDeletePayload } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 const ENDPOINT = '/portaria/abastecimento';
@@ -75,6 +76,10 @@ export const portariaAbastecimentoRegistroService = {
     return this.createAbastecimento(data);
   },
 
+  async deletar(data: PortariaAbastecimentoDeletePayload): Promise<any> {
+    return this.deleteAbastecimento(data);
+  },
+
   /**
    * Cria novo registro de Abastecimento.
    */
@@ -88,6 +93,20 @@ export const portariaAbastecimentoRegistroService = {
       return response.data;
     } catch (error) {
       console.error('❌ [ABASTECIMENTO] Erro ao criar registro:', error);
+      throw error;
+    }
+  },
+
+  async deleteAbastecimento(data: PortariaAbastecimentoDeletePayload): Promise<any> {
+    try {
+      console.log('🗑️ [ABASTECIMENTO] Excluindo em:', `${API_BASE_URL}${ENDPOINT}/excluir`);
+      console.log('📦 [ABASTECIMENTO] Payload exclusão:', JSON.stringify(data, null, 2));
+
+      const response = await api.post(`${ENDPOINT}/excluir`, data);
+      console.log('✅ [ABASTECIMENTO] Exclusão concluída:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ [ABASTECIMENTO] Erro ao excluir registro:', error);
       throw error;
     }
   },

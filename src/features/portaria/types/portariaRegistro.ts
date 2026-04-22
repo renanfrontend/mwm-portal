@@ -24,7 +24,7 @@ export type PortariaOrigem = 'AGENDADA' | 'ESPONTANEA';
 
 export type TipoDocumento = 'CPF' | 'Passaporte';
 
-export type TipoVeiculo = 'Caminhão' | 'Carro' | 'Moto';
+export type TipoVeiculo = 'Caminhão' | 'Carreta' | 'Toco' | 'Van' | 'Carro' | 'Moto';
 
 // ============================================================================
 // REGISTRO BASE
@@ -83,9 +83,20 @@ export interface PortariaAbastecimento {
 
 export interface PortariaEntregaDejetos {
   id: string;
-  abastecimento_id: string;
   produtor_id: string;
   produtor_nome?: string; // Lookup
+  motorista_id?: string | null;
+  motorista_nome?: string;
+  cpf_motorista?: string;
+  transportadora_id?: string | null;
+  transportadora_manual?: string | null;
+  transportadora_nome?: string;
+  veiculo_id?: string | null;
+  placa_manual?: string | null;
+  placa?: string;
+  tipo_veiculo?: TipoVeiculo;
+  peso_inicial?: number | null;
+  peso_final?: number | null;
   densidade: string | null;
   agenda_realizada_id: string | null;
   criado_em: Date | string;
@@ -98,8 +109,19 @@ export interface PortariaEntregaDejetos {
 
 export interface PortariaEntregaInsumo {
   id: string;
-  abastecimento_id: string;
   empresa: string;
+  motorista_id?: string | null;
+  motorista_nome?: string;
+  cpf_motorista?: string;
+  transportadora_id?: string | null;
+  transportadora_manual?: string | null;
+  transportadora_nome?: string;
+  veiculo_id?: string | null;
+  placa_manual?: string | null;
+  placa?: string;
+  tipo_veiculo?: TipoVeiculo;
+  peso_inicial?: number | null;
+  peso_final?: number | null;
   nota_fiscal: string | null;
   criado_em: Date | string;
   atualizado_em: Date | string;
@@ -111,7 +133,18 @@ export interface PortariaEntregaInsumo {
 
 export interface PortariaExpedicao {
   id: string;
-  abastecimento_id: string;
+  motorista_id?: string | null;
+  motorista_nome?: string;
+  cpf_motorista?: string;
+  transportadora_id?: string | null;
+  transportadora_manual?: string | null;
+  transportadora_nome?: string;
+  veiculo_id?: string | null;
+  placa_manual?: string | null;
+  placa?: string;
+  tipo_veiculo?: TipoVeiculo;
+  peso_inicial?: number | null;
+  peso_final?: number | null;
   nota_fiscal: string | null;
   criado_em: Date | string;
   atualizado_em: Date | string;

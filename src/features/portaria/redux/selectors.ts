@@ -19,6 +19,34 @@ import type { RootState } from '../../../app/store';
  */
 const selectPortariaRegistroState = (state: RootState) => state.portariaRegistro;
 
+const getSearchableText = (registro: RootState['portariaRegistro']['registros'][number]): string => {
+  switch (registro.tipo_registro) {
+    case 'ENTREGA_DEJETOS':
+      return [
+        registro.entrega_dejetos?.motorista_nome,
+        registro.entrega_dejetos?.produtor_nome,
+      ].filter(Boolean).join(' ');
+
+    case 'ABASTECIMENTO':
+      return registro.abastecimento?.motorista_nome || '';
+
+    case 'ENTREGA_INSUMO':
+      return [
+        registro.entrega_insumo?.empresa,
+        registro.entrega_insumo?.motorista_nome,
+      ].filter(Boolean).join(' ');
+
+    case 'EXPEDICAO':
+      return registro.expedicao?.motorista_nome || '';
+
+    case 'VISITA':
+      return registro.visita?.visitante_nome || '';
+
+    default:
+      return '';
+  }
+};
+
 // ============================================================================
 // SELETORES SIMPLES (extraem propriedades diretas)
 // ============================================================================
@@ -155,9 +183,7 @@ export const selectFilteredRegistros = createSelector(
       // Filtro por busca (search)
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        const nome = registro.abastecimento?.motorista_nome || 
-                     registro.visita?.visitante_nome || 
-                     '';
+        const nome = getSearchableText(registro);
         
         if (!nome.toLowerCase().includes(searchLower)) {
           return false;

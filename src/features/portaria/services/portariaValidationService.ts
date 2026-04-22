@@ -10,10 +10,15 @@ import type {
   PortariaRegistroValidationError,
   PortariaRegistroValidationResult,
 } from '../types';
+import { validateAbastecimento } from './activities/abastecimento';
 import {
   PORTARIA_VALIDATION_ERRORS,
   PORTARIA_TIPOS,
 } from '../constants';
+import { validateEntregaDejetos } from './activities/entrega-dejetos';
+import { validateEntregaInsumo } from './activities/entrega-insumo';
+import { validateExpedicao } from './activities/expedicao';
+import { validateVisita } from './activities/visita';
 
 // ============================================================================
 // VALIDAÇÕES
@@ -71,22 +76,27 @@ export const portariaValidationService = {
 
     // Validações específicas por tipo
     if (data.tipoRegistro === PORTARIA_TIPOS.ABASTECIMENTO) {
-      const abastErrors = this._validateAbastecimento(data);
+      const abastErrors = validateAbastecimento(data);
       errors.push(...abastErrors);
     }
 
     if (data.tipoRegistro === PORTARIA_TIPOS.ENTREGA_DEJETOS) {
-      const dejetosErrors = this._validateEntregaDejetos(data);
+      const dejetosErrors = validateEntregaDejetos(data);
       errors.push(...dejetosErrors);
     }
 
     if (data.tipoRegistro === PORTARIA_TIPOS.ENTREGA_INSUMO) {
-      const insumoErrors = this._validateEntregaInsumo(data);
+      const insumoErrors = validateEntregaInsumo(data);
       errors.push(...insumoErrors);
     }
 
+    if (data.tipoRegistro === PORTARIA_TIPOS.EXPEDICAO) {
+      const expedicaoErrors = validateExpedicao(data);
+      errors.push(...expedicaoErrors);
+    }
+
     if (data.tipoRegistro === PORTARIA_TIPOS.VISITA) {
-      const visitaErrors = this._validateVisita(data);
+      const visitaErrors = validateVisita(data);
       errors.push(...visitaErrors);
     }
 
@@ -168,15 +178,18 @@ export const portariaValidationService = {
   },
 
   /**
-   * Validar Abastecimento
+   * Validar campos base de transporte
    */
-  _validateAbastecimento(data: PortariaRegistroFormData): PortariaRegistroValidationError[] {
+  _validateTransportFields(section: {
+    motorista_nome?: string;
+    cpf_motorista?: string;
+    tipo_veiculo?: string;
+  } | null | undefined): PortariaRegistroValidationError[] {
     const errors: PortariaRegistroValidationError[] = [];
-    const ab = data.abastecimento;
 
-    if (!ab) return errors;
+    if (!section) return errors;
 
-    if (!ab.motorista_nome) {
+    if (!section.motorista_nome) {
       errors.push({
         field: 'motorista_nome',
         message: PORTARIA_VALIDATION_ERRORS.MOTORISTA_OBRIGATORIO,
@@ -184,13 +197,13 @@ export const portariaValidationService = {
       });
     }
 
-    if (!ab.cpf_motorista) {
+    if (!section.cpf_motorista) {
       errors.push({
         field: 'cpf_motorista',
         message: PORTARIA_VALIDATION_ERRORS.CPF_OBRIGATORIO,
         code: 'REQUIRED_FIELD',
       });
-    } else if (!this._isValidCPF(ab.cpf_motorista)) {
+    } else if (!this._isValidCPF(section.cpf_motorista)) {
       errors.push({
         field: 'cpf_motorista',
         message: PORTARIA_VALIDATION_ERRORS.CPF_INVALIDO,
@@ -198,7 +211,7 @@ export const portariaValidationService = {
       });
     }
 
-    if (!ab.tipo_veiculo) {
+    if (!section.tipo_veiculo) {
       errors.push({
         field: 'tipo_veiculo',
         message: PORTARIA_VALIDATION_ERRORS.TIPO_VEICULO_OBRIGATORIO,
@@ -210,11 +223,16 @@ export const portariaValidationService = {
   },
 
   /**
+   * Validar Abastecimento
+   */
+  // _validateAbastecimento removido: agora em activities/abastecimento/validateAbastecimento
+
+  /**
    * Validar Entrega Dejetos
    */
   _validateEntregaDejetos(data: PortariaRegistroFormData): PortariaRegistroValidationError[] {
-    const errors = this._validateAbastecimento(data);
     const ed = data.entrega_dejetos;
+    const errors = this._validateTransportFields(ed);
 
     if (!ed) return errors;
 
@@ -241,8 +259,8 @@ export const portariaValidationService = {
    * Validar Entrega Insumo
    */
   _validateEntregaInsumo(data: PortariaRegistroFormData): PortariaRegistroValidationError[] {
-    const errors = this._validateAbastecimento(data);
     const ei = data.entrega_insumo;
+    const errors = this._validateTransportFields(ei);
 
     if (!ei) return errors;
 
@@ -250,6 +268,34 @@ export const portariaValidationService = {
       errors.push({
         field: 'empresa',
         message: PORTARIA_VALIDATION_ERRORS.EMPRESA_OBRIGATORIA,
+        code: 'REQUIRED_FIELD',
+      });
+    }
+
+    if (!ei.nota_fiscal) {
+      errors.push({
+        field: 'nota_fiscal',
+        message: PORTARIA_VALIDATION_ERRORS.NOTA_FISCAL_OBRIGATORIA,
+        code: 'REQUIRED_FIELD',
+      });
+    }
+
+    return errors;
+  },
+
+  /**
+   * Validar Expedição
+   */
+  _validateExpedicao(data: PortariaRegistroFormData): PortariaRegistroValidationError[] {
+    const expedicao = data.expedicao;
+    const errors = this._validateTransportFields(expedicao);
+
+    if (!expedicao) return errors;
+
+    if (!expedicao.nota_fiscal) {
+      errors.push({
+        field: 'nota_fiscal',
+        message: PORTARIA_VALIDATION_ERRORS.NOTA_FISCAL_OBRIGATORIA,
         code: 'REQUIRED_FIELD',
       });
     }
