@@ -39,6 +39,9 @@ interface FilterState {
   pressaoInicial: Dayjs | null;
 }
 
+// ==========================================
+// GERAÇÃO DE PDF: RELATÓRIO DE ABASTECIMENTO
+// ==========================================
 const generatePDF = (row: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
@@ -94,73 +97,92 @@ const generatePDF = (row: any) => {
   window.open(pdfBlobUrl, '_blank');
 };
 
+// ==========================================
+// GERAÇÃO DE PDF: RECIBO DE FATURA (MWM)
+// ==========================================
 const handleGenerateFaturaPDF = (row: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
 
+  try { doc.addImage(logoImg, 'PNG', 14, 10, 35, 12); } catch (e) { console.error("Erro ao carregar o logo:", e); }
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MWM - TUPY DO BRASIL LTDA.', 52, 14);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('SÍTIO LINHA ALVES, S/N - OURO VERDE DO OESTE/PR - Brasil', 52, 18);
+  doc.text('CEP 85933-000 Fone 55 11 3882-3291', 52, 22);
+
+  doc.setFontSize(8);
+  doc.text('Portal Clientes', pageWidth - 14, 14, { align: 'right' });
+  doc.text('Rel: 001-V01', pageWidth - 14, 18, { align: 'right' });
+  const nowStr = new Date().toLocaleString('pt-BR');
+  doc.text(nowStr, pageWidth - 14, 22, { align: 'right' });
+
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
-  doc.line(14, 26, pageWidth - 14, 26);
-  doc.line(14, 34, pageWidth - 14, 34);
+  doc.line(14, 28, pageWidth - 14, 28);
   
-  try { doc.addImage(logoImg, 'PNG', 14, 10, 40, 12); } catch (e) {}
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Recibo de Fatura', pageWidth / 2, 33, { align: 'center' });
   
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('BIOPLANTA DO BRASIL LTDA.', 60, 12);
-  doc.text('SÍTIO LINHA ALVES, S/N - OURO VERDE DO OESTE/PR - Brasil', 60, 16);
-  doc.text('CEP 85933-000 Fone 55 11 3882-3291', 60, 20);
+  doc.line(14, 36, pageWidth - 14, 36);
 
-  doc.text('Portal Clientes', pageWidth - 14, 12, { align: 'right' });
-  doc.text('Rel: 001-V01', pageWidth - 14, 16, { align: 'right' });
-  const nowStr = new Date().toLocaleString('pt-BR');
-  doc.text(nowStr, pageWidth - 14, 20, { align: 'right' });
-
-  doc.setFontSize(14);
-  doc.text('Recibo de Fatura', pageWidth / 2, 31, { align: 'center' });
-
-  let currentY = 40;
-  doc.rect(14, currentY, pageWidth - 28, 25);
+  let currentY = 42;
+  doc.rect(14, currentY, pageWidth - 28, 40);
+  
   doc.setFontSize(10);
-  doc.text('Cliente', 16, currentY + 6);
-  doc.text('Primato Cooperativa Agroindustrial', 35, currentY + 6);
+  doc.setFont('helvetica', 'bold'); doc.text('Cliente:', 18, currentY + 8);
+  doc.setFont('helvetica', 'normal'); doc.text('Primato Cooperativa Agroindustrial', 45, currentY + 8);
   
-  doc.text('Endereço', 16, currentY + 18);
-  doc.text('Rua Exemplo, 123', 35, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('Endereço:', 18, currentY + 18);
+  doc.setFont('helvetica', 'normal'); doc.text('Rua Exemplo, 123, Bairro Industrial', 45, currentY + 18);
   
-  doc.text('Cidade', 100, currentY + 18);
-  doc.text('Toledo - PR', 115, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('Cidade:', 18, currentY + 28);
+  doc.setFont('helvetica', 'normal'); doc.text('Toledo - PR', 45, currentY + 28);
 
-  doc.text('E-mail', 160, currentY + 18);
-  doc.text('contato@primato.com.br', 175, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('E-mail:', 18, currentY + 38);
+  doc.setFont('helvetica', 'normal'); doc.text('contato@primato.com.br', 45, currentY + 38);
 
-  currentY += 32;
+  currentY += 48;
 
   autoTable(doc, {
     startY: currentY,
-    head: [['Mês Fatura', 'Volume Utilização (VU)', 'Mês Ref. ANP', 'Valor Ref. ANPV', 'Valor Primato', 'Fator Utilização (%)', 'Valor do Serviço']],
+    head: [['Mês Fatura', 'Volume Utilizado (m³)', 'Mês Ref. ANP', 'Valor Ref. ANPV', 'Valor Primato', 'Fator Utilização (%)', 'Valor do Serviço']],
     body: [[ row.mesFatura, row.vu, row.mesAnp, row.vdanp, row.vp, row.fu, row.sa ]],
     theme: 'plain',
-    styles: { lineColor: [0, 0, 0], lineWidth: 0.2, fontSize: 8, halign: 'center', cellPadding: 3, textColor: [0,0,0], font: 'helvetica' },
-    headStyles: { fontStyle: 'bold' }
+    styles: { lineColor: [0, 0, 0], lineWidth: 0.1, fontSize: 8, halign: 'center', cellPadding: 2, textColor: [0,0,0], font: 'helvetica' },
+    headStyles: { fontStyle: 'bold', fillColor: [245, 245, 245] }
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 8;
+  currentY = (doc as any).lastAutoTable.finalY + 10;
 
+  doc.setFont('helvetica', 'bold');
+  doc.text('Memória de Cálculo:', 14, currentY - 2);
   doc.rect(14, currentY, pageWidth - 28, 55);
+  
   doc.setFontSize(9);
-  let calcY = currentY + 6;
-  doc.text(`Volume Contratado Mensal (VCM) = 15.000 m³`, 16, calcY); calcY += 8;
-  doc.text(`Valor Diesel ANP (VDANP) =`, 16, calcY); doc.text(row.vdanp, 65, calcY); calcY += 4;
-  doc.text(`Valor Primato (VP) =`, 16, calcY); doc.text(row.vp, 65, calcY); calcY += 8;
-  doc.text(`Parcela Fixa (PF) = R$ 10.000,00`, 16, calcY); calcY += 8;
-  doc.text(`Volume Utilização (VU):`, 16, calcY); doc.text(row.vu, 65, calcY); calcY += 4;
-  doc.text(`Fator Utilização (FU) = VU / VCM =`, 16, calcY); doc.text(row.fu, 65, calcY); calcY += 8;
-  doc.text(`Serviço Abastecimento (SA) =`, 16, calcY); doc.text(row.sa, 65, calcY);
+  doc.setFont('helvetica', 'normal');
+  let calcY = currentY + 8;
+  doc.text(`Volume Contratado Mensal (VCM) = 15.000 m³`, 18, calcY); calcY += 8;
+  doc.text(`Valor Diesel ANP (VDANP) =`, 18, calcY); doc.text(row.vdanp, 70, calcY); calcY += 4;
+  doc.text(`Valor Primato (VP) =`, 18, calcY); doc.text(row.vp, 70, calcY); calcY += 8;
+  doc.text(`Parcela Fixa (PF) = R$ 10.000,00`, 18, calcY); calcY += 8;
+  doc.text(`Volume Utilização (VU):`, 18, calcY); doc.text(row.vu, 70, calcY); calcY += 4;
+  doc.text(`Fator Utilização (FU) = VU / VCM =`, 18, calcY); doc.text(row.fu, 70, calcY); calcY += 8;
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Serviço Abastecimento (SA) =`, 18, calcY); doc.text(row.sa, 70, calcY);
 
   window.open(doc.output('bloburl'), '_blank');
 };
 
+
+// ==========================================
+// COMPONENTE PRINCIPAL DA TELA
+// ==========================================
 export const Abastecimentos: React.FC = () => {
   const [tabValue, setTabValue] = useState(0); 
   const [searchTerm, setSearchTerm] = useState('');
