@@ -35,21 +35,16 @@ const Conta = () => {
                 <div className="field">
                   <label className="label">Nome de Usuário</label>
                   <div className="control">
-                    <input className="input" type="text" value={user?.username || ''} readOnly disabled />
+                    <input className="input" type="text" value={user?.usuario?.nome || ''} readOnly disabled />
                   </div>
                 </div>
 
-                <div className="field">
-                  <label className="label">E-mail</label>
-                  <div className="control">
-                    <input className="input" type="email" value={user?.email || ''} readOnly disabled />
-                  </div>
-                </div>
+                {/* Campo de e-mail removido pois não existe mais em usuario */}
 
                 <div className="field">
                   <label className="label">Função (Role)</label>
                   <div className="control">
-                    <span className="tag is-info is-medium">{user?.role || 'N/A'}</span>
+                    <span className="tag is-info is-medium">{user?.usuario?.perfil || 'N/A'}</span>
                   </div>
                 </div>
               </div>

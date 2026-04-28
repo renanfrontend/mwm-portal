@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const STORAGE_KEY = '@MWM:user';
 
+import type { LoginResponse } from '../services/auth';
+
 export interface AuthContextType {
   isAuthenticated: boolean;
-  user: any;
-  login: (userData: any) => void;
+  user: LoginResponse | null;
+  login: (userData: LoginResponse) => void;
   logout: () => Promise<void>;
 }
 
@@ -13,7 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Inicialização síncrona do localStorage para evitar flickering no refresh
-  const [user, setUser] = useState<any>(() => {
+  const [user, setUser] = useState<LoginResponse | null>(() => {
     const savedUser = localStorage.getItem(STORAGE_KEY);
     try {
       return savedUser ? JSON.parse(savedUser) : null;
@@ -29,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(!!user);
   }, [user]);
 
-  const login = (userData: any) => {
+  const login = (userData: LoginResponse) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
     setUser(userData);
   };

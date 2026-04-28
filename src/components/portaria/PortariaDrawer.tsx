@@ -126,6 +126,24 @@ const PortariaDrawer: React.FC<PortariaDrawerProps> = ({ open, onClose, onSave, 
       newErrors.cpf = 'Campo obrigatório';
     }
 
+    // Validar peso conforme tipo de atividade
+    const parsePeso = (peso: string): number => {
+      if (!peso) return 0;
+      const normalized = peso.replace(/\./g, '');
+      return parseFloat(normalized);
+    };
+    
+    const pesoIni = parsePeso(form.pesoInicial);
+    const pesoFin = parsePeso(form.pesoFinal);
+    
+    // Para Entrega de dejetos: peso final deve ser menor (remove peso)
+    // Para outros: peso final deve ser maior ou igual (adiciona peso)
+    if (pesoFin > 0 && pesoIni > 0 && form.atividade === 'Entrega de dejetos') {
+      if (pesoFin >= pesoIni) {
+        newErrors.pesoFinal = 'Peso final deve ser menor que peso inicial';
+      }
+    }
+
     try {
       const payload = portariaActivityPayloadService.buildPayload(form);
       const validationResult = portariaValidationService.validateRegistro(payload);
@@ -176,8 +194,8 @@ const PortariaDrawer: React.FC<PortariaDrawerProps> = ({ open, onClose, onSave, 
 
         <Box sx={{ flex: 1, overflowY: 'auto', p: '20px 32px 32px 32px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Stack direction="row" spacing={2}>
-            <DatePicker label="Data" value={form.data || null} disabled={mode === 'view'} maxDate={new Date()} onChange={v => setForm({...form, data: v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
-            <TimePicker label="Horário Entrada" value={form.horario || null} disabled={mode === 'view'} ampm={false} maxTime={form.data && isToday(form.data) ? new Date() : undefined} onChange={v => setForm({...form, horario: v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle('horario'), error: !!errors.horario, helperText: errors.horario }, ...layerProps.slotProps }} />
+            <DatePicker label="Data" value={form.data || null} disabled={mode === 'view'} maxDate={new Date()} onChange={v => setForm({...form, data: v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
+            <TimePicker label="Horário Entrada" value={form.horario || null} disabled={mode === 'view'} ampm={false} maxTime={form.data && isToday(form.data) ? new Date() : undefined} onChange={v => setForm({...form, horario: v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle('horario'), error: !!errors.horario, helperText: errors.horario }, ...layerProps.slotProps }} />
           </Stack>
 
           <FormControl fullWidth sx={fieldStyle('atividade')} error={!!errors.atividade} disabled={mode === 'view' || mode === 'edit'}>
@@ -275,10 +293,10 @@ const PortariaDrawer: React.FC<PortariaDrawerProps> = ({ open, onClose, onSave, 
               {form.atividade !== 'Entrega de dejetos' && form.atividade !== 'Abastecimento' && form.atividade !== 'Entrega de insumo' && form.atividade !== 'Expedição' && (
                 <Stack direction="row" spacing={2}>
                   <Box sx={{ flex: 1 }}>
-                    <DatePicker label="Data de saída" value={form.dataSaida || null} disabled={mode === 'view'} minDate={form.data || undefined} onChange={v => setForm({...form, dataSaida: v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
+                    <DatePicker label="Data de saída" value={form.dataSaida || null} disabled={mode === 'view'} minDate={form.data || undefined} onChange={v => setForm({...form, dataSaida: v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <TimePicker label="Horário de saída" value={form.horarioSaida || null} disabled={mode === 'view'} ampm={false} minTime={(form.data && form.dataSaida && isSameDay(form.data, form.dataSaida)) ? (form.horario || undefined) : undefined} onChange={v => setForm({...form, horarioSaida: v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
+                    <TimePicker label="Horário de saída" value={form.horarioSaida || null} disabled={mode === 'view'} ampm={false} minTime={(form.data && form.dataSaida && isSameDay(form.data, form.dataSaida)) ? (form.horario || undefined) : undefined} onChange={v => setForm({...form, horarioSaida: v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v})} slotProps={{ textField: { fullWidth: true, sx: fieldStyle() }, ...layerProps.slotProps }} />
                   </Box>
                 </Stack>
               )}

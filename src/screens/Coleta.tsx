@@ -20,7 +20,7 @@ const Coleta = () => {
   const [selectedItem, setSelectedItem] = useState<ColetaItem | null>(null);
   const navigate = useNavigate();
 
-  const canAdd = user?.role === 'editor' || user?.role === 'administrador';
+  const canAdd = user?.usuario?.perfil === 'editor' || user?.usuario?.perfil === 'administrador';
 
   useEffect(() => {
     dispatch(loadColetaData());

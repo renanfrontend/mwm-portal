@@ -39,6 +39,8 @@ export interface LoginResponse {
     nome: string;
     perfil: string;
   };
+  perfis: string[];
+  permissoes: string[];
 }
 
 export const login = (username: string, password: string): Promise<LoginResponse> => {
@@ -51,6 +53,21 @@ export const login = (username: string, password: string): Promise<LoginResponse
         nome: username,
         perfil: 'ADMIN',
       },
+      perfis: ['Administrador'],
+      permissoes: [
+        'LOGISTICA_CADASTRAR',
+        'LOGISTICA_EDITAR',
+        'LOGISTICA_EXCLUIR',
+        'LOGISTICA_VISUALIZAR',
+        'PORTARIA_CADASTRAR',
+        'PORTARIA_EDITAR',
+        'PORTARIA_EXCLUIR',
+        'PORTARIA_VISUALIZAR',
+        'QUALIDADE_CADASTRAR',
+        'QUALIDADE_EDITAR',
+        'QUALIDADE_EXCLUIR',
+        'QUALIDADE_VISUALIZAR',
+      ],
     }));
   }
 
@@ -59,7 +76,12 @@ export const login = (username: string, password: string): Promise<LoginResponse
       const response = await api.post('/auth/login', { username, password });
       // Adapta para o formato esperado pelo frontend
       if (response.data.token && response.data.usuario) {
-        resolve(response.data);
+        resolve({
+          token: response.data.token,
+          usuario: response.data.usuario,
+          perfis: response.data.perfis || [],
+          permissoes: response.data.permissoes || [],
+        });
       } else if (response.data.message && response.data.nome) {
         // Monta um objeto compatível
         resolve({
@@ -69,6 +91,8 @@ export const login = (username: string, password: string): Promise<LoginResponse
             nome: response.data.nome,
             perfil: 'ADMIN', // Ajuste conforme regra de perfil real
           },
+          perfis: [],
+          permissoes: [],
         });
       } else {
         reject(new Error('Resposta inesperada do servidor.'));

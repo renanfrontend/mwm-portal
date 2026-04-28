@@ -17,7 +17,7 @@ export const portariaFormatterService = {
    * Formatar data para grid (dd/mm/yyyy)
    */
   formatDataBr(date: Date | string): string {
-    const d = new Date(date);
+    const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();

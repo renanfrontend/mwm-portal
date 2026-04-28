@@ -51,6 +51,7 @@ export type {
   PortariaDeleteTransportOrigin,
   PortariaAbastecimentoDeletePayload,
   PortariaEntregaDejetosDeletePayload,
+  PortariaEntregaInsumoDeletePayload,
   PortariaRegistroDeletePayload,
   PortariaRegistroDeleteContext,
 } from './portariaRegistroDelete';

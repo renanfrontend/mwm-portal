@@ -136,6 +136,9 @@ export const portariaActivityPayloadService = {
       case 'Entrega de dejetos':
         return buildEntregaDejetosUpdatePayload(entry, basePayload);
 
+      case 'Abastecimento':
+        return buildAbastecimentoPayload(entry, basePayload);
+
       case 'Entrega de insumo':
         return buildEntregaInsumoPayload(entry, basePayload);
 

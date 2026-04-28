@@ -292,7 +292,7 @@ export const EntregaDejetosForm: React.FC<Props> = ({
           fullWidth
           label="Peso final"
           value={form.pesoFinal || ''}
-          sx={fieldStyle()}
+          sx={fieldStyle('pesoFinal')}
           disabled={mode === 'view'}
           onChange={e => {
             const d = e.target.value.replace(/\D/g, '').substring(0, 6);

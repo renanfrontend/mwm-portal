@@ -132,7 +132,7 @@ export const AbastecimentoFilter: React.FC<AbastecimentoFilterProps> = ({
             <DesktopDatePicker
               label="Pressão inicial"
               value={filters.pressaoInicial}
-              onChange={(val) => setFilters({ ...filters, pressaoInicial: val })}
+              onChange={(val: any) => setFilters({ ...filters, pressaoInicial: val })}
               format="DD/MM/YYYY"
               onOpen={() => setDateOpen(true)} // Avisa que clicou no ícone
               onClose={() => setDateOpen(false)} // Avisa que fechou o calendário

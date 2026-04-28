@@ -25,17 +25,13 @@ const LoginScreen = () => {
       // 1. Chama o serviço de API
       const response = await authLogin(username, password);
       console.log('Resposta do login:', response);
-      // Garante que o objeto salvo no contexto tenha token e usuario
-      const userData = {
+      // Passa todos os campos de LoginResponse para o contexto
+      login({
         token: response.token || '',
-        usuario: response.usuario || {
-          id: 0,
-          nome: username,
-          perfil: 'ADMIN',
-        },
-      };
-      console.log('UserData salvo:', userData);
-      login(userData);
+        usuario: response.usuario || { id: 0, nome: username, perfil: 'ADMIN' },
+        perfis: response.perfis || [],
+        permissoes: response.permissoes || [],
+      });
       navigate('/');
     } catch (err: any) {
       console.error('Erro no login:', err);

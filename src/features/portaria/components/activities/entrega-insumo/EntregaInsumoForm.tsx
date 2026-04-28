@@ -32,6 +32,12 @@ export const EntregaInsumoForm: React.FC<Props> = ({
   }, [open]);
 
   useEffect(() => {
+    if (form.data && !form.dataSaida) {
+      setForm((prev: any) => ({ ...prev, dataSaida: prev.data }));
+    }
+  }, [form.data]);
+
+  useEffect(() => {
     if (form.transportadora && form.transportadora !== 'outros') {
       entregaInsumoService.getPlacasByTransportadora(form.transportadora)
         .then(setPlacaOptions)
@@ -212,7 +218,7 @@ export const EntregaInsumoForm: React.FC<Props> = ({
           fullWidth
           label="Peso final"
           value={form.pesoFinal || ''}
-          sx={fieldStyle()}
+          sx={fieldStyle('pesoFinal')}
           disabled={mode === 'view'}
           onChange={e => {
             const d = e.target.value.replace(/\D/g, '').substring(0, 6);
