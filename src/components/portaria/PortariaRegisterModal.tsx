@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { podeCadastrarPortaria, podeEditarPortaria } from '../../domain/permissaoPortaria';
 import { entregaDejetosService } from '../../features/portaria/services/activities/entrega-dejetos/entregaDejetosService';
 
 
@@ -12,6 +14,8 @@ interface Props {
 
 
 const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) => {
+    const { user } = useAuth();
+    const podeEditarOuCadastrar = podeCadastrarPortaria(user) || podeEditarPortaria(user);
   // --- ESTADOS ---
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [hora, setHora] = useState(new Date().toTimeString().slice(0, 5));
@@ -224,6 +228,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     value={data} 
                     style={{ color: defaultTextColor }}
                     onChange={e => { setData(e.target.value); clearError('data'); }} 
+                    disabled={!podeEditarOuCadastrar}
                 />
                 {errors.data && <p className="help is-danger">Campo obrigatório</p>}
             </div>
@@ -237,6 +242,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                     value={hora} 
                     style={{ color: defaultTextColor }}
                     onChange={e => { setHora(e.target.value); clearError('hora'); }} 
+                    disabled={!podeEditarOuCadastrar}
                 />
                 {errors.hora && <p className="help is-danger">Campo obrigatório</p>}
             </div>
@@ -245,16 +251,17 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
              <div className="column is-12 pb-0"><label className="label is-small has-text-grey">Atividade a realizar *</label></div>
              <div className="column is-12 pt-1">
                <div className={`select is-fullwidth ${errors.atividade ? 'is-danger' : ''}`}>
-                 <select 
-                     value={atividade} 
-                     onChange={e => {
-                       const novaAtividade = e.target.value;
-                       setAtividade(novaAtividade);
-                       clearError('atividade');
-                       console.log('%c📋 ATIVIDADE SELECIONADA', 'color: #8b5cf6; font-weight: bold; font-size: 13px;', novaAtividade);
-                     }}
-                     style={{ color: defaultTextColor }}
-                 >
+                                 <select 
+                                         value={atividade} 
+                                         onChange={e => {
+                                             const novaAtividade = e.target.value;
+                                             setAtividade(novaAtividade);
+                                             clearError('atividade');
+                                             console.log('%c📋 ATIVIDADE SELECIONADA', 'color: #8b5cf6; font-weight: bold; font-size: 13px;', novaAtividade);
+                                         }}
+                                         style={{ color: defaultTextColor }}
+                                         disabled={!podeEditarOuCadastrar}
+                                 >
                   <option value="" disabled>Selecionar</option>
                   <option value="Entrega de dejetos">Entrega de dejetos</option>
                   <option value="Entrega de Insumo">Entrega de Insumo</option>
@@ -281,6 +288,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                                 value={cooperado} 
                                 onChange={e => { setCooperado(e.target.value); clearError('cooperado'); }}
                                 style={{ color: defaultTextColor }}
+                                disabled={!podeEditarOuCadastrar}
                             >
                                 <option value="" disabled>Selecionar</option>
                                 <option value="Primato">Primato</option>
@@ -299,6 +307,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                                 value={transportadora} 
                                 onChange={e => { setTransportadora(e.target.value); clearError('transportadora'); setPlaca(''); }}
                                 style={{ color: defaultTextColor }}
+                                disabled={!podeEditarOuCadastrar}
                             >
                                 <option value="">Selecionar Transportadora</option>
                                 {transportadoraOptions.map(t => (
@@ -317,6 +326,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                                 value={tipoVeiculo} 
                                 onChange={e => { setTipoVeiculo(e.target.value); clearError('tipoVeiculo'); }}
                                 style={{ color: defaultTextColor }}
+                                disabled={!podeEditarOuCadastrar}
                             >
                                 <option value="">Selecionar</option>
                                 {veiculoOptions.map(v => (
@@ -337,6 +347,7 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
                             onChange={e => { setPlaca(e.target.value); clearError('placa'); }}
                             style={{ color: defaultTextColor }}
                             placeholder="Selecione ou digite..."
+                            disabled={!podeEditarOuCadastrar}
                         />
                         <datalist id="placas-list">
                             {placaOptions.map(opt => <option key={opt.id} value={opt.placa} />)}
@@ -692,12 +703,13 @@ const PortariaRegisterModal: React.FC<Props> = ({ isActive, onClose, onSave }) =
 
         <footer className="modal-card-foot has-background-white is-justify-content-flex-end" style={{ borderTop: 'none' }}>
           <button className="button" onClick={handleClose}>Cancelar</button>
-          <button 
-            className="button has-text-white border-0" 
-            style={{ backgroundColor: '#10b981' }}
-            onClick={handleSave}
-          >
-            Salvar
+                    <button 
+                        className="button has-text-white border-0" 
+                        style={{ backgroundColor: '#10b981' }}
+                        onClick={handleSave}
+                        disabled={!podeEditarOuCadastrar}
+                    >
+                        Salvar
           </button>
         </footer>
       </div>

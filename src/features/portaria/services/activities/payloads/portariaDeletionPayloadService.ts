@@ -1,6 +1,7 @@
 import type {
   PortariaAbastecimentoDeletePayload,
   PortariaEntregaDejetosDeletePayload,
+  PortariaEntregaInsumoDeletePayload,
   PortariaRegistro,
   PortariaRegistroDeletePayload,
 } from '../../../types';
@@ -20,6 +21,13 @@ const buildAbastecimentoDeletePayload = (registro: PortariaRegistro): PortariaAb
   ...buildTransportDeleteContext(registro.abastecimento),
 });
 
+const buildEntregaInsumoDeletePayload = (registro: PortariaRegistro): PortariaEntregaInsumoDeletePayload => ({
+  registroId: registro.id,
+  tipoRegistro: registro.tipo_registro,
+  entregaInsumoId: registro.entrega_insumo?.id ?? null,
+  ...buildTransportDeleteContext(registro.entrega_insumo as any),
+});
+
 export const portariaDeletionPayloadService = {
   buildPayload(registro: PortariaRegistro): PortariaRegistroDeletePayload {
     switch (registro.tipo_registro) {
@@ -28,6 +36,9 @@ export const portariaDeletionPayloadService = {
 
       case 'ABASTECIMENTO':
         return buildAbastecimentoDeletePayload(registro);
+
+      case 'ENTREGA_INSUMO':
+        return buildEntregaInsumoDeletePayload(registro);
 
       default:
         throw new Error(`Exclusão não implementada para o tipo ${registro.tipo_registro}`);

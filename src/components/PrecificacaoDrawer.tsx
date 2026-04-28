@@ -8,7 +8,7 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
 
 const SCHIBSTED = '"Schibsted Grotesk", sans-serif';
@@ -127,7 +127,7 @@ export const PrecificacaoDrawer: React.FC<PrecificacaoDrawerProps> = ({ open, on
             <DesktopDatePicker 
               label="Data" 
               value={form.data} 
-              onChange={(val) => setForm({...form, data: val})} 
+              onChange={(val: any) => setForm({...form, data: val ? val.format('DD/MM/YYYY') : ''})}
               format="DD/MM/YYYY" 
               sx={{ width: '100%', ...fieldStyle }} 
               slotProps={calendarSlotProps} 

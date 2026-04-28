@@ -18,6 +18,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 import { AbastecimentoDrawer } from '../components/AbastecimentoDrawer';
 import { PrecificacaoDrawer } from '../components/PrecificacaoDrawer';
+import { BaseCalculoDrawer } from '../components/BaseCalculoDrawer'; 
 import { AbastecimentoFilter } from '../components/AbastecimentoFilter'; 
 import { PrecificacaoFilter } from '../components/PrecificacaoFilter'; 
 import { FaturamentoFilter } from '../components/FaturamentoFilter'; 
@@ -39,6 +40,9 @@ interface FilterState {
   pressaoInicial: Dayjs | null;
 }
 
+// ==========================================
+// GERAÇÃO DE PDF: RELATÓRIO DE ABASTECIMENTO
+// ==========================================
 const generatePDF = (row: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
@@ -94,73 +98,92 @@ const generatePDF = (row: any) => {
   window.open(pdfBlobUrl, '_blank');
 };
 
+// ==========================================
+// GERAÇÃO DE PDF: RECIBO DE FATURA (MWM)
+// ==========================================
 const handleGenerateFaturaPDF = (row: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
 
+  try { doc.addImage(logoImg, 'PNG', 14, 10, 35, 12); } catch (e) { console.error("Erro ao carregar o logo:", e); }
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MWM - TUPY DO BRASIL LTDA.', 52, 14);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('SÍTIO LINHA ALVES, S/N - OURO VERDE DO OESTE/PR - Brasil', 52, 18);
+  doc.text('CEP 85933-000 Fone 55 11 3882-3291', 52, 22);
+
+  doc.setFontSize(8);
+  doc.text('Portal Clientes', pageWidth - 14, 14, { align: 'right' });
+  doc.text('Rel: 001-V01', pageWidth - 14, 18, { align: 'right' });
+  const nowStr = new Date().toLocaleString('pt-BR');
+  doc.text(nowStr, pageWidth - 14, 22, { align: 'right' });
+
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
-  doc.line(14, 26, pageWidth - 14, 26);
-  doc.line(14, 34, pageWidth - 14, 34);
+  doc.line(14, 28, pageWidth - 14, 28);
   
-  try { doc.addImage(logoImg, 'PNG', 14, 10, 40, 12); } catch (e) {}
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Recibo de Fatura', pageWidth / 2, 33, { align: 'center' });
   
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('BIOPLANTA DO BRASIL LTDA.', 60, 12);
-  doc.text('SÍTIO LINHA ALVES, S/N - OURO VERDE DO OESTE/PR - Brasil', 60, 16);
-  doc.text('CEP 85933-000 Fone 55 11 3882-3291', 60, 20);
+  doc.line(14, 36, pageWidth - 14, 36);
 
-  doc.text('Portal Clientes', pageWidth - 14, 12, { align: 'right' });
-  doc.text('Rel: 001-V01', pageWidth - 14, 16, { align: 'right' });
-  const nowStr = new Date().toLocaleString('pt-BR');
-  doc.text(nowStr, pageWidth - 14, 20, { align: 'right' });
-
-  doc.setFontSize(14);
-  doc.text('Recibo de Fatura', pageWidth / 2, 31, { align: 'center' });
-
-  let currentY = 40;
-  doc.rect(14, currentY, pageWidth - 28, 25);
+  let currentY = 42;
+  doc.rect(14, currentY, pageWidth - 28, 40);
+  
   doc.setFontSize(10);
-  doc.text('Cliente', 16, currentY + 6);
-  doc.text('Primato Cooperativa Agroindustrial', 35, currentY + 6);
+  doc.setFont('helvetica', 'bold'); doc.text('Cliente:', 18, currentY + 8);
+  doc.setFont('helvetica', 'normal'); doc.text('Primato Cooperativa Agroindustrial', 45, currentY + 8);
   
-  doc.text('Endereço', 16, currentY + 18);
-  doc.text('Rua Exemplo, 123', 35, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('Endereço:', 18, currentY + 18);
+  doc.setFont('helvetica', 'normal'); doc.text('Rua Exemplo, 123, Bairro Industrial', 45, currentY + 18);
   
-  doc.text('Cidade', 100, currentY + 18);
-  doc.text('Toledo - PR', 115, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('Cidade:', 18, currentY + 28);
+  doc.setFont('helvetica', 'normal'); doc.text('Toledo - PR', 45, currentY + 28);
 
-  doc.text('E-mail', 160, currentY + 18);
-  doc.text('contato@primato.com.br', 175, currentY + 18);
+  doc.setFont('helvetica', 'bold'); doc.text('E-mail:', 18, currentY + 38);
+  doc.setFont('helvetica', 'normal'); doc.text('contato@primato.com.br', 45, currentY + 38);
 
-  currentY += 32;
+  currentY += 48;
 
   autoTable(doc, {
     startY: currentY,
-    head: [['Mês Fatura', 'Volume Utilização (VU)', 'Mês Ref. ANP', 'Valor Ref. ANPV', 'Valor Primato', 'Fator Utilização (%)', 'Valor do Serviço']],
+    head: [['Mês Fatura', 'Volume Utilizado (m³)', 'Mês Ref. ANP', 'Valor Ref. ANPV', 'Valor Primato', 'Fator Utilização (%)', 'Valor do Serviço']],
     body: [[ row.mesFatura, row.vu, row.mesAnp, row.vdanp, row.vp, row.fu, row.sa ]],
     theme: 'plain',
-    styles: { lineColor: [0, 0, 0], lineWidth: 0.2, fontSize: 8, halign: 'center', cellPadding: 3, textColor: [0,0,0], font: 'helvetica' },
-    headStyles: { fontStyle: 'bold' }
+    styles: { lineColor: [0, 0, 0], lineWidth: 0.1, fontSize: 8, halign: 'center', cellPadding: 2, textColor: [0,0,0], font: 'helvetica' },
+    headStyles: { fontStyle: 'bold', fillColor: [245, 245, 245] }
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 8;
+  currentY = (doc as any).lastAutoTable.finalY + 10;
 
+  doc.setFont('helvetica', 'bold');
+  doc.text('Memória de Cálculo:', 14, currentY - 2);
   doc.rect(14, currentY, pageWidth - 28, 55);
+  
   doc.setFontSize(9);
-  let calcY = currentY + 6;
-  doc.text(`Volume Contratado Mensal (VCM) = 15.000 m³`, 16, calcY); calcY += 8;
-  doc.text(`Valor Diesel ANP (VDANP) =`, 16, calcY); doc.text(row.vdanp, 65, calcY); calcY += 4;
-  doc.text(`Valor Primato (VP) =`, 16, calcY); doc.text(row.vp, 65, calcY); calcY += 8;
-  doc.text(`Parcela Fixa (PF) = R$ 10.000,00`, 16, calcY); calcY += 8;
-  doc.text(`Volume Utilização (VU):`, 16, calcY); doc.text(row.vu, 65, calcY); calcY += 4;
-  doc.text(`Fator Utilização (FU) = VU / VCM =`, 16, calcY); doc.text(row.fu, 65, calcY); calcY += 8;
-  doc.text(`Serviço Abastecimento (SA) =`, 16, calcY); doc.text(row.sa, 65, calcY);
+  doc.setFont('helvetica', 'normal');
+  let calcY = currentY + 8;
+  doc.text(`Volume Contratado Mensal (VCM) = 15.000 m³`, 18, calcY); calcY += 8;
+  doc.text(`Valor Diesel ANP (VDANP) =`, 18, calcY); doc.text(row.vdanp, 70, calcY); calcY += 4;
+  doc.text(`Valor Primato (VP) =`, 18, calcY); doc.text(row.vp, 70, calcY); calcY += 8;
+  doc.text(`Parcela Fixa (PF) = R$ 10.000,00`, 18, calcY); calcY += 8;
+  doc.text(`Volume Utilização (VU):`, 18, calcY); doc.text(row.vu, 70, calcY); calcY += 4;
+  doc.text(`Fator Utilização (FU) = VU / VCM =`, 18, calcY); doc.text(row.fu, 70, calcY); calcY += 8;
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Serviço Abastecimento (SA) =`, 18, calcY); doc.text(row.sa, 70, calcY);
 
   window.open(doc.output('bloburl'), '_blank');
 };
 
+
+// ==========================================
+// COMPONENTE PRINCIPAL DA TELA
+// ==========================================
 export const Abastecimentos: React.FC = () => {
   const [tabValue, setTabValue] = useState(0); 
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,9 +191,11 @@ export const Abastecimentos: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [openDelete, setOpenDelete] = useState(false);
+  
   const [openDrawer, setOpenDrawer] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create'|'edit'|'concluir'|'assinar'|'view'>('create');
   const [openPrecificacaoDrawer, setOpenPrecificacaoDrawer] = useState(false);
+  const [openBaseCalculoDrawer, setOpenBaseCalculoDrawer] = useState(false); 
 
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [activeFilters, setActiveFilters] = useState<FilterState>({
@@ -211,6 +236,13 @@ export const Abastecimentos: React.FC = () => {
     { id: 5, ano: '2026', mesFatura: 'Junho/2026', vu: '109m³', mesAnp: 'Junho/2026', vdanp: '6364', vp: 'R$ 4,08', fu: '-3,95%', sa: 'R$ 0,54' }
   ]);
 
+  const [baseCalculoData, setBaseCalculoData] = useState([
+    { id: 1, cliente: 'Primato Cooperativa Agroindustrial', produto: 'Biometano', volume: '37.509m³', percentual: '42,40%', descricao: '' },
+    { id: 2, cliente: 'Agrocampo Cooperativa Agroindustrial', produto: 'Biometano', volume: '45.900m³', percentual: '69,85%', descricao: '' },
+    { id: 3, cliente: 'Agrocampo Cooperativa Agroindustrial', produto: 'CO²', volume: '90.000m³', percentual: '80,05%', descricao: '' },
+    { id: 4, cliente: 'Primato Cooperativa Agroindustrial', produto: 'CO²', volume: '87.000m³', percentual: '76,0%', descricao: 'Valor Diesel ANP (VDANP) = Site ANP: Diesel S0 valor médio revenda PR\nParcela Fixa (PF) = VP * VCM' }
+  ]);
+
   const clientesDisponiveis = useMemo(() => Array.from(new Set(data.map(d => d.cliente))).sort(), [data]);
   const placasDisponiveis = useMemo(() => Array.from(new Set(data.map(d => d.placa))).sort(), [data]);
   const datasPrecificacaoDisponiveis = useMemo(() => Array.from(new Set(precificacaoData.map(d => d.data))).sort(), [precificacaoData]);
@@ -249,6 +281,10 @@ export const Abastecimentos: React.FC = () => {
   const paginatedData = useMemo(() => {
     return filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [filteredData, page, rowsPerPage]);
+
+  const paginatedBaseCalculo = useMemo(() => {
+    return baseCalculoData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [baseCalculoData, page, rowsPerPage]);
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -296,8 +332,13 @@ export const Abastecimentos: React.FC = () => {
     handleTriggerToast('Preço cadastrado com sucesso', 'O valor foi salvo e já está disponível no sistema.', 'success');
   };
 
+  const handleSaveBaseCalculo = (payload: any) => {
+    setOpenBaseCalculoDrawer(false);
+    setBaseCalculoData(prev => prev.map(r => r.id === payload.id ? { ...r, ...payload } : r));
+    handleTriggerToast('Registro atualizado com sucesso', 'As alterações foram salvas e já estão disponíveis no sistema.', 'success');
+  };
+
   const isFilterActive = Boolean(activeFilters.cliente || activeFilters.placa || activeFilters.carga || activeFilters.pressaoInicial);
-  const isFilterOpenOrActive = Boolean(filterAnchorEl) || isFilterActive;
   const isPrecificacaoFilterActive = Boolean(activePrecificacaoDate);
   const isFaturamentoFilterActive = Boolean(activeFaturamentoYear);
 
@@ -367,7 +408,7 @@ export const Abastecimentos: React.FC = () => {
           </Tabs>
         </Box>
 
-        {tabValue !== 2 && (
+        {tabValue !== 2 && tabValue !== 3 && (
           <Box sx={{ p: '8px 16px 12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <TextField 
               placeholder="Buscar" size="small" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }} 
@@ -487,7 +528,17 @@ export const Abastecimentos: React.FC = () => {
 
               </Box>
               <Box sx={{ flex: 1, width: '100%', minHeight: 300 }}>
-                <BarChart xAxis={[{ scaleType: 'band', data: ['Jan/2026', 'Fev/2026', 'Mar/2026', 'Abr/2026', 'Mai/2026', 'Jun/2026', 'Jul/2026'], tickLabelStyle: { fontFamily: SCHIBSTED, fontSize: 12, fill: 'rgba(0,0,0,0.87)' } }]} series={[{ data: [15, 20, 25, 22, 18, 24, 28], label: 'CO²', color: '#fcd34d' }, { data: [25, 28, 30, 26, 24, 29, 32], label: 'Biometano', color: '#a855f7' }]} valueFormatter={(value) => `$${value}`} slotProps={{ legend: { labelStyle: { fontFamily: SCHIBSTED, fontSize: 14 }, direction: 'row', position: { vertical: 'top', horizontal: 'right' } } }} margin={{ top: 70, bottom: 30, left: 40, right: 10 }} />
+                {/* ✅ GRÁFICO 1 CORRIGIDO */}
+                <BarChart 
+                  xAxis={[{ scaleType: 'band', data: ['Jan/2026', 'Fev/2026', 'Mar/2026', 'Abr/2026', 'Mai/2026', 'Jun/2026', 'Jul/2026'], tickLabelStyle: { fontFamily: SCHIBSTED, fontSize: 12, fill: 'rgba(0,0,0,0.87)' } }]} 
+                  series={[
+                    { data: [15, 20, 25, 22, 18, 24, 28], label: 'CO²', color: '#fcd34d', valueFormatter: (value: number | null) => value !== null ? `R$ ${value}` : '' }, 
+                    { data: [25, 28, 30, 26, 24, 29, 32], label: 'Biometano', color: '#a855f7', valueFormatter: (value: number | null) => value !== null ? `R$ ${value}` : '' }
+                  ]} 
+                  slotProps={{ legend: { direction: 'row' as any, position: { vertical: 'top', horizontal: 'right' } as any } }} 
+                  margin={{ top: 70, bottom: 30, left: 40, right: 10 }} 
+                  sx={{ '& .MuiChartsLegend-series text': { fontFamily: SCHIBSTED, fontSize: '14px !important' } }}
+                />
               </Box>
             </Box>
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
@@ -546,15 +597,16 @@ export const Abastecimentos: React.FC = () => {
 
             {faturamentoView === 'chart' ? (
               <Box sx={{ flex: 1, width: '100%', minHeight: 460, display: 'flex', justifyContent: 'center' }}>
+                 {/* ✅ GRÁFICO 2 CORRIGIDO */}
                  <BarChart 
                    xAxis={[{ scaleType: 'band', data: chartLabels, tickLabelStyle: { fontFamily: SCHIBSTED, fontSize: 12, fill: 'rgba(0,0,0,0.87)' } }]} 
                    series={[
-                     { data: [45000, 52300, 48000, 51000, 49000, 53000, 55000, 56000, 52000, 48000, 49000, 60000], label: 'Valor R$', color: '#fcd34d' }, 
-                     { data: [15000, 18000, 16000, 19000, 17500, 20000, 22000, 21000, 19000, 18000, 17000, 25000], label: 'Valor R$', color: '#a855f7' }
+                     { data: [45000, 52300, 48000, 51000, 49000, 53000, 55000, 56000, 52000, 48000, 49000, 60000], label: 'Valor R$', color: '#fcd34d', valueFormatter: (value: number | null) => value !== null ? `R$ ${value.toLocaleString('pt-BR')},00` : '' }, 
+                     { data: [15000, 18000, 16000, 19000, 17500, 20000, 22000, 21000, 19000, 18000, 17000, 25000], label: 'Valor R$', color: '#a855f7', valueFormatter: (value: number | null) => value !== null ? `R$ ${value.toLocaleString('pt-BR')},00` : '' }
                    ]} 
-                   valueFormatter={(value) => `$${value?.toLocaleString('pt-BR')},00`} 
-                   slotProps={{ legend: { labelStyle: { fontFamily: SCHIBSTED, fontSize: 14 }, direction: 'row', position: { vertical: 'top', horizontal: 'right' } } }} 
+                   slotProps={{ legend: { direction: 'row' as any, position: { vertical: 'top', horizontal: 'right' } as any } }} 
                    margin={{ top: 50, bottom: 30, left: 80, right: 10 }} 
+                   sx={{ '& .MuiChartsLegend-series text': { fontFamily: SCHIBSTED, fontSize: '14px !important' } }}
                  />
               </Box>
             ) : (
@@ -599,11 +651,70 @@ export const Abastecimentos: React.FC = () => {
           </Box>
         )}
 
+        {/* ABA 3: BASE DE CÁLCULO */}
+        {tabValue === 3 && (
+          <Box sx={{ p: '16px', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+              <Typography sx={{ fontSize: 24, fontWeight: 600, fontFamily: SCHIBSTED, color: 'black' }}>
+                Base de cálculo do cliente
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, bgcolor: 'white', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.12)' }}>
+              
+              <Box sx={{ display: 'flex', width: '100%', minHeight: 56, flexShrink: 0, bgcolor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+                <Box sx={{ px: 2, flex: 2, display: 'flex', alignItems: 'center' }}><Typography sx={headerStyle}>Cliente</Typography></Box>
+                <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={headerStyle}>Produto</Typography></Box>
+                <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={headerStyle}>Volume contrato mensal</Typography></Box>
+                <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={headerStyle}>Porcentual do cliente</Typography></Box>
+                <Box sx={{ px: 2, width: 80, flexShrink: 0, display: 'flex', alignItems: 'center' }}><Typography sx={headerStyle}>Ações</Typography></Box>
+              </Box>
+              
+              <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', flex: 1 }}>
+                {paginatedBaseCalculo.length > 0 ? (
+                  paginatedBaseCalculo.map((row) => (
+                    <Box key={row.id} sx={{ display: 'flex', width: '100%', minHeight: 56, borderBottom: '1px solid rgba(0,0,0,0.08)', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
+                      <Box sx={{ px: 2, flex: 2, display: 'flex', alignItems: 'center' }}><Typography sx={textStyle}>{row.cliente}</Typography></Box>
+                      <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={textStyle}>{row.produto}</Typography></Box>
+                      <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={textStyle}>{row.volume}</Typography></Box>
+                      <Box sx={{ px: 2, flex: 1.5, display: 'flex', alignItems: 'center' }}><Typography sx={textStyle}>{row.percentual}</Typography></Box>
+                      <Box sx={{ px: 2, width: 80, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                        <IconButton size="small" onClick={() => { setSelectedRow(row); setOpenBaseCalculoDrawer(true); }} sx={{ color: PRIMARY_BLUE }}>
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  ))
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, py: 6 }}>
+                    <Box component="img" src={emptyStateImg} alt="Sem registros" sx={{ width: 160, height: 'auto', mb: 3 }} />
+                    <Typography sx={{ fontSize: 18, fontWeight: 500, color: '#404040', fontFamily: SCHIBSTED, mb: 1 }}>Área sem registros</Typography>
+                    <Typography sx={{ fontSize: 14, fontWeight: 400, color: 'rgba(0, 0, 0, 0.87)', fontFamily: SCHIBSTED, textAlign: 'center', maxWidth: 400 }}>
+                      Não há bases de cálculo configuradas para exibição.
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
+              <Box sx={{ display: 'flex', flexShrink: 0, justifyContent: 'flex-end', alignItems: 'center', p: 1, bgcolor: 'white', borderTop: '1px solid rgba(0,0,0,0.12)' }}>
+                <TablePagination 
+                  component="div" count={baseCalculoData.length} page={page} onPageChange={(_, n) => setPage(n)} rowsPerPage={rowsPerPage} onRowsPerPageChange={e => { setRowsPerPage(Number(e.target.value)); setPage(0); }} rowsPerPageOptions={[5, 10, 25]} 
+                  labelRowsPerPage="Linhas por página:" labelDisplayedRows={({ from, to, count }) => `${from}–${to} of ${count}`} sx={{ border: 'none', '& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel': { fontFamily: SCHIBSTED, fontSize: 12, color: 'black' } }} 
+                />
+              </Box>
+
+            </Box>
+          </Box>
+        )}
+
       </Paper>
 
+      {/* DRAWERS GLOBAIS */}
       <AbastecimentoDrawer open={openDrawer} onClose={() => setOpenDrawer(false)} onSave={handleSaveDrawer} mode={drawerMode} initialData={selectedRow} />
       <PrecificacaoDrawer open={openPrecificacaoDrawer} onClose={() => setOpenPrecificacaoDrawer(false)} onSave={handleSavePrecificacao} />
+      <BaseCalculoDrawer open={openBaseCalculoDrawer} onClose={() => setOpenBaseCalculoDrawer(false)} onSave={handleSaveBaseCalculo} initialData={selectedRow} />
 
+      {/* FILTROS GLOBAIS */}
       <AbastecimentoFilter anchorEl={filterAnchorEl} onClose={() => setFilterAnchorEl(null)} currentFilters={activeFilters} clientes={clientesDisponiveis} placas={placasDisponiveis} onApply={(f) => { setActiveFilters(f); setPage(0); handleTriggerToast('Filtro aplicado', 'A listagem foi atualizada.', 'success'); }} onClear={() => { setActiveFilters({ cliente: '', placa: '', carga: '', pressaoInicial: null }); setPage(0); handleTriggerToast('Filtro removido', 'Exibindo todos os registros.', 'success'); }} />
       <PrecificacaoFilter anchorEl={filterPrecificacaoAnchorEl} onClose={() => setFilterPrecificacaoAnchorEl(null)} currentDate={activePrecificacaoDate} datas={datasPrecificacaoDisponiveis} onApply={(date) => { setActivePrecificacaoDate(date); handleTriggerToast('Filtro aplicado', 'A listagem de preços foi atualizada.', 'success'); }} onClear={() => { setActivePrecificacaoDate(''); handleTriggerToast('Filtro removido', 'Exibindo todos os preços.', 'success'); }} />
       <FaturamentoFilter anchorEl={filterFaturamentoAnchorEl} onClose={() => setFilterFaturamentoAnchorEl(null)} currentAno={activeFaturamentoYear} anos={anosFaturamentoDisponiveis} onApply={(ano) => { setActiveFaturamentoYear(ano); handleTriggerToast('Filtro aplicado', `Exibindo faturamentos de ${ano || 'todos os anos'}.`, 'success'); }} onClear={() => { setActiveFaturamentoYear(''); handleTriggerToast('Filtro removido', 'Exibindo todos os anos.', 'success'); }} />

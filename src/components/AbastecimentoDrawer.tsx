@@ -3,13 +3,13 @@ import {
   Box, Typography, TextField, IconButton, Button, 
   Stack, Drawer, FormControl, InputLabel, Select, MenuItem 
 } from '@mui/material';
-import { Close as CloseIcon, InfoOutlined as InfoIcon } from '@mui/icons-material';
+import { Close as CloseIcon } from '@mui/icons-material';
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 
 import SignatureCanvas from 'react-signature-canvas';
@@ -62,7 +62,7 @@ const timePickerSlotProps: any = {
 // ============================================================================
 // 1. SUBCOMPONENTE: STEP CADASTRO/EDIÇÃO E VISUALIZAÇÃO
 // ============================================================================
-const StepCadastro = ({ form, setForm, isFieldDisabled, transportadoras, veiculosDisponiveis, mode, isAutomation, handleMaskM3 }: any) => {
+const StepCadastro = ({ form, setForm, isFieldDisabled, transportadoras, veiculosDisponiveis, mode }: any) => {
   
   if (mode === 'edit' || mode === 'view') {
     return (

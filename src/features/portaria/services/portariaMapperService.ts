@@ -30,11 +30,11 @@ export const portariaMapperService = {
   mapApiToRegistro(apiData: PortariaRegistroApiData): PortariaRegistro {
     return {
       id: apiData.id,
-      data_entrada: new Date(apiData.data_entrada),
+      data_entrada: new Date(apiData.data_entrada + 'T12:00:00'),
       hora_entrada: apiData.hora_entrada,
       tipo_registro: apiData.tipo_registro,
       status: apiData.status,
-      data_saida: apiData.data_saida ? new Date(apiData.data_saida) : null,
+      data_saida: apiData.data_saida ? new Date(apiData.data_saida + 'T12:00:00') : null,
       hora_saida: apiData.hora_saida ?? null,
       origem_entrada: apiData.origem_entrada,
       observacoes: apiData.observacoes ?? null,
@@ -77,7 +77,7 @@ export const portariaMapperService = {
     * API → Linha da Tabela (para grid)
     */
   mapApiToTableRow(apiData: PortariaRegistroApiData): PortariaRegistroTableRow {
-    const data = new Date(apiData.data_entrada);
+    const data = new Date(apiData.data_entrada + 'T12:00:00');
     const hora = apiData.hora_entrada;
 
     // Extrair nome, placa, veiculoId e responsavel de acordo com o tipo de registro

@@ -207,7 +207,7 @@ export default function ExportPanel({ open, onClose, transportadoras = [], dados
                   format="dd/MM/yyyy"
                   value={dataInicial}
                   onChange={(v) => {
-                    setDataInicial(v);
+                    setDataInicial(v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v);
                   }}
                   open={false}
                   onOpen={() => setShowCalendarInicial(true)}
@@ -240,7 +240,7 @@ export default function ExportPanel({ open, onClose, transportadoras = [], dados
                   format="dd/MM/yyyy"
                   value={dataFinal}
                   onChange={(v) => {
-                    setDataFinal(v);
+                    setDataFinal(v && typeof v === 'object' && 'toDate' in v ? v.toDate() : v);
                   }}
                   open={false}
                   onOpen={() => setShowCalendarFinal(true)}

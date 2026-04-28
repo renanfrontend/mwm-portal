@@ -29,9 +29,16 @@ export interface PortariaEntregaDejetosDeletePayload
   entregaDejetosId: string | null;
 }
 
+export interface PortariaEntregaInsumoDeletePayload
+  extends PortariaRegistroDeletePayloadBase,
+    PortariaTransportDeleteContext {
+  entregaInsumoId: string | null;
+}
+
 export type PortariaRegistroDeletePayload =
   | PortariaAbastecimentoDeletePayload
-  | PortariaEntregaDejetosDeletePayload;
+  | PortariaEntregaDejetosDeletePayload
+  | PortariaEntregaInsumoDeletePayload;
 
 export interface PortariaRegistroDeleteContext {
   registro: PortariaRegistro;

@@ -18,6 +18,7 @@ interface EstabelecimentoOption {
 }
 
 interface AgendaTableProps {
+    isEditing?: boolean;
   title: string;
   referenceDate: Date;
   onDateChange: (date: Date) => void;

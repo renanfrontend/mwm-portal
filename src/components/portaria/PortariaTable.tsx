@@ -1,10 +1,13 @@
 import React from 'react';
 import { Box, Typography, Checkbox, IconButton, Stack, Tooltip } from '@mui/material';
 import { Visibility as VisibilityIcon, Edit as EditIcon } from '@mui/icons-material';
+import { useAuth } from '../../context/AuthContext';
+import { podeEditarPortaria, podeVisualizarPortaria } from '../../domain/permissaoPortaria';
 
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 
 const PortariaTable: React.FC<any> = ({ data, selectedIds, onSelectionChange, isHistory, onEdit, onView }) => {
+  const { user } = useAuth();
   // 🛡️ Grid Layout baseado na referência: 8 colunas para histórico, 8 para registro (incluindo checkbox)
   const gridLayout = isHistory 
     ? `1fr 1fr 1.5fr 1.2fr 1.5fr 1fr 1.2fr 100px` // Histórico (Sem checkbox)
@@ -92,16 +95,20 @@ const PortariaTable: React.FC<any> = ({ data, selectedIds, onSelectionChange, is
             </Box>
 
             <Stack direction="row" spacing={0.5} sx={{ px: 2 }} onClick={e => e.stopPropagation()}>
-              <Tooltip title="Visualizar">
-                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => onView(row)}>
-                  <VisibilityIcon sx={{ fontSize: 20 }} />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Editar">
-                <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => onEdit(row)}>
-                  <EditIcon sx={{ fontSize: 20 }} />
-                </IconButton>
-              </Tooltip>
+              {podeVisualizarPortaria(user) && (
+                <Tooltip title="Visualizar">
+                  <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => onView(row)}>
+                    <VisibilityIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {podeEditarPortaria(user) && (
+                <Tooltip title="Editar">
+                  <IconButton size="small" sx={{ color: '#0072C3' }} onClick={() => onEdit(row)}>
+                    <EditIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Stack>
           </Box>
         );

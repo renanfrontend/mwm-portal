@@ -9,6 +9,8 @@ import {
 } from '@mui/icons-material';
 import PortariaTable from './PortariaTable';
 import PortariaDrawer from './PortariaDrawer';
+import { useAuth } from '../../context/AuthContext';
+import { podeCadastrarPortaria, podeExcluirPortaria } from '../../domain/permissaoPortaria';
 import { portariaRegistroService, portariaMapperService, portariaSubmissionService, portariaDeletionService } from '../../features/portaria';
 import type { PortariaDrawerFormState, PortariaRegistro, PortariaRegistroApiData } from '../../features/portaria/types';
 import EmptyImage from '../../assets/empty-states-sheets.png'; 
@@ -16,6 +18,7 @@ import EmptyImage from '../../assets/empty-states-sheets.png';
 const SCHIBSTED = 'Schibsted Grotesk, sans-serif';
 
 export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
+  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [page, setPage] = useState(0); 
   const [rowsPerPage, setRowsPerPage] = useState(5); 
@@ -224,7 +227,7 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
       // Exclusão diferenciada por atividade
       for (const registro of registros) {
         if (
-          (registro.tipo_registro === 'ENTREGA_DEJETOS' || registro.tipo_registro === 'ABASTECIMENTO') &&
+          (registro.tipo_registro === 'ENTREGA_DEJETOS' || registro.tipo_registro === 'ABASTECIMENTO' || registro.tipo_registro === 'ENTREGA_INSUMO') &&
           registro.status === 'Em andamento'
         ) {
           await portariaDeletionService.deleteRegistro(registro);
@@ -280,19 +283,21 @@ export const PortariaList: React.FC<any> = ({ onSuccess, onTabChange }) => {
          />
          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
            {(() => { try { console.log('selectedIds:', selectedIds, fullApiData.map(r => ({id: r.id, status: r.status}))); } catch(e) {} return null; })()}
-          {tabValue === 0 && (
-            <IconButton
-              disabled={!canDeleteSelectedRows(selectedIds)}
-              onClick={() => setIsDeleteDrawerOpen(true)}
-              sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'rgba(0,0,0,0.26)' }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-          <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FileUploadIcon /></IconButton>
-          <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FilterAltIcon /></IconButton>
-          {tabValue === 0 && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDrawerConfig({open: true, mode: 'add', data: null})} sx={{ bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>ADICIONAR</Button>}
-        </Box>
+           {tabValue === 0 && podeExcluirPortaria(user) && (
+             <IconButton
+               disabled={!canDeleteSelectedRows(selectedIds)}
+               onClick={() => setIsDeleteDrawerOpen(true)}
+               sx={{ color: selectedIds.length > 0 ? '#0072C3' : 'rgba(0,0,0,0.26)' }}
+             >
+               <DeleteIcon />
+             </IconButton>
+           )}
+           <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FileUploadIcon /></IconButton>
+           <IconButton sx={{ color: 'rgba(0,0,0,0.26)' }}><FilterAltIcon /></IconButton>
+           {tabValue === 0 && podeCadastrarPortaria(user) && (
+             <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDrawerConfig({open: true, mode: 'add', data: null})} sx={{ bgcolor: '#0072C3', fontFamily: SCHIBSTED }}>ADICIONAR</Button>
+           )}
+         </Box>
       </Box>
       
        <Box sx={{ p: '0 16px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>

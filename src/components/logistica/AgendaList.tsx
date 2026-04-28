@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { podeVisualizarPortaria, podeEditarPortaria } from '../../domain/permissaoPortaria';
 import { 
   Box, 
   Snackbar, 
@@ -56,6 +58,7 @@ interface AgendaListProps {
 
 // Recebe a lista de produtores como prop opcional
 export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorListItem[] }> = ({ onShowSuccess, produtoresList = [] }) => {
+  const { user } = useAuth();
   const [realizadoDate, setRealizadoDate] = useState(new Date());
   const [planejadoDate, setPlanejadoDate] = useState(new Date());
   const [isCopyDrawerOpen, setIsCopyDrawerOpen] = useState(false);
@@ -372,6 +375,8 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
     // outros campos se necessário
   }));
 
+  if (!podeVisualizarPortaria(user)) return null;
+
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: '8px 16px', position: 'relative', overflowX: 'hidden' }}>
       <AgendaTable 
@@ -383,6 +388,7 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
          showCopy={false}
          disableNext={false}
          produtores={[]}
+         isEditing={false}
        />
 
       <AgendaTable
@@ -405,6 +411,7 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
         showCopy={true}
         disableNext={false}
         produtoresList={produtoresList}
+        isEditing={podeEditarPortaria(user)}
       />
       <CopyPlanningDrawer open={isCopyDrawerOpen} onClose={() => setIsCopyDrawerOpen(false)} onApply={handleApplyCopy} />
 
@@ -417,7 +424,7 @@ export const AgendaList: React.FC<AgendaListProps & { produtoresList?: ProdutorL
       >
         <Box sx={{ 
           display: 'flex', 
-          bgcolor: '#F1F9EE', 
+          bgcolor: '#F1F9EE',
           borderRadius: '4px', 
           border: '1px solid rgba(112, 191, 84, 0.2)', // Bordas suaves de sucesso
           p: '6px 16px',
